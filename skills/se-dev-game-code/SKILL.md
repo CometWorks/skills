@@ -10,9 +10,11 @@ How to build custom tool script to conduct search and for other tasks:
 - Use this Python virtual environment to write short, targeted, reusable utility scripts as needed. 
   Build a catalog of such scripts in `UtilityScripts.md` next to this skill file. 
 - Use `uv run script_name.py` in this folder (as CWD) to run your scripts.
-- Use `busybox bash` to open a bash shell, which you can use easier, because it is close to UNIX.
-- Alternatively use the Windows PowerShell if busybox would not work for something.
-- On the Windows command line (cmd) (NOT on busybox!) use the `&` delimiter commands instead of `&&`.
+- **IMPORTANT: Space Engineers modding is done on Windows.** All commands must work on Windows.
+- Use `busybox.exe` as a prefix to run individual UNIX-like commands, for example: `busybox.exe grep -r "pattern" folder`.
+- Do NOT open a bash shell with `busybox bash`. Run busybox commands directly from cmd or PowerShell instead.
+- **CRITICAL: Always use forward slashes (`/`) in file paths passed to busybox.** Backslashes are interpreted as escape characters by bash and will be silently removed, mangling paths. Windows accepts forward slashes. Correct: `busybox.exe grep "pattern" C:/Users/name/folder` — Wrong: `C:\Users\name\folder`.
+- Alternatively use Windows PowerShell, which handles backslash paths natively.
 - See the list of available Python packages in `pyproject.toml`.
 
 Use the code search if you need to know more about the game's internal by reading its decompiled C# code.
@@ -27,9 +29,7 @@ The textual part of the game's `Content` is copied into the `Content` folder, so
 - Default blueprints and scenarios
 
 General rules:
-- Use `busybox bash` to open a bash shell, which you can use easier, because it is close to UNIX.
-- Alternatively use the Windows PowerShell if busybox would not work for something.
-- On the Windows command line (cmd) (NOT on busybox!) use the `&` delimiter commands instead of `&&`.
+- Follow the Windows command line rules above (use `busybox.exe` prefix, forward slashes in paths).
 - In the `Decompiled` folder search only inside the C# source files (*.cs) in general. If you work on transpiler or preloader patches, then also search in the IL code (*.il) files.
 - In the `Content` folder search the files appropriate for the task. See `ContentTypes.md` for the list of types.
 - Do not search for decompiled game code outside the `Decompiled` folder which is at the same level as this skill file. The decompiled game source tree must be there is the preparation succeeded.
