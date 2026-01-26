@@ -26,7 +26,7 @@ from tree_sitter_c_sharp import language
 class IndexEntry:
     """Represents a single index entry for declarations or usages"""
     namespace: str
-    containing_type: str
+    declaring_type: str
     method: str
     variable_name: str
     entry_type: str  # 'declaration' or 'usage'
@@ -39,7 +39,7 @@ class IndexEntry:
         """Convert to CSV row format"""
         return [
             self.namespace,
-            self.containing_type,
+            self.declaring_type,
             self.method,
             self.variable_name,
             self.entry_type,
@@ -54,7 +54,7 @@ class IndexEntry:
         """Return CSV header row"""
         return [
             'namespace',
-            'containing_type',
+            'declaring_type',
             'method',
             'variable_name',
             'type',
@@ -147,7 +147,7 @@ class FileProcessor:
 
         context = {
             'namespace': '',
-            'containing_type': '',
+            'declaring_type': '',
             'method': '',
             'file_path': relative_path,
             'source_lines': source_lines,
@@ -161,7 +161,7 @@ class FileProcessor:
     def _traverse_tree(self, node: Node, context: Dict):
         """Recursively traverse the syntax tree"""
         prev_namespace = context['namespace']
-        prev_containing_type = context['containing_type']
+        prev_declaring_type = context['declaring_type']
         prev_method = context['method']
         is_file_scoped_namespace = False
         result = context['result']
@@ -180,7 +180,7 @@ class FileProcessor:
                              'record_declaration', 'enum_declaration'):
                 name = self._get_identifier_name(node)
                 if name:
-                    context['containing_type'] = name
+                    context['declaring_type'] = name
             elif node.type in ('method_declaration', 'constructor_declaration'):
                 name = self._get_identifier_name(node)
                 if name:
@@ -215,7 +215,7 @@ class FileProcessor:
 
         if not is_file_scoped_namespace:
             context['namespace'] = prev_namespace
-        context['containing_type'] = prev_containing_type
+        context['declaring_type'] = prev_declaring_type
         context['method'] = prev_method
 
     def _get_identifier_name(self, node: Node) -> Optional[str]:
@@ -281,7 +281,7 @@ class FileProcessor:
 
         entry = IndexEntry(
             namespace=name,
-            containing_type='',
+            declaring_type='',
             method='',
             variable_name='',
             entry_type='declaration',
@@ -306,7 +306,7 @@ class FileProcessor:
 
         entry = IndexEntry(
             namespace=full_namespace,
-            containing_type='',
+            declaring_type='',
             method='',
             variable_name='',
             entry_type='declaration',
@@ -323,7 +323,7 @@ class FileProcessor:
         if not name:
             return
 
-        context['containing_type'] = name
+        context['declaring_type'] = name
 
         if name not in result.declared_interfaces:
             result.declared_interfaces[name] = set()
@@ -333,7 +333,7 @@ class FileProcessor:
 
         entry = IndexEntry(
             namespace=context['namespace'],
-            containing_type=name,
+            declaring_type=name,
             method='',
             variable_name='',
             entry_type='declaration',
@@ -350,7 +350,7 @@ class FileProcessor:
         if not name:
             return
 
-        context['containing_type'] = name
+        context['declaring_type'] = name
 
         if name not in result.declared_classes:
             result.declared_classes[name] = set()
@@ -360,7 +360,7 @@ class FileProcessor:
 
         entry = IndexEntry(
             namespace=context['namespace'],
-            containing_type=name,
+            declaring_type=name,
             method='',
             variable_name='',
             entry_type='declaration',
@@ -377,7 +377,7 @@ class FileProcessor:
         if not name:
             return
 
-        context['containing_type'] = name
+        context['declaring_type'] = name
 
         if name not in result.declared_structs:
             result.declared_structs[name] = set()
@@ -387,7 +387,7 @@ class FileProcessor:
 
         entry = IndexEntry(
             namespace=context['namespace'],
-            containing_type=name,
+            declaring_type=name,
             method='',
             variable_name='',
             entry_type='declaration',
@@ -404,7 +404,7 @@ class FileProcessor:
         if not name:
             return
 
-        context['containing_type'] = name
+        context['declaring_type'] = name
 
         if name not in result.declared_enums:
             result.declared_enums[name] = set()
@@ -414,7 +414,7 @@ class FileProcessor:
 
         entry = IndexEntry(
             namespace=context['namespace'],
-            containing_type=name,
+            declaring_type=name,
             method='',
             variable_name='',
             entry_type='declaration',
@@ -435,13 +435,13 @@ class FileProcessor:
 
         if name not in result.declared_methods:
             result.declared_methods[name] = set()
-        result.declared_methods[name].add((context['namespace'], context['containing_type']))
+        result.declared_methods[name].add((context['namespace'], context['declaring_type']))
 
         description = self._get_preceding_comment(node, context['source_lines'])
 
         entry = IndexEntry(
             namespace=context['namespace'],
-            containing_type=context['containing_type'],
+            declaring_type=context['declaring_type'],
             method=name,
             variable_name='',
             entry_type='declaration',
@@ -464,7 +464,7 @@ class FileProcessor:
 
                             entry = IndexEntry(
                                 namespace=context['namespace'],
-                                containing_type=context['containing_type'],
+                                declaring_type=context['declaring_type'],
                                 method='',
                                 variable_name=name,
                                 entry_type='declaration',
@@ -485,7 +485,7 @@ class FileProcessor:
 
         entry = IndexEntry(
             namespace=context['namespace'],
-            containing_type=context['containing_type'],
+            declaring_type=context['declaring_type'],
             method='',
             variable_name=name,
             entry_type='declaration',
@@ -535,7 +535,7 @@ class FileProcessor:
         if name in self.declared_namespaces:
             entry = IndexEntry(
                 namespace=name,
-                containing_type='',
+                declaring_type='',
                 method='',
                 variable_name='',
                 entry_type='usage',
@@ -550,7 +550,7 @@ class FileProcessor:
         if name in self.declared_interfaces:
             entry = IndexEntry(
                 namespace=context['namespace'],
-                containing_type=name,
+                declaring_type=name,
                 method=context['method'],
                 variable_name='',
                 entry_type='usage',
@@ -565,7 +565,7 @@ class FileProcessor:
         if name in self.declared_classes:
             entry = IndexEntry(
                 namespace=context['namespace'],
-                containing_type=name,
+                declaring_type=name,
                 method=context['method'],
                 variable_name='',
                 entry_type='usage',
@@ -580,7 +580,7 @@ class FileProcessor:
         if name in self.declared_structs:
             entry = IndexEntry(
                 namespace=context['namespace'],
-                containing_type=name,
+                declaring_type=name,
                 method=context['method'],
                 variable_name='',
                 entry_type='usage',
@@ -595,7 +595,7 @@ class FileProcessor:
         if name in self.declared_enums:
             entry = IndexEntry(
                 namespace=context['namespace'],
-                containing_type=name,
+                declaring_type=name,
                 method=context['method'],
                 variable_name='',
                 entry_type='usage',
@@ -610,7 +610,7 @@ class FileProcessor:
         if name in self.declared_methods:
             entry = IndexEntry(
                 namespace=context['namespace'],
-                containing_type=context['containing_type'],
+                declaring_type=context['declaring_type'],
                 method=name,
                 variable_name='',
                 entry_type='usage',
@@ -625,7 +625,7 @@ class FileProcessor:
         if not added:
             entry = IndexEntry(
                 namespace=context['namespace'],
-                containing_type=context['containing_type'],
+                declaring_type=context['declaring_type'],
                 method=context['method'],
                 variable_name=name,
                 entry_type='usage',
@@ -785,7 +785,7 @@ class CSharpIndexer:
                 index_data,
                 key=lambda e: (
                     e.namespace,
-                    e.containing_type,
+                    e.declaring_type,
                     e.method,
                     e.variable_name,
                     e.entry_type,

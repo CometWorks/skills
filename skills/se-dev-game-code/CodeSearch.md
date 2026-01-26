@@ -1,5 +1,16 @@
 # Code Search Guide
 
+**IMPORTANT:** All commands run on Windows. This skill folder must be the current working directory.
+
+## Running Commands
+
+Always change to this skill folder first, then run commands:
+
+```
+cd skills/se-dev-game-code
+uv run search_code.py class declaration MyToolbar
+```
+
 ## Index Files
 
 Located in `CodeIndex/` folder after preparation:
@@ -19,11 +30,11 @@ Located in `CodeIndex/` folder after preparation:
 All index files share this structure:
 
 ```
-namespace,containing_type,method,variable_name,type,file_path,start_line,end_line,description
+namespace,declaring_type,method,variable_name,type,file_path,start_line,end_line,description
 ```
 
 - `namespace` - The namespace containing the symbol
-- `containing_type` - The class/struct/interface containing the symbol
+- `declaring_type` - The class/struct/interface containing the symbol
 - `method` - The method containing the symbol (empty for type-level declarations)
 - `variable_name` - Variable/field/property name (for variables.csv)
 - `type` - Either `declaration` or `usage`
@@ -31,159 +42,134 @@ namespace,containing_type,method,variable_name,type,file_path,start_line,end_lin
 - `start_line`, `end_line` - Line range in source file
 - `description` - XML doc comment summary (for declarations)
 
-## The `type` Column
-
-This is the most important column for efficient searching:
-
-- **`declaration`** - The actual definition of a type/method/variable
-- **`usage`** - A reference to the symbol from elsewhere in the code
-
-Always filter by `type` to get relevant results quickly.
-
-## Finding Declarations
-
-To find where something is **defined**, filter for `declaration`:
-
-```bash
-# Find struct declaration
-grep ",Vector3D," CodeIndex/structs.csv | grep ",declaration,"
-
-# Find class declaration
-grep ",MyToolbar," CodeIndex/classes.csv | grep ",declaration,"
-
-# Find interface declaration
-grep ",IMyTerminalBlock," CodeIndex/interfaces.csv | grep ",declaration,"
-
-# Find enum declaration
-grep ",MyRelationsBetweenPlayerAndBlock," CodeIndex/enums.csv | grep ",declaration,"
-
-# Find method declaration (all overloads)
-grep ",GetPosition," CodeIndex/methods.csv | grep ",declaration,"
-
-# Find method in specific class
-grep ",MyEntity,GetPosition," CodeIndex/methods.csv | grep ",declaration,"
-```
-
-## Finding Usages
-
-To find where something is **used**, filter for `usage`:
-
-```bash
-# Find all usages of a class
-grep ",MyToolbar," CodeIndex/classes.csv | grep ",usage,"
-
-# Find all calls to a method
-grep ",GetPosition," CodeIndex/methods.csv | grep ",usage,"
-
-# Find usages of a method from a specific class
-grep ",MyEntity,GetPosition," CodeIndex/methods.csv | grep ",usage,"
-```
-
 ## Using search_code.py
 
-The `search_code.py` script provides pagination and pattern matching:
+The primary search tool. Run from this skill folder:
 
-```bash
-uv run python search_code.py <index_file> <max_results> <offset> <pattern>
+```
+uv run search_code.py [options] <category> <symbol_type> <patterns...>
 ```
 
-### Pattern Modes
+### Arguments
 
-- **Simple text** (default): Case-insensitive substring match
-  ```bash
-  uv run python search_code.py CodeIndex/classes.csv 20 0 MyToolbar
-  ```
+| Argument | Values | Description |
+|----------|--------|-------------|
+| `category` | `class`, `method`, `enum`, `struct`, `interface`, `variable` | Symbol category |
+| `symbol_type` | `declaration`, `usage` | Find definitions or references |
+| `patterns` | One or more | Search patterns (see below) |
 
-- **Exact match**: Case-sensitive exact match (prefix with `exact:`)
-  ```bash
-  uv run python search_code.py CodeIndex/structs.csv 20 0 "exact:Vector3D"
-  ```
+### Options
 
-- **Regex**: Regular expression (prefix with `re:`)
-  ```bash
-  uv run python search_code.py CodeIndex/classes.csv 20 0 "re:^My.*Block$"
-  ```
+| Option | Description |
+|--------|-------------|
+| `-h`, `--help` | Show help |
+| `-c`, `--count` | Print only match count |
+| `-l N`, `--limit N` | Limit to N results |
+| `-o N`, `--offset N` | Skip first N results |
+| `-n NS`, `--namespace NS` | Filter by namespace prefix |
 
-### Combining with grep for declarations/usages
+### Pattern Syntax
 
-```bash
-# Find declaration with search_code.py
-uv run python search_code.py CodeIndex/structs.csv 100 0 "exact:Vector3D" | grep ",declaration,"
+Patterns match against the symbol name (not namespace):
 
-# Find usages with pagination
-uv run python search_code.py CodeIndex/methods.csv 50 0 GetPosition | grep ",usage,"
+| Prefix | Behavior |
+|--------|----------|
+| `text:X` or just `X` | Case-insensitive substring match |
+| `re:X` | Case-insensitive regex match (Python regex syntax) |
+
+Multiple patterns use AND logic (all must match).
+
+### Output Format
+
+- No matches: `NO-MATCHES`
+- Matches (one line match): `relative_source_file_path:line` or `relative_source_file_path:start_line-end_line`
+- Results sorted by code depth, then alphabetically inside the same depth
+
+The `relative_source_file_path` is relative to the `Decompiled` folder which is next to this document.
+
+In count mode (`--count` or `-c`) only the number of search hits are printed instead of the actual matches.
+
+If you expect too many hits, then first count, then paginate as needed. Try not to query more than 10 results at a time.
+
+## Examples
+
+### Find Declarations
+
+```
+uv run search_code.py class declaration MyToolbar
+uv run search_code.py struct declaration Vector3D
+uv run search_code.py interface declaration IMyTerminalBlock
+uv run search_code.py enum declaration MyRelationsBetweenPlayerAndBlock
+uv run search_code.py method declaration GetPosition
+uv run search_code.py variable declaration AngularDamping
 ```
 
-## Common Search Patterns
+### Find Usages
 
-### Find a type definition
-
-```bash
-# Quick: use grep directly
-grep ",TypeName," CodeIndex/classes.csv | grep ",declaration,"
-
-# With description/docs
-uv run python search_code.py CodeIndex/classes.csv 10 0 "exact:TypeName" | grep ",declaration,"
+```
+uv run search_code.py -l 10 class usage MyToolbar
+uv run search_code.py -l 10 method usage GetPosition
+uv run search_code.py -l 10 struct usage Vector3D
 ```
 
-### Find all members of a class
+### Regex Patterns
 
-```bash
-# All methods
-grep ",MyClassName," CodeIndex/methods.csv | grep ",declaration,"
-
-# All fields/properties
-grep ",MyClassName," CodeIndex/variables.csv | grep ",declaration,"
+```
+uv run search_code.py class declaration "re:^My.*Block$"
+uv run search_code.py method declaration "re:^Get.*Position$"
+uv run search_code.py struct declaration "re:^Vector[23]D$"
 ```
 
-### Find implementations of an interface
+### Namespace Filtering
 
-```bash
-# First find the interface
-grep ",IMyInterface," CodeIndex/interfaces.csv | grep ",declaration,"
-
-# Then find classes that reference it (potential implementers)
-grep ",IMyInterface," CodeIndex/classes.csv | grep ",usage,"
+```
+uv run search_code.py -n Sandbox.Game class declaration ""
+uv run search_code.py -n VRageMath method declaration Add
+uv run search_code.py -n Sandbox.Engine.Physics -l 5 class declaration ""
 ```
 
-### Find method call sites
+### Pagination
 
-```bash
-# All calls to MethodName anywhere
-grep ",MethodName," CodeIndex/methods.csv | grep ",usage,"
-
-# Calls to ClassName.MethodName specifically
-grep ",ClassName,MethodName," CodeIndex/methods.csv | grep ",usage,"
+```
+uv run search_code.py -l 20 class usage MyEntity
+uv run search_code.py -l 20 -o 20 class usage MyEntity
+uv run search_code.py -l 20 -o 40 class usage MyEntity
 ```
 
-### Find where a variable is used
+### Count Mode
 
-```bash
-grep ",variableName," CodeIndex/variables.csv | grep ",usage,"
+```
+uv run search_code.py -c class usage MyEntity
+uv run search_code.py -c struct usage Vector3D
+```
+
+### Multiple Patterns
+
+```
+uv run search_code.py method declaration Get Position
 ```
 
 ## Reading Source Files
 
-After finding a declaration, read the source:
+After finding their relative paths, read the actual source files under `Decompiled/`. 
 
-```bash
-# From search result: file_path=VRage.Math\VRageMath\Vector3D.cs, start_line=13
-# Read the file at: Decompiled/VRage.Math/VRageMath/Vector3D.cs
+For example:
+```
+# Search result: VRage.Math/VRageMath/Vector3D.cs:13-2293
+# Read: Decompiled/VRage.Math/VRageMath/Vector3D.cs
 ```
 
-The `Decompiled/` folder contains the full decompiled source organized by assembly.
+The first folder in the relative path indicates the assembly (DLL), from the second level the folders match the namespace hierarchy.
 
 ## Tips
 
-1. **Start with declarations** - Filter `,declaration,` first to find definitions
-2. **Use exact match for common names** - Avoid `Vector` matching `Vector2`, `Vector3`, `Vector3D`, etc.
-3. **Check the assembly** - The first folder in `file_path` indicates which game DLL contains the code
-4. **Use grep for speed** - Direct grep is faster than search_code.py for simple lookups
-5. **Use search_code.py for pagination** - When you expect many results and need to browse them
+1. **Start with declarations** - Find definitions before usages
+2. **Use regex for exact names** - `"re:^Vector3D$"` avoids matching Vector3DI, Vector3D_Extensions, etc.
+3. **Check the assembly** - The first folder in `file_path` shows which DLL contains the code
+4. **Use count first** - Check `-c` to see how many matches before fetching all
+5. **Paginate large results** - Use `-l` and `-o` to browse incrementally
 
 ## Assembly Reference
-
-Common assemblies in the decompiled code:
 
 | Assembly | Contains |
 |----------|----------|
@@ -193,4 +179,4 @@ Common assemblies in the decompiled code:
 | `Sandbox.Game` | Game logic, entities, blocks |
 | `Sandbox.Common` | Shared game code |
 | `SpaceEngineers.Game` | SE-specific game code |
-| `SpaceEngineers.ObjectBuilders` | SE save data structures |
+| `SpaceEngineers.ObjectBuilders` | Save data structures |
