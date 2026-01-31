@@ -214,5 +214,85 @@ uv run search_code.py struct declaration "re:^ZZZZZ.*XXXXX$"
 echo.
 
 echo ============================================================
+echo HIERARCHY SEARCH - CLASS PARENT
+echo ============================================================
+echo --- Find parent of MyGrid ---
+uv run search_code.py class parent MyGrid
+echo.
+echo --- Find parent of MyProjectorBase ---
+uv run search_code.py class parent MyProjectorBase
+echo.
+
+echo ============================================================
+echo HIERARCHY SEARCH - CLASS CHILDREN
+echo ============================================================
+echo --- Find children of MyEntity (limit 5) ---
+uv run search_code.py -l 5 class children MyEntity
+echo.
+echo --- Find children of MyTerminalBlock (limit 3) ---
+uv run search_code.py -l 3 class children MyTerminalBlock
+echo.
+
+echo ============================================================
+echo HIERARCHY SEARCH - INTERFACE PARENT
+echo ============================================================
+echo --- Find parent of IMyTerminalBlock ---
+uv run search_code.py interface parent IMyTerminalBlock
+echo.
+echo --- Find parent of IMyFunctionalBlock ---
+uv run search_code.py interface parent IMyFunctionalBlock
+echo.
+
+echo ============================================================
+echo HIERARCHY SEARCH - INTERFACE CHILDREN
+echo ============================================================
+echo --- Find children of IMyEntity (limit 5) ---
+uv run search_code.py -l 5 interface children IMyEntity
+echo.
+echo --- Find children of IMyCubeBlock (limit 3) ---
+uv run search_code.py -l 3 interface children IMyCubeBlock
+echo.
+
+echo ============================================================
+echo HIERARCHY SEARCH - CLASS IMPLEMENTS
+echo ============================================================
+echo --- Find interfaces implemented by MyTerminalBlock ---
+uv run search_code.py class implements MyTerminalBlock
+echo.
+echo --- Find interfaces implemented by MyGrid ---
+uv run search_code.py class implements MyGrid
+echo.
+
+echo ============================================================
+echo HIERARCHY SEARCH - INTERFACE IMPLEMENTORS
+echo ============================================================
+echo --- Find implementors of IMyEntity (limit 5) ---
+uv run search_code.py -l 5 interface implementors IMyEntity
+echo.
+echo --- Find implementors of IMyTerminalBlock (limit 5) ---
+uv run search_code.py -l 5 interface implementors IMyTerminalBlock
+echo.
+
+echo ============================================================
+echo HIERARCHY SEARCH - COUNT MODE
+echo ============================================================
+echo --- Count children of MyEntity ---
+uv run search_code.py -c class children MyEntity
+echo.
+echo --- Count implementors of IMyEntity ---
+uv run search_code.py -c interface implementors IMyEntity
+echo.
+
+echo ============================================================
+echo HIERARCHY SEARCH - WITH NAMESPACE FILTER
+echo ============================================================
+echo --- Find children of MyEntity in Sandbox.Game namespace ---
+uv run search_code.py -n Sandbox.Game -l 5 class children MyEntity
+echo.
+echo --- Find implementors of IMyEntity in VRage.Game.ModAPI namespace ---
+uv run search_code.py -n VRage.Game.ModAPI -l 3 interface implementors IMyEntity
+echo.
+
+echo ============================================================
 echo ALL TESTS COMPLETED
 echo ============================================================

@@ -105,6 +105,111 @@ class SignatureEntry:
             'description'
         ]
 
+@dataclass
+class ClassHierarchyEntry:
+    """Represents a class inheritance relationship"""
+    child_namespace: str
+    child_class: str
+    parent_namespace: str
+    parent_class: str
+    file_path: str
+    start_line: int
+    end_line: int
+
+    def to_csv_row(self) -> List[str]:
+        """Convert to CSV row format"""
+        return [
+            self.child_namespace,
+            self.child_class,
+            self.parent_namespace,
+            self.parent_class,
+            self.file_path,
+            str(self.start_line),
+            str(self.end_line)
+        ]
+
+    @staticmethod
+    def csv_header() -> List[str]:
+        """Return CSV header row"""
+        return [
+            'child_namespace',
+            'child_class',
+            'parent_namespace',
+            'parent_class',
+            'file_path',
+            'start_line',
+            'end_line'
+        ]
+
+@dataclass
+class InterfaceHierarchyEntry:
+    """Represents an interface inheritance relationship"""
+    child_namespace: str
+    child_interface: str
+    parent_namespace: str
+    parent_interface: str
+    file_path: str
+    start_line: int
+    end_line: int
+
+    def to_csv_row(self) -> List[str]:
+        """Convert to CSV row format"""
+        return [
+            self.child_namespace,
+            self.child_interface,
+            self.parent_namespace,
+            self.parent_interface,
+            self.file_path,
+            str(self.start_line),
+            str(self.end_line)
+        ]
+
+    @staticmethod
+    def csv_header() -> List[str]:
+        """Return CSV header row"""
+        return [
+            'child_namespace',
+            'child_interface',
+            'parent_namespace',
+            'parent_interface',
+            'file_path',
+            'start_line',
+            'end_line'
+        ]
+
+@dataclass
+class InterfaceImplementationEntry:
+    """Represents a class/struct implementing interfaces"""
+    implementing_namespace: str
+    implementing_type: str
+    interfaces: str  # Comma-separated list of fully-qualified interface names
+    file_path: str
+    start_line: int
+    end_line: int
+
+    def to_csv_row(self) -> List[str]:
+        """Convert to CSV row format"""
+        return [
+            self.implementing_namespace,
+            self.implementing_type,
+            self.interfaces,
+            self.file_path,
+            str(self.start_line),
+            str(self.end_line)
+        ]
+
+    @staticmethod
+    def csv_header() -> List[str]:
+        """Return CSV header row"""
+        return [
+            'implementing_namespace',
+            'implementing_type',
+            'interfaces',
+            'file_path',
+            'start_line',
+            'end_line'
+        ]
+
 
 @dataclass
 class FileProcessingResult:
@@ -117,6 +222,11 @@ class FileProcessingResult:
     method_entries: List[IndexEntry] = field(default_factory=list)
     field_entries: List[IndexEntry] = field(default_factory=list)
     signature_entries: List[SignatureEntry] = field(default_factory=list)
+    
+    # Hierarchy entries
+    class_hierarchy_entries: List[ClassHierarchyEntry] = field(default_factory=list)
+    interface_hierarchy_entries: List[InterfaceHierarchyEntry] = field(default_factory=list)
+    interface_implementation_entries: List[InterfaceImplementationEntry] = field(default_factory=list)
 
     # Declared names found in this file (for building shared state after pass 1)
     declared_namespaces: Set[str] = field(default_factory=set)
@@ -262,11 +372,27 @@ class FileProcessor:
 
     def _get_identifier_name(self, node: Node) -> Optional[str]:
         """Extract identifier name from a node"""
-        for child in node.children:
-            if child.type == 'identifier':
-                return child.text.decode('utf-8')
-            elif child.type == 'qualified_name':
-                return child.text.decode('utf-8')
+        # For method/constructor declarations, we need the identifier right before the parameter list
+        # (not the return type which comes first)
+        if node.type in ('method_declaration', 'constructor_declaration'):
+            # Find the identifier that comes right before the parameter_list
+            identifiers = []
+            for child in node.children:
+                if child.type == 'identifier':
+                    identifiers.append(child.text.decode('utf-8'))
+                elif child.type == 'parameter_list' and identifiers:
+                    # The last identifier before parameter_list is the method name
+                    return identifiers[-1]
+            # Fallback: return last identifier if no parameter_list found
+            if identifiers:
+                return identifiers[-1]
+        else:
+            # For other node types, return first identifier as before
+            for child in node.children:
+                if child.type == 'identifier':
+                    return child.text.decode('utf-8')
+                elif child.type == 'qualified_name':
+                    return child.text.decode('utf-8')
         return None
 
     def _build_namespace(self, current: str, new: str) -> str:
@@ -309,6 +435,94 @@ class FileProcessor:
                 break
 
         return ' '.join(comment_lines)
+
+    def _extract_type_name(self, node: Node) -> Optional[str]:
+        """Extract type name from a type node, stripping generic parameters"""
+        if node.type == 'identifier':
+            text = node.text
+            if text:
+                return text.decode('utf-8')
+        elif node.type == 'qualified_name':
+            text = node.text
+            if text:
+                return text.decode('utf-8')
+        elif node.type == 'generic_name':
+            # For generic types, extract just the base name
+            for child in node.children:
+                if child.type == 'identifier':
+                    text = child.text
+                    if text:
+                        return text.decode('utf-8')
+        return None
+
+    def _get_base_list_types(self, node: Node) -> List[str]:
+        """Extract all type names from a base_list node"""
+        types = []
+        for child in node.children:
+            if child.type in ('identifier', 'qualified_name', 'generic_name'):
+                type_name = self._extract_type_name(child)
+                if type_name:
+                    types.append(type_name)
+        return types
+
+    def _find_base_list(self, node: Node) -> Optional[Node]:
+        """Find the base_list child node"""
+        for child in node.children:
+            if child.type == 'base_list':
+                return child
+        return None
+
+    def _resolve_type_namespace(self, type_name: str, current_namespace: str) -> str:
+        """
+        Attempt to resolve the namespace of a type.
+        Returns the best-guess fully-qualified name.
+        """
+        # If already qualified (contains a dot), return as-is
+        if '.' in type_name:
+            return type_name
+        
+        # Check if it's in the current namespace
+        full_name = f"{current_namespace}.{type_name}" if current_namespace else type_name
+        
+        # Try to match against known types in declared sets
+        if type_name in self.declared_interfaces:
+            # Find matching namespace
+            locations = self.declared_interfaces[type_name]
+            for ns, _ in locations:
+                if ns == current_namespace:
+                    return full_name
+            # Return first match if not in current namespace
+            if locations:
+                ns, _ = next(iter(locations))
+                return f"{ns}.{type_name}" if ns else type_name
+        
+        if type_name in self.declared_classes:
+            locations = self.declared_classes[type_name]
+            for ns, _ in locations:
+                if ns == current_namespace:
+                    return full_name
+            if locations:
+                ns, _ = next(iter(locations))
+                return f"{ns}.{type_name}" if ns else type_name
+        
+        if type_name in self.declared_structs:
+            locations = self.declared_structs[type_name]
+            for ns, _ in locations:
+                if ns == current_namespace:
+                    return full_name
+            if locations:
+                ns, _ = next(iter(locations))
+                return f"{ns}.{type_name}" if ns else type_name
+        
+        # Default: assume it's in current namespace
+        return full_name
+
+    def _split_namespace_and_type(self, fully_qualified: str) -> Tuple[str, str]:
+        """Split a fully-qualified type name into namespace and type name"""
+        if '.' not in fully_qualified:
+            return ('', fully_qualified)
+        parts = fully_qualified.rsplit('.', 1)
+        return (parts[0], parts[1])
 
     def _extract_method_signature(self, node: Node, source_lines: List[str]) -> Tuple[str, int, int]:
         """
@@ -454,6 +668,26 @@ class FileProcessor:
         )
         result.interface_entries.append(entry)
 
+        # Process interface hierarchy (interfaces extending other interfaces)
+        base_list = self._find_base_list(node)
+        if base_list:
+            parent_types = self._get_base_list_types(base_list)
+            for parent_type in parent_types:
+                # All items in interface base list are parent interfaces
+                parent_fqn = self._resolve_type_namespace(parent_type, context['namespace'])
+                parent_ns, parent_name = self._split_namespace_and_type(parent_fqn)
+                
+                hier_entry = InterfaceHierarchyEntry(
+                    child_namespace=context['namespace'],
+                    child_interface=name,
+                    parent_namespace=parent_ns,
+                    parent_interface=parent_name,
+                    file_path=context['file_path'],
+                    start_line=node.start_point[0] + 1,
+                    end_line=node.end_point[0] + 1
+                )
+                result.interface_hierarchy_entries.append(hier_entry)
+
     def _process_class(self, node: Node, context: Dict, result: FileProcessingResult):
         """Process class/record declaration"""
         name = self._get_identifier_name(node)
@@ -481,6 +715,58 @@ class FileProcessor:
         )
         result.class_entries.append(entry)
 
+        # Process class hierarchy (base class and interfaces)
+        base_list = self._find_base_list(node)
+        if base_list:
+            base_types = self._get_base_list_types(base_list)
+            if base_types:
+                # First item could be base class or interface
+                first_type = base_types[0]
+                first_fqn = self._resolve_type_namespace(first_type, context['namespace'])
+                first_ns, first_name = self._split_namespace_and_type(first_fqn)
+                
+                # Check if first type is an interface (check declared_interfaces)
+                is_interface = first_name in self.declared_interfaces
+                
+                interfaces = []
+                if is_interface:
+                    # All items are interfaces
+                    interfaces = base_types
+                else:
+                    # First item is base class, rest are interfaces
+                    parent_fqn = first_fqn
+                    parent_ns, parent_name = first_ns, first_name
+                    
+                    hier_entry = ClassHierarchyEntry(
+                        child_namespace=context['namespace'],
+                        child_class=name,
+                        parent_namespace=parent_ns,
+                        parent_class=parent_name,
+                        file_path=context['file_path'],
+                        start_line=node.start_point[0] + 1,
+                        end_line=node.end_point[0] + 1
+                    )
+                    result.class_hierarchy_entries.append(hier_entry)
+                    
+                    interfaces = base_types[1:]
+                
+                # Process interfaces
+                if interfaces:
+                    interface_fqns = []
+                    for iface in interfaces:
+                        iface_fqn = self._resolve_type_namespace(iface, context['namespace'])
+                        interface_fqns.append(iface_fqn)
+                    
+                    impl_entry = InterfaceImplementationEntry(
+                        implementing_namespace=context['namespace'],
+                        implementing_type=name,
+                        interfaces=','.join(interface_fqns),
+                        file_path=context['file_path'],
+                        start_line=node.start_point[0] + 1,
+                        end_line=node.end_point[0] + 1
+                    )
+                    result.interface_implementation_entries.append(impl_entry)
+
     def _process_struct(self, node: Node, context: Dict, result: FileProcessingResult):
         """Process struct declaration"""
         name = self._get_identifier_name(node)
@@ -507,6 +793,26 @@ class FileProcessor:
             description=description
         )
         result.struct_entries.append(entry)
+
+        # Process interface implementations (structs can implement interfaces)
+        base_list = self._find_base_list(node)
+        if base_list:
+            interfaces = self._get_base_list_types(base_list)
+            if interfaces:
+                interface_fqns = []
+                for iface in interfaces:
+                    iface_fqn = self._resolve_type_namespace(iface, context['namespace'])
+                    interface_fqns.append(iface_fqn)
+                
+                impl_entry = InterfaceImplementationEntry(
+                    implementing_namespace=context['namespace'],
+                    implementing_type=name,
+                    interfaces=','.join(interface_fqns),
+                    file_path=context['file_path'],
+                    start_line=node.start_point[0] + 1,
+                    end_line=node.end_point[0] + 1
+                )
+                result.interface_implementation_entries.append(impl_entry)
 
     def _process_enum(self, node: Node, context: Dict, result: FileProcessingResult):
         """Process enum declaration"""
@@ -778,6 +1084,11 @@ class CSharpIndexer:
         self.method_index: List[IndexEntry] = []
         self.field_index: List[IndexEntry] = []
         self.signature_index: List[SignatureEntry] = []
+        
+        # Hierarchy indices
+        self.class_hierarchy_index: List[ClassHierarchyEntry] = []
+        self.interface_hierarchy_index: List[InterfaceHierarchyEntry] = []
+        self.interface_implementation_index: List[InterfaceImplementationEntry] = []
 
         # Track declared names for each category to detect usages
         self.declared_namespaces: Set[str] = set()
@@ -810,6 +1121,9 @@ class CSharpIndexer:
                 self.method_index.extend(result.method_entries)
                 self.field_index.extend(result.field_entries)
                 self.signature_index.extend(result.signature_entries)
+                self.class_hierarchy_index.extend(result.class_hierarchy_entries)
+                self.interface_hierarchy_index.extend(result.interface_hierarchy_entries)
+                self.interface_implementation_index.extend(result.interface_implementation_entries)
 
     def _merge_batch_declarations(self, batch_results: List[List[FileProcessingResult]]):
         """Merge declared names from batched pass 1 results"""
@@ -980,10 +1294,85 @@ class CSharpIndexer:
             for entry in sorted_signatures:
                 writer.writerow(entry.to_csv_row())
 
-        print(f"\nIndex files written to {output_dir}")
+        # Write hierarchy CSV files
+        def hier_sort_key_class(e):
+            return (e.child_namespace, e.child_class, e.parent_namespace, e.parent_class)
+        
+        def hier_sort_key_interface(e):
+            return (e.child_namespace, e.child_interface, e.parent_namespace, e.parent_interface)
+        
+        def impl_sort_key(e):
+            return (e.implementing_namespace, e.implementing_type, e.interfaces)
+        
+        # Class hierarchy
+        sorted_class_hierarchy = sorted(self.class_hierarchy_index, key=hier_sort_key_class)
+        class_hier_path = output_dir / "class_hierarchy.csv"
+        print(f"Writing {len(sorted_class_hierarchy)} class hierarchy entries to {class_hier_path}...")
+        
+        with open(class_hier_path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(ClassHierarchyEntry.csv_header())
+            for entry in sorted_class_hierarchy:
+                writer.writerow(entry.to_csv_row())
+        
+        # Interface hierarchy
+        sorted_interface_hierarchy = sorted(self.interface_hierarchy_index, key=hier_sort_key_interface)
+        interface_hier_path = output_dir / "interface_hierarchy.csv"
+        print(f"Writing {len(sorted_interface_hierarchy)} interface hierarchy entries to {interface_hier_path}...")
+        
+        with open(interface_hier_path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(InterfaceHierarchyEntry.csv_header())
+            for entry in sorted_interface_hierarchy:
+                writer.writerow(entry.to_csv_row())
+        
+        # Interface implementations
+        sorted_implementations = sorted(self.interface_implementation_index, key=impl_sort_key)
+        impl_path = output_dir / "interface_implementation.csv"
+        print(f"Writing {len(sorted_implementations)} interface implementation entries to {impl_path}...")
+        
+        with open(impl_path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(InterfaceImplementationEntry.csv_header())
+            for entry in sorted_implementations:
+                writer.writerow(entry.to_csv_row())
+        
+        # Generate tree text files
+        print("\nGenerating hierarchy tree visualizations...")
+        
+        from hierarchy_tree import build_class_tree, build_interface_tree
+        
+        # Class hierarchy tree
+        if sorted_class_hierarchy:
+            class_tree_data = [
+                (e.child_namespace, e.child_class, e.parent_namespace, e.parent_class)
+                for e in sorted_class_hierarchy
+            ]
+            class_tree_text = build_class_tree(class_tree_data)
+            class_tree_path = output_dir / "class_hierarchy.txt"
+            with open(class_tree_path, 'w', encoding='utf-8') as f:
+                f.write(class_tree_text)
+            print(f"Written class hierarchy tree to {class_tree_path}")
+        
+        # Interface hierarchy tree
+        if sorted_interface_hierarchy:
+            interface_tree_data = [
+                (e.child_namespace, e.child_interface, e.parent_namespace, e.parent_interface)
+                for e in sorted_interface_hierarchy
+            ]
+            interface_tree_text = build_interface_tree(interface_tree_data)
+            interface_tree_path = output_dir / "interface_hierarchy.txt"
+            with open(interface_tree_path, 'w', encoding='utf-8') as f:
+                f.write(interface_tree_text)
+            print(f"Written interface hierarchy tree to {interface_tree_path}")
+
+        print(f"\nAll index files written to {output_dir}")
         print(f"  - Total declarations: {total_declarations} entries")
         print(f"  - Total usages: {total_usages} entries")
         print(f"  - Total signatures: {len(sorted_signatures)} entries")
+        print(f"  - Class hierarchy: {len(sorted_class_hierarchy)} entries")
+        print(f"  - Interface hierarchy: {len(sorted_interface_hierarchy)} entries")
+        print(f"  - Interface implementations: {len(sorted_implementations)} entries")
 
 
 def main():

@@ -1,143 +1,39 @@
 # Code Search Guide
 
+Search the decompiled Space Engineers C# codebase efficiently.
+
 **IMPORTANT:** All commands run on Windows. This skill folder must be the current working directory.
 
 ## Running Commands
 
-Always change to this skill folder first, then run commands:
+Always change to this skill folder first:
 
-```
+```bash
 cd skills/se-dev-game-code
 uv run search_code.py class declaration MyToolbar
 ```
 
-## Index Files
+## Search Categories
 
-Located in `CodeIndex/` folder after preparation:
+| Category | What It Searches |
+|----------|-----------------|
+| `class` | Class declarations and usages |
+| `interface` | Interface declarations and usages |
+| `struct` | Struct declarations and usages |
+| `enum` | Enum declarations and usages |
+| `method` | Method declarations and usages |
+| `field` | Fields and properties (accessed identically) |
+| `signature` | Full method signatures with parameters |
 
-| Index File | Contains | Use For |
-|------------|----------|---------|
-| `namespace_declarations.csv` | Namespace declarations | Finding which assembly defines a namespace |
-| `interface_declarations.csv` | Interface declarations | Finding interface definitions |
-| `interface_usages.csv` | Interface usages | Finding interface implementations and references |
-| `class_declarations.csv` | Class declarations | Finding class definitions |
-| `class_usages.csv` | Class usages | Finding class references |
-| `struct_declarations.csv` | Struct declarations | Finding struct definitions |
-| `struct_usages.csv` | Struct usages | Finding struct references |
-| `enum_declarations.csv` | Enum declarations | Finding enum definitions |
-| `enum_usages.csv` | Enum usages | Finding enum references |
-| `method_declarations.csv` | Method declarations | Finding method signatures |
-| `method_usages.csv` | Method usages | Finding method call sites |
-| `method_signatures.csv` | Full method signatures | Finding methods by signature text |
-| `field_declarations.csv` | Fields and properties | Finding field/property definitions |
-| `field_usages.csv` | Field/property usages | Finding field/property references |
+## Basic Usage
 
-**Note:** The field index includes both fields and properties since they are accessed identically at usage sites.
-
-## CSV Column Structure
-
-Most index files share this structure:
-
+```bash
+uv run search_code.py <category> <declaration|usage> <pattern>
 ```
-namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,description
-```
-
-- `namespace` - The namespace containing the symbol
-- `declaring_type` - The class/struct/interface containing the symbol
-- `method` - The method containing the symbol (empty for type-level declarations)
-- `symbol_name` - Field/property name (for field index)
-- `type` - Either `declaration` or `usage`
-- `file_path` - Relative path from `Decompiled/` folder
-- `start_line`, `end_line` - Line range in source file
-- `description` - XML doc comment summary (for declarations)
-
-### Method Signatures CSV (Different Structure)
-
-**Important:** The `method_signatures.csv` file has a **different column structure**:
-
-```
-namespace,declaring_type,method_name,signature,file_path,start_line,end_line,description
-```
-
-- `namespace` - Full namespace of the declaring class
-- `declaring_type` - Class name (for inner classes: `ParentClass.ChildClass`)
-- `method_name` - The method name
-- `signature` - Full method signature on a single line (whitespace normalized)
-- `file_path` - Relative path from `Decompiled/` folder
-- `start_line`, `end_line` - Line range of signature only (not whole method body)
-- `description` - XML doc comment before the method
-
-Includes all method types: abstract methods, inline `=>` methods, and block `{...}` methods. Property getters/setters are NOT indexed here (they're in field index).
-
-## Using search_code.py
-
-The primary search tool. Run from this skill folder:
-
-```
-uv run search_code.py [options] <category> <symbol_type> <patterns...>
-```
-
-### Arguments
-
-| Argument | Values | Description |
-|----------|--------|-------------|
-| `category` | `class`, `method`, `enum`, `struct`, `interface`, `field`, `signature` | Symbol category |
-| `symbol_type` | `declaration`, `usage` | Find definitions or references |
-| `patterns` | One or more | Search patterns (see below) |
-
-**Note:** The `signature` category only supports `declaration` (returns NO-MATCHES for usage).
-
-### Options
-
-| Option | Description |
-|--------|-------------|
-| `-h`, `--help` | Show help |
-| `-c`, `--count` | Print only match count |
-| `-l N`, `--limit N` | Limit to N results |
-| `-o N`, `--offset N` | Skip first N results |
-| `-n NS`, `--namespace NS` | Filter by namespace prefix |
-
-### Pattern Syntax
-
-Patterns match against the symbol name (not namespace):
-
-| Prefix | Behavior |
-|--------|----------|
-| `text:X` or just `X` | Case-insensitive substring match |
-| `re:X` | Case-insensitive regex match (Python regex syntax) |
-
-Multiple patterns use AND logic (all must match).
-
-### Output Format
-
-- No matches: `NO-MATCHES`
-- Matches: `relative_source_file_path:line` or `relative_source_file_path:start_line-end_line`
-- Line ranges are inclusive (both start and end lines are part of the match)
-- Results sorted by code depth, then alphabetically inside the same depth
-
-The `relative_source_file_path` is relative to the `Decompiled` folder which is next to this document.
-
-**Signature category special output:** For `signature` searches, the output includes the full signature text after a pipe separator:
-```
-file_path:start-end|signature_text
-```
-
-Example:
-```
-Sandbox.Game\Sandbox\Game\MyClass.cs:100-102|[Attribute] public static void MyMethod(int param)
-```
-
-The signature text includes attributes (normalized to single line), but not doc comments.
-
-In count mode (`--count` or `-c`) only the number of search hits are printed instead of the actual matches.
-
-If you expect too many hits, then first count, then paginate as needed. Try not to query more than 10 results at a time.
-
-## Examples
 
 ### Find Declarations
 
-```
+```bash
 uv run search_code.py class declaration MyToolbar
 uv run search_code.py struct declaration Vector3D
 uv run search_code.py interface declaration IMyTerminalBlock
@@ -148,76 +44,122 @@ uv run search_code.py field declaration AngularDamping
 
 ### Find Usages
 
-```
+```bash
 uv run search_code.py -l 10 class usage MyToolbar
 uv run search_code.py -l 10 method usage GetPosition
 uv run search_code.py -l 10 struct usage Vector3D
 ```
 
-### Regex Patterns
+### Search Method Signatures
 
-```
-uv run search_code.py class declaration "re:^My.*Block$"
-uv run search_code.py method declaration "re:^Get.*Position$"
-uv run search_code.py struct declaration "re:^Vector[23]D$"
-```
-
-### Namespace Filtering
-
-```
-uv run search_code.py -n Sandbox.Game class declaration ""
-uv run search_code.py -n VRageMath method declaration Add
-uv run search_code.py -n Sandbox.Engine.Physics -l 5 class declaration ""
+```bash
+uv run search_code.py signature declaration GetPosition
+uv run search_code.py -l 10 signature declaration "re:^Build$"
 ```
 
-### Pagination
-
+**Note:** Signature searches show the full method signature after a pipe separator:
 ```
+Sandbox.Game/MyClass.cs:100-102|[Attribute] public static void MyMethod(int param)
+```
+
+## Search Options
+
+| Option | Description |
+|--------|-------------|
+| `-h`, `--help` | Show help |
+| `-c`, `--count` | Print only match count |
+| `-l N`, `--limit N` | Limit to N results |
+| `-o N`, `--offset N` | Skip first N results |
+| `-n NS`, `--namespace NS` | Filter by namespace prefix |
+
+### Count Before Fetching
+
+```bash
+uv run search_code.py -c class usage MyEntity
+# Output: 1247
+
+uv run search_code.py -l 20 class usage MyEntity
+```
+
+### Paginate Large Results
+
+```bash
 uv run search_code.py -l 20 class usage MyEntity
 uv run search_code.py -l 20 -o 20 class usage MyEntity
 uv run search_code.py -l 20 -o 40 class usage MyEntity
 ```
 
-### Count Mode
+### Filter by Namespace
 
+```bash
+uv run search_code.py -n Sandbox.Game class declaration ""
+uv run search_code.py -n VRageMath method declaration Add
 ```
-uv run search_code.py -c class usage MyEntity
-uv run search_code.py -c struct usage Vector3D
+
+## Pattern Syntax
+
+Patterns match against the symbol name (not namespace):
+
+| Prefix | Behavior |
+|--------|----------|
+| `text:X` or just `X` | Case-insensitive substring match |
+| `re:X` | Case-insensitive regex (Python regex syntax) |
+
+Multiple patterns use AND logic (all must match).
+
+### Examples
+
+```bash
+# Substring match (default)
+uv run search_code.py class declaration Toolbar
+
+# Explicit text match
+uv run search_code.py class declaration "text:Toolbar"
+
+# Regex for exact match
+uv run search_code.py class declaration "re:^MyToolbar$"
+
+# Regex patterns
+uv run search_code.py class declaration "re:^My.*Block$"
+uv run search_code.py method declaration "re:^Get.*Position$"
+uv run search_code.py struct declaration "re:^Vector[23]D$"
 ```
 
 ### Multiple Patterns
 
-```
+```bash
 uv run search_code.py method declaration Get Position
 ```
 
-### Signature Search
+Both "Get" AND "Position" must appear in the name.
 
+## Reading Output
+
+### No Matches
 ```
-uv run search_code.py signature declaration GetPosition
-uv run search_code.py -l 10 signature declaration "re:^Build$"
-uv run search_code.py -n VRageMath signature declaration Abs
+NO-MATCHES
 ```
 
-## Reading Source Files
-
-After finding their relative paths, read the actual source files under `Decompiled/`. 
-
-For example:
+### Standard Output
 ```
+relative_path:line
+relative_path:start-end
+```
+
+Lines are inclusive (both start and end are part of the match).
+
+Results are sorted by code depth, then alphabetically.
+
+### Reading Source Files
+
+The `relative_path` is relative to the `Decompiled/` folder:
+
+```bash
 # Search result: VRage.Math/VRageMath/Vector3D.cs:13-2293
-# Read: Decompiled/VRage.Math/VRageMath/Vector3D.cs
+# Read file: Decompiled/VRage.Math/VRageMath/Vector3D.cs
 ```
 
-The first folder in the relative path indicates the assembly (DLL), from the second level the folders match the namespace hierarchy.
-
-## Tips
-
-1. **Start with declarations** - Find definitions before usages
-2. **Use regex for exact names** - `"re:^Vector3D$"` avoids matching Vector3DI, Vector3D_Extensions, etc.
-3. **Check the assembly** - The first folder in `file_path` shows which DLL contains the code
-4. **Use count first** - Check `-c` to see how many matches before fetching all
-5. **Paginate large results** - Use `-l` and `-o` to browse incrementally
+The first folder indicates the assembly (DLL). From the second level, folders match namespace hierarchy.
 
 ## Assembly Reference
 
@@ -230,3 +172,18 @@ The first folder in the relative path indicates the assembly (DLL), from the sec
 | `Sandbox.Common` | Shared game code |
 | `SpaceEngineers.Game` | SE-specific game code |
 | `SpaceEngineers.ObjectBuilders` | Save data structures |
+
+## Best Practices
+
+1. **Start with declarations** - Find definitions before usages
+2. **Use regex for exact names** - `"re:^Vector3D$"` avoids Vector3DI, Vector3D_Extensions, etc.
+3. **Check the assembly** - First folder in path shows which DLL
+4. **Count first** - Use `-c` to see match count before fetching all
+5. **Paginate large results** - Use `-l` and `-o` for incremental browsing
+6. **Query at most 10-20 results** - Keep context manageable
+
+## Next Steps
+
+- **Hierarchy searches**: See `HierarchySearch.md` for class/interface relationships
+- **Advanced patterns**: See `Advanced.md` for complex regex and workflows
+- **Technical details**: See `Implementation.md` for CSV structures and internals
