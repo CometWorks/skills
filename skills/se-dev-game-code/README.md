@@ -24,13 +24,19 @@ Located in `CodeIndex/` after preparation:
 
 | File | Contains |
 |------|----------|
-| `namespaces.csv` | Namespace declarations |
-| `interfaces.csv` | Interface declarations and usages |
-| `classes.csv` | Class declarations and usages |
-| `structs.csv` | Struct declarations and usages |
-| `enums.csv` | Enum declarations and usages |
-| `methods.csv` | Method declarations and usages |
-| `variables.csv` | Fields, properties, and variable usages |
+| `namespace_declarations.csv` | Namespace declarations |
+| `interface_declarations.csv` | Interface declarations |
+| `interface_usages.csv` | Interface usages |
+| `class_declarations.csv` | Class declarations |
+| `class_usages.csv` | Class usages |
+| `struct_declarations.csv` | Struct declarations |
+| `struct_usages.csv` | Struct usages |
+| `enum_declarations.csv` | Enum declarations |
+| `enum_usages.csv` | Enum usages |
+| `method_declarations.csv` | Method declarations |
+| `method_usages.csv` | Method usages |
+| `variable_declarations.csv` | Fields and properties declarations |
+| `variable_usages.csv` | Variable usages |
 
 ### CSV Structure
 

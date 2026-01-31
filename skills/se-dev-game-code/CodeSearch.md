@@ -17,13 +17,19 @@ Located in `CodeIndex/` folder after preparation:
 
 | Index File | Contains | Use For |
 |------------|----------|---------|
-| `namespaces.csv` | Namespace declarations | Finding which assembly defines a namespace |
-| `interfaces.csv` | Interface declarations and usages | Finding interface definitions and implementations |
-| `classes.csv` | Class declarations and usages | Finding class definitions and references |
-| `structs.csv` | Struct declarations and usages | Finding struct definitions and references |
-| `enums.csv` | Enum declarations and usages | Finding enum definitions and references |
-| `methods.csv` | Method declarations and usages | Finding method signatures and call sites |
-| `variables.csv` | Fields, properties, locals | Finding variable definitions and references |
+| `namespace_declarations.csv` | Namespace declarations | Finding which assembly defines a namespace |
+| `interface_declarations.csv` | Interface declarations | Finding interface definitions |
+| `interface_usages.csv` | Interface usages | Finding interface implementations and references |
+| `class_declarations.csv` | Class declarations | Finding class definitions |
+| `class_usages.csv` | Class usages | Finding class references |
+| `struct_declarations.csv` | Struct declarations | Finding struct definitions |
+| `struct_usages.csv` | Struct usages | Finding struct references |
+| `enum_declarations.csv` | Enum declarations | Finding enum definitions |
+| `enum_usages.csv` | Enum usages | Finding enum references |
+| `method_declarations.csv` | Method declarations | Finding method signatures |
+| `method_usages.csv` | Method usages | Finding method call sites |
+| `variable_declarations.csv` | Fields, properties | Finding variable definitions |
+| `variable_usages.csv` | Variable usages | Finding variable references |
 
 ## CSV Column Structure
 

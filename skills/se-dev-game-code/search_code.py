@@ -9,12 +9,12 @@ SCRIPT_DIR = Path(__file__).parent.resolve()
 INDEX_DIR = SCRIPT_DIR / "CodeIndex"
 
 CATEGORY_FILES = {
-    "class": "classes.csv",
-    "method": "methods.csv",
-    "enum": "enums.csv",
-    "struct": "structs.csv",
-    "interface": "interfaces.csv",
-    "variable": "variables.csv",
+    "class": ("class_declarations.csv", "class_usages.csv"),
+    "method": ("method_declarations.csv", "method_usages.csv"),
+    "enum": ("enum_declarations.csv", "enum_usages.csv"),
+    "struct": ("struct_declarations.csv", "struct_usages.csv"),
+    "interface": ("interface_declarations.csv", "interface_usages.csv"),
+    "variable": ("variable_declarations.csv", "variable_usages.csv"),
 }
 
 def parse_args():
@@ -75,7 +75,10 @@ def get_sort_key(row):
 def main():
     args = parse_args()
 
-    index_file = INDEX_DIR / CATEGORY_FILES[args.category]
+    # Select the appropriate file based on symbol_type (declaration or usage)
+    decl_file, usage_file = CATEGORY_FILES[args.category]
+    index_file = INDEX_DIR / (decl_file if args.symbol_type == "declaration" else usage_file)
+    
     if not index_file.exists():
         print("NO-MATCHES")
         sys.exit(0)
@@ -87,8 +90,6 @@ def main():
     with open(index_file, "r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            if row["type"] != args.symbol_type:
-                continue
             if ns_filter:
                 row_ns = row["namespace"].lower()
                 if not (row_ns == ns_filter or row_ns.startswith(ns_filter + ".")):

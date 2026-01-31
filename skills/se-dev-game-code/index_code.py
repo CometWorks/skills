@@ -765,53 +765,74 @@ class CSharpIndexer:
         print(f"Completed pass 2: {total_files} files.")
 
     def write_indices(self, output_dir: Path):
-        """Write all indices to CSV files"""
+        """Write all indices to CSV files - declarations and usages in separate files"""
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Sort and write each index
-        indices = [
-            ('namespaces.csv', self.namespace_index),
-            ('interfaces.csv', self.interface_index),
-            ('classes.csv', self.class_index),
-            ('structs.csv', self.struct_index),
-            ('enums.csv', self.enum_index),
-            ('methods.csv', self.method_index),
-            ('variables.csv', self.variable_index)
+        # Split entries into declarations and usages for each category
+        def split_entries(entries):
+            declarations = [e for e in entries if e.entry_type == 'declaration']
+            usages = [e for e in entries if e.entry_type == 'usage']
+            return declarations, usages
+
+        # Define categories with their indices (singular form for filename)
+        categories = [
+            ('namespace', self.namespace_index),
+            ('interface', self.interface_index),
+            ('class', self.class_index),
+            ('struct', self.struct_index),
+            ('enum', self.enum_index),
+            ('method', self.method_index),
+            ('variable', self.variable_index)
         ]
 
-        for filename, index_data in indices:
-            # Sort by all columns left to right
-            sorted_data = sorted(
-                index_data,
-                key=lambda e: (
+        total_declarations = 0
+        total_usages = 0
+
+        for category_name, index_data in categories:
+            declarations, usages = split_entries(index_data)
+            total_declarations += len(declarations)
+            total_usages += len(usages)
+
+            # Sort function for entries
+            def sort_key(e):
+                return (
                     e.namespace,
                     e.declaring_type,
                     e.method,
                     e.variable_name,
-                    e.entry_type,
                     e.file_path,
                     e.start_line,
                     e.end_line
                 )
-            )
 
-            output_path = output_dir / filename
-            print(f"Writing {len(sorted_data)} entries to {output_path}...")
+            sorted_declarations = sorted(declarations, key=sort_key)
+            sorted_usages = sorted(usages, key=sort_key)
 
-            with open(output_path, 'w', newline='', encoding='utf-8') as f:
+            # Write declarations file
+            decl_filename = f"{category_name}_declarations.csv"
+            decl_path = output_dir / decl_filename
+            print(f"Writing {len(sorted_declarations)} declaration entries to {decl_path}...")
+
+            with open(decl_path, 'w', newline='', encoding='utf-8') as f:
                 writer = csv.writer(f)
                 writer.writerow(IndexEntry.csv_header())
-                for entry in sorted_data:
+                for entry in sorted_declarations:
+                    writer.writerow(entry.to_csv_row())
+
+            # Write usages file
+            usage_filename = f"{category_name}_usages.csv"
+            usage_path = output_dir / usage_filename
+            print(f"Writing {len(sorted_usages)} usage entries to {usage_path}...")
+
+            with open(usage_path, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.writer(f)
+                writer.writerow(IndexEntry.csv_header())
+                for entry in sorted_usages:
                     writer.writerow(entry.to_csv_row())
 
         print(f"\nIndex files written to {output_dir}")
-        print(f"  - Namespaces: {len(self.namespace_index)} entries")
-        print(f"  - Interfaces: {len(self.interface_index)} entries")
-        print(f"  - Classes: {len(self.class_index)} entries")
-        print(f"  - Structs: {len(self.struct_index)} entries")
-        print(f"  - Enums: {len(self.enum_index)} entries")
-        print(f"  - Methods: {len(self.method_index)} entries")
-        print(f"  - Variables: {len(self.variable_index)} entries")
+        print(f"  - Total declarations: {total_declarations} entries")
+        print(f"  - Total usages: {total_usages} entries")
 
 
 def main():
