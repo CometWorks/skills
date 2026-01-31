@@ -66,26 +66,26 @@ uv run search_code.py -l 5 method usage ClampToByte
 echo.
 
 echo ============================================================
-echo VARIABLE DECLARATION
+echo FIELD DECLARATION
 echo ============================================================
-echo --- AngularDamping variable declaration ---
-uv run search_code.py variable declaration AngularDamping
+echo --- AngularDamping field declaration ---
+uv run search_code.py field declaration AngularDamping
 echo.
-echo --- AllowScaling variable declaration ---
-uv run search_code.py variable declaration AllowScaling
+echo --- AllowScaling field declaration ---
+uv run search_code.py field declaration AllowScaling
 echo.
-echo --- Forward variable declaration (limit 5) ---
-uv run search_code.py -l 5 variable declaration "re:^Forward$"
+echo --- Forward field declaration (limit 5) ---
+uv run search_code.py -l 5 field declaration "re:^Forward$"
 echo.
 
 echo ============================================================
-echo VARIABLE USAGE
+echo FIELD USAGE
 echo ============================================================
-echo --- Forward variable usage (limit 5) ---
-uv run search_code.py -l 5 variable usage "re:^Forward$"
+echo --- Forward field usage (limit 5) ---
+uv run search_code.py -l 5 field usage "re:^Forward$"
 echo.
-echo --- AngularDamping variable usage (limit 5) ---
-uv run search_code.py -l 5 variable usage AngularDamping
+echo --- AngularDamping field usage (limit 5) ---
+uv run search_code.py -l 5 field usage AngularDamping
 echo.
 
 echo ============================================================

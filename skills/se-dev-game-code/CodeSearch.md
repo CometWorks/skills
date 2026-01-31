@@ -28,21 +28,23 @@ Located in `CodeIndex/` folder after preparation:
 | `enum_usages.csv` | Enum usages | Finding enum references |
 | `method_declarations.csv` | Method declarations | Finding method signatures |
 | `method_usages.csv` | Method usages | Finding method call sites |
-| `variable_declarations.csv` | Fields, properties | Finding variable definitions |
-| `variable_usages.csv` | Variable usages | Finding variable references |
+| `field_declarations.csv` | Fields and properties | Finding field/property definitions |
+| `field_usages.csv` | Field/property usages | Finding field/property references |
+
+**Note:** The field index includes both fields and properties since they are accessed identically at usage sites.
 
 ## CSV Column Structure
 
 All index files share this structure:
 
 ```
-namespace,declaring_type,method,variable_name,type,file_path,start_line,end_line,description
+namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,description
 ```
 
 - `namespace` - The namespace containing the symbol
 - `declaring_type` - The class/struct/interface containing the symbol
 - `method` - The method containing the symbol (empty for type-level declarations)
-- `variable_name` - Variable/field/property name (for variables.csv)
+- `symbol_name` - Field/property name (for field index)
 - `type` - Either `declaration` or `usage`
 - `file_path` - Relative path from `Decompiled/` folder
 - `start_line`, `end_line` - Line range in source file
@@ -60,7 +62,7 @@ uv run search_code.py [options] <category> <symbol_type> <patterns...>
 
 | Argument | Values | Description |
 |----------|--------|-------------|
-| `category` | `class`, `method`, `enum`, `struct`, `interface`, `variable` | Symbol category |
+| `category` | `class`, `method`, `enum`, `struct`, `interface`, `field` | Symbol category |
 | `symbol_type` | `declaration`, `usage` | Find definitions or references |
 | `patterns` | One or more | Search patterns (see below) |
 
@@ -107,7 +109,7 @@ uv run search_code.py struct declaration Vector3D
 uv run search_code.py interface declaration IMyTerminalBlock
 uv run search_code.py enum declaration MyRelationsBetweenPlayerAndBlock
 uv run search_code.py method declaration GetPosition
-uv run search_code.py variable declaration AngularDamping
+uv run search_code.py field declaration AngularDamping
 ```
 
 ### Find Usages

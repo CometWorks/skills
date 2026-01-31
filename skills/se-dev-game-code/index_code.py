@@ -28,7 +28,7 @@ class IndexEntry:
     namespace: str
     declaring_type: str
     method: str
-    variable_name: str
+    symbol_name: str
     entry_type: str  # 'declaration' or 'usage'
     file_path: str
     start_line: int
@@ -41,7 +41,7 @@ class IndexEntry:
             self.namespace,
             self.declaring_type,
             self.method,
-            self.variable_name,
+            self.symbol_name,
             self.entry_type,
             self.file_path,
             str(self.start_line),
@@ -56,7 +56,7 @@ class IndexEntry:
             'namespace',
             'declaring_type',
             'method',
-            'variable_name',
+            'symbol_name',
             'type',
             'file_path',
             'start_line',
@@ -74,7 +74,7 @@ class FileProcessingResult:
     struct_entries: List[IndexEntry] = field(default_factory=list)
     enum_entries: List[IndexEntry] = field(default_factory=list)
     method_entries: List[IndexEntry] = field(default_factory=list)
-    variable_entries: List[IndexEntry] = field(default_factory=list)
+    field_entries: List[IndexEntry] = field(default_factory=list)
 
     # Declared names found in this file (for building shared state after pass 1)
     declared_namespaces: Set[str] = field(default_factory=set)
@@ -283,7 +283,7 @@ class FileProcessor:
             namespace=name,
             declaring_type='',
             method='',
-            variable_name='',
+            symbol_name='',
             entry_type='declaration',
             file_path=context['file_path'],
             start_line=node.start_point[0] + 1,
@@ -308,7 +308,7 @@ class FileProcessor:
             namespace=full_namespace,
             declaring_type='',
             method='',
-            variable_name='',
+            symbol_name='',
             entry_type='declaration',
             file_path=context['file_path'],
             start_line=node.start_point[0] + 1,
@@ -335,7 +335,7 @@ class FileProcessor:
             namespace=context['namespace'],
             declaring_type=name,
             method='',
-            variable_name='',
+            symbol_name='',
             entry_type='declaration',
             file_path=context['file_path'],
             start_line=node.start_point[0] + 1,
@@ -362,7 +362,7 @@ class FileProcessor:
             namespace=context['namespace'],
             declaring_type=name,
             method='',
-            variable_name='',
+            symbol_name='',
             entry_type='declaration',
             file_path=context['file_path'],
             start_line=node.start_point[0] + 1,
@@ -389,7 +389,7 @@ class FileProcessor:
             namespace=context['namespace'],
             declaring_type=name,
             method='',
-            variable_name='',
+            symbol_name='',
             entry_type='declaration',
             file_path=context['file_path'],
             start_line=node.start_point[0] + 1,
@@ -416,7 +416,7 @@ class FileProcessor:
             namespace=context['namespace'],
             declaring_type=name,
             method='',
-            variable_name='',
+            symbol_name='',
             entry_type='declaration',
             file_path=context['file_path'],
             start_line=node.start_point[0] + 1,
@@ -443,7 +443,7 @@ class FileProcessor:
             namespace=context['namespace'],
             declaring_type=context['declaring_type'],
             method=name,
-            variable_name='',
+            symbol_name='',
             entry_type='declaration',
             file_path=context['file_path'],
             start_line=node.start_point[0] + 1,
@@ -466,14 +466,14 @@ class FileProcessor:
                                 namespace=context['namespace'],
                                 declaring_type=context['declaring_type'],
                                 method='',
-                                variable_name=name,
+                                symbol_name=name,
                                 entry_type='declaration',
                                 file_path=context['file_path'],
                                 start_line=node.start_point[0] + 1,
                                 end_line=node.end_point[0] + 1,
                                 description=description
                             )
-                            result.variable_entries.append(entry)
+                            result.field_entries.append(entry)
 
     def _process_property(self, node: Node, context: Dict, result: FileProcessingResult):
         """Process property declaration"""
@@ -487,14 +487,14 @@ class FileProcessor:
             namespace=context['namespace'],
             declaring_type=context['declaring_type'],
             method='',
-            variable_name=name,
+            symbol_name=name,
             entry_type='declaration',
             file_path=context['file_path'],
             start_line=node.start_point[0] + 1,
             end_line=node.end_point[0] + 1,
             description=description
         )
-        result.variable_entries.append(entry)
+        result.field_entries.append(entry)
 
     def _process_identifier_usage(self, node: Node, context: Dict, result: FileProcessingResult):
         """Process identifier usage (not a declaration)"""
@@ -537,7 +537,7 @@ class FileProcessor:
                 namespace=name,
                 declaring_type='',
                 method='',
-                variable_name='',
+                symbol_name='',
                 entry_type='usage',
                 file_path=context['file_path'],
                 start_line=node.start_point[0] + 1,
@@ -552,7 +552,7 @@ class FileProcessor:
                 namespace=context['namespace'],
                 declaring_type=name,
                 method=context['method'],
-                variable_name='',
+                symbol_name='',
                 entry_type='usage',
                 file_path=context['file_path'],
                 start_line=node.start_point[0] + 1,
@@ -567,7 +567,7 @@ class FileProcessor:
                 namespace=context['namespace'],
                 declaring_type=name,
                 method=context['method'],
-                variable_name='',
+                symbol_name='',
                 entry_type='usage',
                 file_path=context['file_path'],
                 start_line=node.start_point[0] + 1,
@@ -582,7 +582,7 @@ class FileProcessor:
                 namespace=context['namespace'],
                 declaring_type=name,
                 method=context['method'],
-                variable_name='',
+                symbol_name='',
                 entry_type='usage',
                 file_path=context['file_path'],
                 start_line=node.start_point[0] + 1,
@@ -597,7 +597,7 @@ class FileProcessor:
                 namespace=context['namespace'],
                 declaring_type=name,
                 method=context['method'],
-                variable_name='',
+                symbol_name='',
                 entry_type='usage',
                 file_path=context['file_path'],
                 start_line=node.start_point[0] + 1,
@@ -612,7 +612,7 @@ class FileProcessor:
                 namespace=context['namespace'],
                 declaring_type=context['declaring_type'],
                 method=name,
-                variable_name='',
+                symbol_name='',
                 entry_type='usage',
                 file_path=context['file_path'],
                 start_line=node.start_point[0] + 1,
@@ -627,14 +627,14 @@ class FileProcessor:
                 namespace=context['namespace'],
                 declaring_type=context['declaring_type'],
                 method=context['method'],
-                variable_name=name,
+                symbol_name=name,
                 entry_type='usage',
                 file_path=context['file_path'],
                 start_line=node.start_point[0] + 1,
                 end_line=node.end_point[0] + 1,
                 description=''
             )
-            result.variable_entries.append(entry)
+            result.field_entries.append(entry)
 
 
 class CSharpIndexer:
@@ -650,7 +650,7 @@ class CSharpIndexer:
         self.struct_index: List[IndexEntry] = []
         self.enum_index: List[IndexEntry] = []
         self.method_index: List[IndexEntry] = []
-        self.variable_index: List[IndexEntry] = []
+        self.field_index: List[IndexEntry] = []
 
         # Track declared names for each category to detect usages
         self.declared_namespaces: Set[str] = set()
@@ -681,7 +681,7 @@ class CSharpIndexer:
                 self.struct_index.extend(result.struct_entries)
                 self.enum_index.extend(result.enum_entries)
                 self.method_index.extend(result.method_entries)
-                self.variable_index.extend(result.variable_entries)
+                self.field_index.extend(result.field_entries)
 
     def _merge_batch_declarations(self, batch_results: List[List[FileProcessingResult]]):
         """Merge declared names from batched pass 1 results"""
@@ -782,7 +782,7 @@ class CSharpIndexer:
             ('struct', self.struct_index),
             ('enum', self.enum_index),
             ('method', self.method_index),
-            ('variable', self.variable_index)
+            ('field', self.field_index)
         ]
 
         total_declarations = 0
@@ -799,7 +799,7 @@ class CSharpIndexer:
                     e.namespace,
                     e.declaring_type,
                     e.method,
-                    e.variable_name,
+                    e.symbol_name,
                     e.file_path,
                     e.start_line,
                     e.end_line

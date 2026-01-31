@@ -14,7 +14,7 @@ CATEGORY_FILES = {
     "enum": ("enum_declarations.csv", "enum_usages.csv"),
     "struct": ("struct_declarations.csv", "struct_usages.csv"),
     "interface": ("interface_declarations.csv", "interface_usages.csv"),
-    "variable": ("variable_declarations.csv", "variable_usages.csv"),
+    "field": ("field_declarations.csv", "field_usages.csv"),
 }
 
 def parse_args():
@@ -39,8 +39,8 @@ def compile_pattern(pattern_str):
 def get_symbol_name(row, category):
     if category == "method":
         return row["method"]
-    elif category == "variable":
-        return row["variable_name"]
+    elif category == "field":
+        return row["symbol_name"]
     else:
         return row["declaring_type"]
 
@@ -67,7 +67,7 @@ def get_sort_key(row):
         row["namespace"],
         row["declaring_type"],
         row["method"],
-        row["variable_name"],
+        row["symbol_name"],
         row["file_path"],
         int(row["start_line"]),
     )
