@@ -3,16 +3,24 @@ name: se-dev-script
 description: In-game (programmable block, aka PB) script development for Space Engineers version 1
 license: MIT
 ---
-Do the one-time preparation steps described in `Prepare.md`, but only if the `Prepare.DONE` file is missing.
+## Getting Started
 
-How to build custom tool script to conduct search and for other tasks:
+If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time preparation steps:
+1. Review the requirements and instructions in [Prepare.md](Prepare.md).
+2. Execute the preparation by running `.\Prepare.bat` from this folder.
+3. **IMPORTANT:** You are on Windows. Use `&` to chain commands in `cmd.exe` or `;` in PowerShell. Do NOT use `&&`.
+4. **DO NOT** create the `Prepare.DONE` file yourself. It is automatically created by `Prepare.bat` only upon a successful run. Creating it manually is "faking" success and will lead to errors.
+
+## Usage Guide
 - A Python virtual environment in this folder was made available by the preparation.
 - Use this Python virtual environment to write short, targeted, reusable utility scripts as needed. 
-  Build a catalog of such scripts in `UtilityScripts.md` next to this skill file. 
+  Build a catalog of such scripts in [UtilityScripts.md](UtilityScripts.md) next to this skill file. 
 - Use `uv run script_name.py` in this folder (as CWD) to run your scripts.
-- Use `busybox bash` to open a bash shell, which you can use easier, because it is close to UNIX.
-- Alternatively use the Windows PowerShell if busybox would not work for something.
-- On the Windows command line (cmd) (NOT on busybox!) use the `&` delimiter commands instead of `&&`.
+- **IMPORTANT: Space Engineers modding is done on Windows.** All commands must work on Windows.
+- Use `busybox.exe` as a prefix to run individual UNIX-like commands, for example: `busybox.exe grep -r "pattern" folder`.
+- Do NOT open a bash shell with `busybox bash`. Run busybox commands directly from cmd or PowerShell instead.
+- **CRITICAL: Always use forward slashes (`/`) in file paths passed to busybox.** Backslashes are interpreted as escape characters by bash and will be silently removed, mangling paths. Windows accepts forward slashes. Correct: `busybox.exe grep "pattern" C:/Users/name/folder` — Wrong: `C:\Users\name\folder`.
+- Alternatively use Windows PowerShell, which handles backslash paths natively.
 - See the list of available Python packages in `pyproject.toml`.
 - The `SteamScripts` folder contains game content (mods, scripts, blueprints) the player downloaded. Filter scripts by the existence of a `Script.cs` file directly in the numbered content folder. 
 - The `LocalScripts` folder contains mods the player is developing. It is a link to `%AppData%/SpaceEngineers/IngameScripts`.

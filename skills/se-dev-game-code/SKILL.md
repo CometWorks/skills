@@ -3,34 +3,47 @@ name: se-dev-game-code
 description: Allows reading the decompiled C# code of Space Engineers version 1.  
 license: MIT
 ---
-If the `Prepare.DONE` file is missing, then start by following the steps in `Prepare.md` first.
 
-How to build custom tool script to conduct search and for other tasks:
-- A Python virtual environment in this folder was made available by the preparation.
-- Use this Python virtual environment to write short, targeted, reusable utility scripts as needed. 
-  Build a catalog of such scripts in `UtilityScripts.md` next to this skill file. 
-- Use `uv run script_name.py` in this folder (as CWD) to run your scripts.
-- Use `busybox bash` to open a bash shell, which you can use easier, because it is close to UNIX.
-- Alternatively use the Windows PowerShell if busybox would not work for something.
-- On the Windows command line (cmd) (NOT on busybox!) use the `&` delimiter commands instead of `&&`.
-- See the list of available Python packages in `pyproject.toml`.
+## Getting Started
 
-Use the code search if you need to know more about the game's internal by reading its decompiled C# code.
-Read `CodeSearch.md` for detailed information on code search and its best practices, including example commands.
-Always check the game code if you are unsure about its internal APIs and want to know how to interface with them
-properly. Also check the game code if you want to understand existing mod, script or plugin code or the inner
-workings of some Space Engineers data type is unclear.
+If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time preparation steps:
+1. Review the requirements and instructions in [Prepare.md](Prepare.md).
+2. Execute the preparation by running `.\Prepare.bat` from this folder.
+3. **IMPORTANT:** You are on Windows. Use `&` to chain commands in `cmd.exe` or `;` in PowerShell. Do NOT use `&&`.
+4. **DO NOT** create the `Prepare.DONE` file yourself. It is automatically created by `Prepare.bat` only upon a successful run. Creating it manually is "faking" success and will lead to errors.
 
-The textual part of the game's `Content` is copied into the `Content` folder, so you can use free text search in it:
+## Code Search Documentation
+
+Use the code search to explore Space Engineers' decompiled C# source code:
+
+- **[QuickStart.md](QuickStart.md)** - Start here! Essential commands to get going quickly
+- **[CodeSearch.md](CodeSearch.md)** - Complete guide to searching classes, methods, fields, etc.
+- **[HierarchySearch.md](HierarchySearch.md)** - Finding class/interface inheritance and implementations
+- **[Advanced.md](Advanced.md)** - Power user techniques for complex searches
+- **[Implementation.md](Implementation.md)** - Technical details for skill contributors (optional)
+
+Always check the game code when:
+- You're unsure about internal APIs and how to interface with them
+- You want to understand existing mod, script, or plugin code
+- The inner workings of a Space Engineers data type are unclear
+
+## Custom Scripting
+
+For building your own utility scripts to work with the indexes and decompiled code:
+
+- **[ScriptingGuide.md](ScriptingGuide.md)** - How to write Python scripts, use BusyBox, handle Windows paths
+
+## Game Content Data
+
+The textual part of the game's `Content` is copied into the `Content` folder for free text search:
 - Language translations, including the string IDs
 - Block and other entity definitions
 - Default blueprints and scenarios
+- See [ContentTypes.md](ContentTypes.md) for the full list of content types
 
-General rules:
-- Use `busybox bash` to open a bash shell, which you can use easier, because it is close to UNIX.
-- Alternatively use the Windows PowerShell if busybox would not work for something.
-- On the Windows command line (cmd) (NOT on busybox!) use the `&` delimiter commands instead of `&&`.
+## General Rules
+
 - In the `Decompiled` folder search only inside the C# source files (*.cs) in general. If you work on transpiler or preloader patches, then also search in the IL code (*.il) files.
-- In the `Content` folder search the files appropriate for the task. See `ContentTypes.md` for the list of types.
-- Do not search for decompiled game code outside the `Decompiled` folder which is at the same level as this skill file. The decompiled game source tree must be there is the preparation succeeded.
-- Do not search for game content data outside the `Content` folder which is at the same level as this skill file. The copied game content must be there is the preparation succeeded.
+- In the `Content` folder search the files appropriate for the task. See [ContentTypes.md](ContentTypes.md) for the list of types.
+- Do not search for decompiled game code outside the `Decompiled` folder which is at the same level as this skill file. The decompiled game source tree must be there if the preparation succeeded.
+- Do not search for game content data outside the `Content` folder which is at the same level as this skill file. The copied game content must be there if the preparation succeeded.

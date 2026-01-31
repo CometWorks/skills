@@ -3,25 +3,33 @@ name: se-dev-plugin
 description: Plugin development for Space Engineers version 1
 license: MIT
 ---
-Do the one-time preparation steps described in `Prepare.md`, but only if the `Prepare.DONE` file is missing.
+## Getting Started
 
-How to build custom tool script to conduct search and for other tasks:
+If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time preparation steps:
+1. Review the requirements and instructions in [Prepare.md](Prepare.md).
+2. Execute the preparation by running `.\Prepare.bat` from this folder.
+3. **IMPORTANT:** You are on Windows. Use `&` to chain commands in `cmd.exe` or `;` in PowerShell. Do NOT use `&&`.
+4. **DO NOT** create the `Prepare.DONE` file yourself. It is automatically created by `Prepare.bat` only upon a successful run. Creating it manually is "faking" success and will lead to errors.
+
+## Usage Guide
 - A Python virtual environment in this folder was made available by the preparation.
 - Use this Python virtual environment to write short, targeted, reusable utility scripts as needed. 
-  Build a catalog of such scripts in `UtilityScripts.md` next to this skill file. 
+  Build a catalog of such scripts in [UtilityScripts.md](UtilityScripts.md) next to this skill file. 
 - Use `uv run script_name.py` in this folder (as CWD) to run your scripts.
-- Use `busybox bash` to open a bash shell, which you can use easier, because it is close to UNIX.
-- Alternatively use the Windows PowerShell if busybox would not work for something.
-- On the Windows command line (cmd) (NOT on busybox!) use the `&` delimiter commands instead of `&&`.
+- **IMPORTANT: Space Engineers modding is done on Windows.** All commands must work on Windows.
+- Use `busybox.exe` as a prefix to run individual UNIX-like commands, for example: `busybox.exe grep -r "pattern" folder`.
+- Do NOT open a bash shell with `busybox bash`. Run busybox commands directly from cmd or PowerShell instead.
+- **CRITICAL: Always use forward slashes (`/`) in file paths passed to busybox.** Backslashes are interpreted as escape characters by bash and will be silently removed, mangling paths. Windows accepts forward slashes. Correct: `busybox.exe grep "pattern" C:/Users/name/folder` — Wrong: `C:\Users\name\folder`.
+- Alternatively use Windows PowerShell, which handles backslash paths natively.
 - See the list of available Python packages in `pyproject.toml`.
 
 Read the appropriate documents for further details:
-- `Plugin.md` Plugin development (shared skills for both client and server)
-- `ClientPlugin.md` Client plugin development (relevant on client side)
-- `ServerPlugin.md` Server plugin development (relevant on server side)
-- `Guide.md` Use this to answer questions about the plugin development process in general.
-- `Publicizer.md` How to use the Krafs publicizer to access internal, protected or private members in the original game code (optional).
-- `OtherPluginsAsExamples.md` How to look into the source code of other plugins as examples.
+- [Plugin.md](Plugin.md) Plugin development (shared skills for both client and server)
+- [ClientPlugin.md](ClientPlugin.md) Client plugin development (relevant on client side)
+- [ServerPlugin.md](ServerPlugin.md) Server plugin development (relevant on server side)
+- [Guide.md](Guide.md) Use this to answer questions about the plugin development process in general.
+- [Publicizer.md](Publicizer.md) How to use the Krafs publicizer to access internal, protected or private members in the original game code (optional).
+- [OtherPluginsAsExamples.md](OtherPluginsAsExamples.md) How to look into the source code of other plugins as examples.
 
 Plugins are released exclusively on the PluginHub. All plugins must be open source, since they are compiled on
 the player's machine from the GitHub source revision identified by its PluginHub registration. Plugins are
@@ -32,9 +40,7 @@ Use the `se-dev-game-code` skill to search the game's decompiled code. You will 
 understand how the game's internals work and how to interface with it and patch it properly.
 
 General rules:
-- Use `busybox bash` to open a bash shell, which you can use easier, because it is close to UNIX.
-- Alternatively use the Windows PowerShell if busybox would not work for something.
-- On the Windows command line (cmd) (NOT on busybox!) use the `&` delimiter commands instead of `&&`.
+- Follow the Windows command line rules above (use `busybox.exe` prefix, forward slashes in paths).
 
 References:
 - [Pulsar](https://github.com/SpaceGT/Pulsar) Plugin loader for Space Engineers
