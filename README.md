@@ -59,22 +59,17 @@ You can also install the skills manually:
 1. Clone this repository
 2. Run one of the installation scripts from the `install` folder:
 
-| Target Environment | Script |
-|-------------------|--------|
-| Claude Code | `claude.bat` |
-| Cline | `cline.bat` |
-| OpenCode | `opencode.bat` |
-| Custom location | `install.bat <target_skills_folder>` |
+| Target Environment | Script                              |
+|--------------------|-------------------------------------|
+| Claude Code        | `claude.bat`                        |
+| Kilo Code          | `kilocode.bat`                      |
+| Cline              | `cline.bat`                         |
+| OpenCode           | `opencode.bat`                      |
+| Custom location    | `install.bat <target_skills_folder>` |
 
 The scripts create junction points (symlinks) from the target skill folders to the skill folders in this repository.
 
 ## FAQ
-
-### How much of this was "vibe-coded"?
-
-The `index_code.py` and `search_code.py` scripts were written entirely by Claude Code with zero human intervention,
-other than repeated prompting and testing. The indexing logic is based on my previous work using Tree-sitter's C#
-parser, originally developed for the (now defunct) *Ask Your Code* ChatGPT plugin and GPT.
 
 ### How well does this work for plugin development?
 
@@ -103,6 +98,12 @@ specific instructions on how to search the SE codebase efficiently so it doesn't
 
 Ideally, it performs research using sub-agents and clears irrelevant data before passing the results back to the parent
 agent. Agent hierarchies are a fascinating and fast-evolving topic, definitely worth looking into!
+
+### How much of this was "vibe-coded"?
+
+The code indexing and search scripts were written entirely by Claude Code with zero human intervention, other than 
+repeated prompting and some extra testing and review. The indexing logic is based on my previous work using 
+Tree-sitter's C# parser, originally developed for the (now defunct) *Ask Your Code* ChatGPT plugin and GPT.
 
 ## Troubleshooting
 
