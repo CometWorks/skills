@@ -15,6 +15,7 @@ CATEGORY_FILES = {
     "struct": ("struct_declarations.csv", "struct_usages.csv"),
     "interface": ("interface_declarations.csv", "interface_usages.csv"),
     "field": ("field_declarations.csv", "field_usages.csv"),
+    "signature": ("method_signatures.csv", None),  # Signatures are declarations only
 }
 
 def parse_args():
@@ -41,6 +42,8 @@ def get_symbol_name(row, category):
         return row["method"]
     elif category == "field":
         return row["symbol_name"]
+    elif category == "signature":
+        return row["method_name"]
     else:
         return row["declaring_type"]
 
@@ -51,23 +54,28 @@ def matches_pattern(name, pattern):
     else:
         return value in name.lower()
 
-def get_depth(row):
+def get_depth(row, category):
     depth = 0
     if row["namespace"]:
         depth += row["namespace"].count(".") + 1
     if row["declaring_type"]:
         depth += 1
-    if row["method"]:
+    # Handle different column name for signature category
+    method_col = "method_name" if category == "signature" else "method"
+    if row.get(method_col):
         depth += 1
     return depth
 
-def get_sort_key(row):
+def get_sort_key(row, category):
+    # Handle different column names for signature category
+    method_col = "method_name" if category == "signature" else "method"
+    symbol_col = "signature" if category == "signature" else "symbol_name"
     return (
-        get_depth(row),
+        get_depth(row, category),
         row["namespace"],
         row["declaring_type"],
-        row["method"],
-        row["symbol_name"],
+        row.get(method_col, ""),
+        row.get(symbol_col, ""),
         row["file_path"],
         int(row["start_line"]),
     )
@@ -77,8 +85,20 @@ def main():
 
     # Select the appropriate file based on symbol_type (declaration or usage)
     decl_file, usage_file = CATEGORY_FILES[args.category]
-    index_file = INDEX_DIR / (decl_file if args.symbol_type == "declaration" else usage_file)
-    
+
+    # Signature category only has declarations
+    if args.category == "signature" and args.symbol_type == "usage":
+        print("NO-MATCHES")
+        sys.exit(0)
+
+    if args.symbol_type == "declaration":
+        index_file = INDEX_DIR / decl_file
+    else:
+        if usage_file is None:
+            print("NO-MATCHES")
+            sys.exit(0)
+        index_file = INDEX_DIR / usage_file
+
     if not index_file.exists():
         print("NO-MATCHES")
         sys.exit(0)
@@ -106,7 +126,7 @@ def main():
         print(len(matches))
         sys.exit(0)
 
-    matches.sort(key=get_sort_key)
+    matches.sort(key=lambda row: get_sort_key(row, args.category))
 
     if args.offset > 0:
         matches = matches[args.offset:]
@@ -117,9 +137,15 @@ def main():
         start = row["start_line"]
         end = row["end_line"]
         if start == end:
-            print(f"{row['file_path']}:{start}")
+            location = f"{row['file_path']}:{start}"
         else:
-            print(f"{row['file_path']}:{start}-{end}")
+            location = f"{row['file_path']}:{start}-{end}"
+
+        if args.category == "signature":
+            # For signatures, append the signature text after a pipe separator
+            print(f"{location}|{row['signature']}")
+        else:
+            print(location)
 
 if __name__ == "__main__":
     main()

@@ -35,15 +35,16 @@ Located in `CodeIndex/` after preparation:
 | `enum_usages.csv` | Enum usages |
 | `method_declarations.csv` | Method declarations |
 | `method_usages.csv` | Method usages |
-| `variable_declarations.csv` | Fields and properties declarations |
-| `variable_usages.csv` | Variable usages |
+| `method_signatures.csv` | Method signatures (different columns, see below) |
+| `field_declarations.csv` | Fields and properties declarations |
+| `field_usages.csv` | Field/property usages |
 
 ### CSV Structure
 
-All index files share this column structure:
+Most index files share this column structure:
 
 ```
-namespace,declaring_type,method,variable_name,type,file_path,start_line,end_line,description
+namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,description
 ```
 
 | Column | Description |
@@ -51,12 +52,33 @@ namespace,declaring_type,method,variable_name,type,file_path,start_line,end_line
 | `namespace` | The namespace containing the symbol |
 | `declaring_type` | The class/struct/interface containing the symbol |
 | `method` | The method containing the symbol (empty for type-level items) |
-| `variable_name` | Variable/field/property name (for variables.csv) |
+| `symbol_name` | Field/property name (for field index) |
 | `type` | Either `declaration` or `usage` |
 | `file_path` | Relative path from `Decompiled/` folder |
 | `start_line` | Starting line number |
 | `end_line` | Ending line number |
 | `description` | XML doc comment (for declarations only) |
+
+### Method Signatures CSV Structure
+
+**Note:** The `method_signatures.csv` file has a **different column structure**:
+
+```
+namespace,declaring_type,method_name,signature,file_path,start_line,end_line,description
+```
+
+| Column | Description |
+|--------|-------------|
+| `namespace` | Full namespace of the declaring class |
+| `declaring_type` | Class name (for inner classes: `ParentClass.ChildClass`) |
+| `method_name` | The method name |
+| `signature` | Full method signature on a single line (whitespace normalized) |
+| `file_path` | Relative path from `Decompiled/` folder |
+| `start_line` | Starting line of the signature |
+| `end_line` | Ending line of the signature (not the whole method body) |
+| `description` | XML doc comment before the method |
+
+The signature index includes all method types: abstract methods (no body), inline `=>` methods, and block `{...}` methods. Property getters/setters are NOT indexed as signatures; they appear in the field index.
 
 ### Indexer: index_code.py
 
@@ -84,9 +106,11 @@ uv run search_code.py [options] <category> <symbol_type> <patterns...>
 
 | Argument | Values | Description |
 |----------|--------|-------------|
-| `category` | `class`, `method`, `enum`, `struct`, `interface`, `variable` | Symbol category to search |
+| `category` | `class`, `method`, `enum`, `struct`, `interface`, `field`, `signature` | Symbol category to search |
 | `symbol_type` | `declaration`, `usage` | Whether to find definitions or references |
 | `patterns` | One or more patterns | Search expressions (see below) |
+
+**Note:** The `signature` category only supports `declaration` (signatures are not tracked as usages).
 
 #### Options
 
@@ -112,8 +136,20 @@ Multiple patterns must all match (AND logic).
 #### Output
 
 - If no matches: prints `NO-MATCHES`
-- Otherwise: prints `file_path:line` or `file_path:start-end` for each match
+- Otherwise: prints `file_path:line` or `file_path:start-end` for each match (line ranges are inclusive)
 - Results sorted by code depth (namespace.class.method nesting), then alphabetically
+
+**Signature category special output:** For `signature` searches, the output includes the full signature text after the file location, separated by a pipe character:
+```
+file_path:start-end|signature_text
+```
+
+Example:
+```
+Sandbox.Game\Sandbox\Game\MyClass.cs:100-102|[Attribute] public static void MyMethod(int param)
+```
+
+The signature includes any attributes on preceding lines, normalized to a single line with whitespace collapsed. Doc comments are not included in the signature text.
 
 ### Examples
 
@@ -145,7 +181,12 @@ uv run search_code.py -l 20 -o 20 interface declaration ""
 
 Find variable declarations with "Entity" in name within VRage namespace:
 ```
-uv run search_code.py -n VRage variable declaration Entity
+uv run search_code.py -n VRage field declaration Entity
+```
+
+Find method signatures containing "GetPosition":
+```
+uv run search_code.py signature declaration GetPosition
 ```
 
 ## Direct grep Search

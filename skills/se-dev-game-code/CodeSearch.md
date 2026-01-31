@@ -28,6 +28,7 @@ Located in `CodeIndex/` folder after preparation:
 | `enum_usages.csv` | Enum usages | Finding enum references |
 | `method_declarations.csv` | Method declarations | Finding method signatures |
 | `method_usages.csv` | Method usages | Finding method call sites |
+| `method_signatures.csv` | Full method signatures | Finding methods by signature text |
 | `field_declarations.csv` | Fields and properties | Finding field/property definitions |
 | `field_usages.csv` | Field/property usages | Finding field/property references |
 
@@ -35,7 +36,7 @@ Located in `CodeIndex/` folder after preparation:
 
 ## CSV Column Structure
 
-All index files share this structure:
+Most index files share this structure:
 
 ```
 namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,description
@@ -50,6 +51,24 @@ namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,d
 - `start_line`, `end_line` - Line range in source file
 - `description` - XML doc comment summary (for declarations)
 
+### Method Signatures CSV (Different Structure)
+
+**Important:** The `method_signatures.csv` file has a **different column structure**:
+
+```
+namespace,declaring_type,method_name,signature,file_path,start_line,end_line,description
+```
+
+- `namespace` - Full namespace of the declaring class
+- `declaring_type` - Class name (for inner classes: `ParentClass.ChildClass`)
+- `method_name` - The method name
+- `signature` - Full method signature on a single line (whitespace normalized)
+- `file_path` - Relative path from `Decompiled/` folder
+- `start_line`, `end_line` - Line range of signature only (not whole method body)
+- `description` - XML doc comment before the method
+
+Includes all method types: abstract methods, inline `=>` methods, and block `{...}` methods. Property getters/setters are NOT indexed here (they're in field index).
+
 ## Using search_code.py
 
 The primary search tool. Run from this skill folder:
@@ -62,9 +81,11 @@ uv run search_code.py [options] <category> <symbol_type> <patterns...>
 
 | Argument | Values | Description |
 |----------|--------|-------------|
-| `category` | `class`, `method`, `enum`, `struct`, `interface`, `field` | Symbol category |
+| `category` | `class`, `method`, `enum`, `struct`, `interface`, `field`, `signature` | Symbol category |
 | `symbol_type` | `declaration`, `usage` | Find definitions or references |
 | `patterns` | One or more | Search patterns (see below) |
+
+**Note:** The `signature` category only supports `declaration` (returns NO-MATCHES for usage).
 
 ### Options
 
@@ -90,10 +111,23 @@ Multiple patterns use AND logic (all must match).
 ### Output Format
 
 - No matches: `NO-MATCHES`
-- Matches (one line match): `relative_source_file_path:line` or `relative_source_file_path:start_line-end_line`
+- Matches: `relative_source_file_path:line` or `relative_source_file_path:start_line-end_line`
+- Line ranges are inclusive (both start and end lines are part of the match)
 - Results sorted by code depth, then alphabetically inside the same depth
 
 The `relative_source_file_path` is relative to the `Decompiled` folder which is next to this document.
+
+**Signature category special output:** For `signature` searches, the output includes the full signature text after a pipe separator:
+```
+file_path:start-end|signature_text
+```
+
+Example:
+```
+Sandbox.Game\Sandbox\Game\MyClass.cs:100-102|[Attribute] public static void MyMethod(int param)
+```
+
+The signature text includes attributes (normalized to single line), but not doc comments.
 
 In count mode (`--count` or `-c`) only the number of search hits are printed instead of the actual matches.
 
@@ -155,6 +189,14 @@ uv run search_code.py -c struct usage Vector3D
 
 ```
 uv run search_code.py method declaration Get Position
+```
+
+### Signature Search
+
+```
+uv run search_code.py signature declaration GetPosition
+uv run search_code.py -l 10 signature declaration "re:^Build$"
+uv run search_code.py -n VRageMath signature declaration Abs
 ```
 
 ## Reading Source Files

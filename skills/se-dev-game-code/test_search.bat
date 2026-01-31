@@ -179,6 +179,28 @@ uv run search_code.py -l 5 method declaration Get Position
 echo.
 
 echo ============================================================
+echo METHOD SIGNATURE SEARCH
+echo ============================================================
+echo --- Activate method signature ---
+uv run search_code.py -l 5 signature declaration Activate
+echo.
+echo --- Build method signature (limit 5) ---
+uv run search_code.py -l 5 signature declaration "re:^Build$"
+echo.
+echo --- Abs method signature in VRageMath namespace ---
+uv run search_code.py -n VRageMath signature declaration "re:^Abs$"
+echo.
+echo --- Count of GetPosition method signatures ---
+uv run search_code.py -c signature declaration GetPosition
+echo.
+echo --- Signature containing both "Get" and "Position" ---
+uv run search_code.py -l 5 signature declaration Get Position
+echo.
+echo --- Signature usage (should return NO-MATCHES) ---
+uv run search_code.py signature usage Activate
+echo.
+
+echo ============================================================
 echo NON-MATCHING EXAMPLES
 echo ============================================================
 echo --- Non-existent class ---

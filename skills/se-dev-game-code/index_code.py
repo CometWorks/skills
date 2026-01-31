@@ -12,6 +12,7 @@ Usage:
 import csv
 import os
 import random
+import re
 import sys
 from dataclasses import dataclass, field
 from multiprocessing import Pool, cpu_count
@@ -66,6 +67,46 @@ class IndexEntry:
 
 
 @dataclass
+class SignatureEntry:
+    """Represents a method signature entry - different columns than IndexEntry"""
+    namespace: str
+    declaring_type: str
+    method_name: str
+    signature: str
+    file_path: str
+    start_line: int
+    end_line: int
+    description: str
+
+    def to_csv_row(self) -> List[str]:
+        """Convert to CSV row format"""
+        return [
+            self.namespace,
+            self.declaring_type,
+            self.method_name,
+            self.signature,
+            self.file_path,
+            str(self.start_line),
+            str(self.end_line),
+            self.description
+        ]
+
+    @staticmethod
+    def csv_header() -> List[str]:
+        """Return CSV header row"""
+        return [
+            'namespace',
+            'declaring_type',
+            'method_name',
+            'signature',
+            'file_path',
+            'start_line',
+            'end_line',
+            'description'
+        ]
+
+
+@dataclass
 class FileProcessingResult:
     """Results from processing a single file"""
     namespace_entries: List[IndexEntry] = field(default_factory=list)
@@ -75,6 +116,7 @@ class FileProcessingResult:
     enum_entries: List[IndexEntry] = field(default_factory=list)
     method_entries: List[IndexEntry] = field(default_factory=list)
     field_entries: List[IndexEntry] = field(default_factory=list)
+    signature_entries: List[SignatureEntry] = field(default_factory=list)
 
     # Declared names found in this file (for building shared state after pass 1)
     declared_namespaces: Set[str] = field(default_factory=set)
@@ -268,6 +310,74 @@ class FileProcessor:
 
         return ' '.join(comment_lines)
 
+    def _extract_method_signature(self, node: Node, source_lines: List[str]) -> Tuple[str, int, int]:
+        """
+        Extract the method signature (everything before the body).
+        Returns (signature_text, start_line, end_line) where lines are 1-indexed.
+        Handles abstract methods (no body), inline => methods, and block {...} methods.
+        """
+        start_line = node.start_point[0]  # 0-indexed
+        start_col = node.start_point[1]
+
+        # Find the body node - could be 'block' ({...}) or 'arrow_expression_clause' (=>)
+        body_node = None
+        semicolon_pos = None
+        for child in node.children:
+            if child.type == 'block':
+                body_node = child
+                break
+            elif child.type == 'arrow_expression_clause':
+                body_node = child
+                break
+            elif child.type == ';':
+                # Abstract method or interface method (no body, ends with semicolon)
+                semicolon_pos = (child.start_point[0], child.start_point[1])
+
+        if body_node:
+            # Signature ends just before the body
+            end_line = body_node.start_point[0]  # 0-indexed
+            end_col = body_node.start_point[1]
+        elif semicolon_pos:
+            # Abstract method - signature includes up to and including the semicolon position
+            end_line = semicolon_pos[0]
+            end_col = semicolon_pos[1] + 1  # Include the semicolon
+        else:
+            # Fallback: use the whole first line of the method
+            end_line = start_line
+            end_col = len(source_lines[start_line]) if start_line < len(source_lines) else 0
+
+        # Extract signature text from source lines
+        sig_parts = []
+        for line_idx in range(start_line, end_line + 1):
+            if line_idx >= len(source_lines):
+                break
+            line = source_lines[line_idx]
+            if line_idx == start_line and line_idx == end_line:
+                # Single line signature
+                sig_parts.append(line[start_col:end_col])
+            elif line_idx == start_line:
+                sig_parts.append(line[start_col:])
+            elif line_idx == end_line:
+                sig_parts.append(line[:end_col])
+            else:
+                sig_parts.append(line)
+
+        # Join and normalize whitespace
+        raw_signature = ' '.join(sig_parts)
+        # Normalize: replace multiple whitespace with single space, strip
+        normalized = re.sub(r'\s+', ' ', raw_signature).strip()
+
+        # Calculate 1-indexed end line (inclusive)
+        # If the body/semicolon is on a different line than the signature start,
+        # the signature ends on the line before the body (end_line in 0-indexed
+        # equals the 1-indexed last signature line due to the off-by-one)
+        if end_line > start_line:
+            sig_end_line = end_line  # 0-indexed body line = 1-indexed signature end
+        else:
+            sig_end_line = end_line + 1  # Same line, convert 0-indexed to 1-indexed
+
+        return (normalized, start_line + 1, sig_end_line)
+
     def _process_file_scoped_namespace(self, node: Node, context: Dict, result: FileProcessingResult):
         """Process file-scoped namespace declaration"""
         name = self._get_identifier_name(node)
@@ -451,6 +561,22 @@ class FileProcessor:
             description=description
         )
         result.method_entries.append(entry)
+
+        # Also create a signature entry
+        signature_text, sig_start, sig_end = self._extract_method_signature(
+            node, context['source_lines']
+        )
+        sig_entry = SignatureEntry(
+            namespace=context['namespace'],
+            declaring_type=context['declaring_type'],
+            method_name=name,
+            signature=signature_text,
+            file_path=context['file_path'],
+            start_line=sig_start,
+            end_line=sig_end,
+            description=description
+        )
+        result.signature_entries.append(sig_entry)
 
     def _process_field(self, node: Node, context: Dict, result: FileProcessingResult):
         """Process field (member variable) declaration"""
@@ -651,6 +777,7 @@ class CSharpIndexer:
         self.enum_index: List[IndexEntry] = []
         self.method_index: List[IndexEntry] = []
         self.field_index: List[IndexEntry] = []
+        self.signature_index: List[SignatureEntry] = []
 
         # Track declared names for each category to detect usages
         self.declared_namespaces: Set[str] = set()
@@ -682,6 +809,7 @@ class CSharpIndexer:
                 self.enum_index.extend(result.enum_entries)
                 self.method_index.extend(result.method_entries)
                 self.field_index.extend(result.field_entries)
+                self.signature_index.extend(result.signature_entries)
 
     def _merge_batch_declarations(self, batch_results: List[List[FileProcessingResult]]):
         """Merge declared names from batched pass 1 results"""
@@ -830,9 +958,32 @@ class CSharpIndexer:
                 for entry in sorted_usages:
                     writer.writerow(entry.to_csv_row())
 
+        # Write method_signatures.csv (different column structure)
+        def sig_sort_key(e):
+            return (
+                e.namespace,
+                e.declaring_type,
+                e.method_name,
+                e.file_path,
+                e.start_line,
+                e.end_line
+            )
+
+        sorted_signatures = sorted(self.signature_index, key=sig_sort_key)
+        sig_filename = "method_signatures.csv"
+        sig_path = output_dir / sig_filename
+        print(f"Writing {len(sorted_signatures)} signature entries to {sig_path}...")
+
+        with open(sig_path, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(SignatureEntry.csv_header())
+            for entry in sorted_signatures:
+                writer.writerow(entry.to_csv_row())
+
         print(f"\nIndex files written to {output_dir}")
         print(f"  - Total declarations: {total_declarations} entries")
         print(f"  - Total usages: {total_usages} entries")
+        print(f"  - Total signatures: {len(sorted_signatures)} entries")
 
 
 def main():
