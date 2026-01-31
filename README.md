@@ -38,10 +38,10 @@ If you want to use BusyBox in your other projects, then this is also available a
 
 ## Skills
 
-* [se-dev-script](https://www.google.com/search?q=skills/se-dev-script/SKILL.md) – In-game script development
-* [se-dev-mod](https://www.google.com/search?q=skills/se-dev-mod/SKILL.md) – Mod development
-* [se-dev-plugin](https://www.google.com/search?q=skills/se-dev-plugin/SKILL.md) – Plugin development
-* [se-dev-game-code](https://www.google.com/search?q=skills/se-dev-game-code/SKILL.md) – Searchable decompiled C# game code (recommended companion for all the other skills)
+* [se-dev-script](skills/se-dev-script/SKILL.md) – In-game script development
+* [se-dev-mod](skills/se-dev-mod/SKILL.md) – Mod development
+* [se-dev-plugin](skills/se-dev-plugin/SKILL.md) – Plugin development
+* [se-dev-game-code](skills/se-dev-game-code/SKILL.md) – Searchable decompiled C# game code (recommended companion for all the other skills)
 
 _Enjoy!_
 

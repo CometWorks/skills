@@ -3,12 +3,12 @@ name: se-dev-mod
 description: Mod development for Space Engineers version 1
 license: MIT
 ---
-Do the one-time preparation steps described in `Prepare.md`, but only if the `Prepare.DONE` file is missing.
+Do the one-time preparation steps described in [Prepare.md](Prepare.md), but only if the `Prepare.DONE` file is missing.
 
 How to build custom tool script to conduct search and for other tasks:
 - A Python virtual environment in this folder was made available by the preparation.
 - Use this Python virtual environment to write short, targeted, reusable utility scripts as needed. 
-  Build a catalog of such scripts in `UtilityScripts.md` next to this skill file. 
+  Build a catalog of such scripts in [UtilityScripts.md](UtilityScripts.md) next to this skill file. 
 - Use `uv run script_name.py` in this folder (as CWD) to run your scripts.
 - **IMPORTANT: Space Engineers modding is done on Windows.** All commands must work on Windows.
 - Use `busybox.exe` as a prefix to run individual UNIX-like commands, for example: `busybox.exe grep -r "pattern" folder`.
