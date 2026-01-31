@@ -120,7 +120,7 @@ If you see them, then make sure they're prepared for first use.
 
 Once they are prepared, conduct some smoke testing on their features to make sure they work.
 
-If something is missing or not working properly, then list those for me.
+If something is missing or not working properly, then list those in a final summary.
 ```
 
 ## Successful self-test result

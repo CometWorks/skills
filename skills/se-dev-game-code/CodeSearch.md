@@ -52,15 +52,28 @@ uv run search_code.py -l 10 struct usage Vector3D
 
 ### Search Method Signatures
 
+Method signatures show the complete method declaration including modifiers, return type, parameters, and attributes:
+
 ```bash
-uv run search_code.py signature declaration GetPosition
-uv run search_code.py -l 10 signature declaration "re:^Build$"
+# Find signatures by method name
+uv run search_code.py method signature GetPosition
+
+# Regex for exact match
+uv run search_code.py method signature "re:^Build$"
+
+# Limit results
+uv run search_code.py -l 10 method signature GetPosition
+
+# Filter by namespace
+uv run search_code.py -n VRageMath method signature Normalize
 ```
 
-**Note:** Signature searches show the full method signature after a pipe separator:
+**Output Format:** Signature searches show the full method signature after a pipe separator:
 ```
-Sandbox.Game/MyClass.cs:100-102|[Attribute] public static void MyMethod(int param)
+Sandbox.Game/MyClass.cs:100-102|public static void MyMethod(int param)
 ```
+
+**Note:** Signatures are always declarations. There is no `method signature usage` - use `method usage` instead to find method call sites.
 
 ## Search Options
 

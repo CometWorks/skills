@@ -16,10 +16,10 @@ CATEGORY_FILES = {
     "struct": ("struct_declarations.csv", "struct_usages.csv"),
     "interface": ("interface_declarations.csv", "interface_usages.csv"),
     "field": ("field_declarations.csv", "field_usages.csv"),
-    "signature": ("method_signatures.csv", None),  # Signatures are declarations only
 }
 
 HIERARCHY_SUBCOMMANDS = {"parent", "children", "implements", "implementors"}
+METHOD_SUBCOMMANDS = {"signature"}
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Search C# code index")
@@ -27,54 +27,61 @@ def parse_args():
     parser.add_argument("-l", "--limit", type=int, default=0, help="Limit number of results")
     parser.add_argument("-o", "--offset", type=int, default=0, help="Skip first N results")
     parser.add_argument("-n", "--namespace", type=str, default="", help="Filter by namespace prefix")
+    parser.add_argument("-i", "--case-insensitive", action="store_true", help="Make pattern matching case-insensitive (case-sensitive by default)")
     parser.add_argument("category", choices=list(CATEGORY_FILES.keys()), help="Symbol category")
-    parser.add_argument("symbol_type", help="Symbol type (declaration/usage) or hierarchy subcommand (parent/children/implements/implementors)")
+    parser.add_argument("symbol_type", help="Symbol type (declaration/usage), method subcommand (signature), or hierarchy subcommand (parent/children/implements/implementors)")
     parser.add_argument("patterns", nargs="+", help="Search patterns (text:X or re:X)")
     return parser.parse_args()
 
-def compile_pattern(pattern_str):
+def compile_pattern(pattern_str, case_insensitive=False):
     if pattern_str.startswith("re:"):
-        return ("regex", re.compile(pattern_str[3:], re.IGNORECASE))
+        flags = re.IGNORECASE if case_insensitive else 0
+        return ("regex", re.compile(pattern_str[3:], flags))
     elif pattern_str.startswith("text:"):
-        return ("text", pattern_str[5:].lower())
+        text = pattern_str[5:]
+        return ("text", text.lower() if case_insensitive else text, case_insensitive)
     else:
-        return ("text", pattern_str.lower())
+        return ("text", pattern_str.lower() if case_insensitive else pattern_str, case_insensitive)
 
-def get_symbol_name(row, category):
-    if category == "method":
-        return row["method"]
-    elif category == "field":
-        return row["symbol_name"]
-    elif category == "signature":
+def get_symbol_name(row, is_signature=False):
+    if is_signature:
         return row["method_name"]
-    else:
+    elif "method" in row and row["method"]:  # For method index
+        return row["method"]
+    elif "symbol_name" in row and row["symbol_name"]:  # For field index
+        return row["symbol_name"]
+    else:  # For class, interface, struct, enum indices
         return row["declaring_type"]
 
 def matches_pattern(name, pattern):
-    mode, value = pattern
-    if mode == "regex":
-        return value.search(name) is not None
-    else:
-        return value in name.lower()
+    if pattern[0] == "regex":
+        regex_obj = pattern[1]
+        return regex_obj.search(name) is not None
+    else:  # text pattern
+        _, search_text, case_insensitive = pattern
+        if case_insensitive:
+            return search_text in name.lower()
+        else:
+            return search_text in name
 
-def get_depth(row, category):
+def get_depth(row, is_signature=False):
     depth = 0
     if row["namespace"]:
         depth += row["namespace"].count(".") + 1
     if row["declaring_type"]:
         depth += 1
-    # Handle different column name for signature category
-    method_col = "method_name" if category == "signature" else "method"
+    # Handle different column name for signature
+    method_col = "method_name" if is_signature else "method"
     if row.get(method_col):
         depth += 1
     return depth
 
-def get_sort_key(row, category):
-    # Handle different column names for signature category
-    method_col = "method_name" if category == "signature" else "method"
-    symbol_col = "signature" if category == "signature" else "symbol_name"
+def get_sort_key(row, is_signature=False):
+    # Handle different column names for signature
+    method_col = "method_name" if is_signature else "method"
+    symbol_col = "signature" if is_signature else "symbol_name"
     return (
-        get_depth(row, category),
+        get_depth(row, is_signature),
         row["namespace"],
         row["declaring_type"],
         row.get(method_col, ""),
@@ -332,9 +339,59 @@ def search_interface_implementors(patterns, ns_filter):
 def main():
     args = parse_args()
     
+    # Check if this is a method signature query (method signature <pattern>)
+    if args.category == "method" and args.symbol_type in METHOD_SUBCOMMANDS:
+        if args.symbol_type == "signature":
+            index_file = INDEX_DIR / "method_signatures.csv"
+            
+            if not index_file.exists():
+                print("NO-MATCHES")
+                sys.exit(0)
+            
+            patterns = [compile_pattern(p, args.case_insensitive) for p in args.patterns]
+            ns_filter = args.namespace.lower() if args.namespace else ""
+            
+            matches = []
+            with open(index_file, "r", encoding="utf-8", newline="") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    if ns_filter:
+                        row_ns = row["namespace"].lower()
+                        if not (row_ns == ns_filter or row_ns.startswith(ns_filter + ".")):
+                            continue
+                    name = get_symbol_name(row, is_signature=True)
+                    if all(matches_pattern(name, p) for p in patterns):
+                        matches.append(row)
+            
+            if not matches:
+                print("NO-MATCHES")
+                sys.exit(0)
+            
+            if args.count:
+                print(len(matches))
+                sys.exit(0)
+            
+            matches.sort(key=lambda row: get_sort_key(row, is_signature=True))
+            
+            if args.offset > 0:
+                matches = matches[args.offset:]
+            if args.limit > 0:
+                matches = matches[:args.limit]
+            
+            for row in matches:
+                start = row["start_line"]
+                end = row["end_line"]
+                if start == end:
+                    location = f"{row['file_path']}:{start}"
+                else:
+                    location = f"{row['file_path']}:{start}-{end}"
+                print(f"{location}|{row['signature']}")
+            
+            sys.exit(0)
+    
     # Check if this is a hierarchy query
     if args.symbol_type in HIERARCHY_SUBCOMMANDS:
-        patterns = [compile_pattern(p) for p in args.patterns]
+        patterns = [compile_pattern(p, args.case_insensitive) for p in args.patterns]
         ns_filter = args.namespace.lower() if args.namespace else ""
         
         # Route to appropriate hierarchy handler
@@ -384,16 +441,11 @@ def main():
     
     # Standard declaration/usage search
     if args.symbol_type not in ["declaration", "usage"]:
-        print(f"Error: Invalid symbol_type '{args.symbol_type}'. Must be 'declaration', 'usage', or one of: {', '.join(HIERARCHY_SUBCOMMANDS)}", file=sys.stderr)
+        print(f"Error: Invalid symbol_type '{args.symbol_type}'. Must be 'declaration', 'usage', or one of: {', '.join(HIERARCHY_SUBCOMMANDS | METHOD_SUBCOMMANDS)}", file=sys.stderr)
         sys.exit(1)
     
     # Select the appropriate file based on symbol_type (declaration or usage)
     decl_file, usage_file = CATEGORY_FILES[args.category]
-
-    # Signature category only has declarations
-    if args.category == "signature" and args.symbol_type == "usage":
-        print("NO-MATCHES")
-        sys.exit(0)
 
     if args.symbol_type == "declaration":
         index_file = INDEX_DIR / decl_file
@@ -407,7 +459,7 @@ def main():
         print("NO-MATCHES")
         sys.exit(0)
 
-    patterns = [compile_pattern(p) for p in args.patterns]
+    patterns = [compile_pattern(p, args.case_insensitive) for p in args.patterns]
     ns_filter = args.namespace.lower() if args.namespace else ""
 
     matches = []
@@ -418,7 +470,7 @@ def main():
                 row_ns = row["namespace"].lower()
                 if not (row_ns == ns_filter or row_ns.startswith(ns_filter + ".")):
                     continue
-            name = get_symbol_name(row, args.category)
+            name = get_symbol_name(row, is_signature=False)
             if all(matches_pattern(name, p) for p in patterns):
                 matches.append(row)
 
@@ -430,7 +482,7 @@ def main():
         print(len(matches))
         sys.exit(0)
 
-    matches.sort(key=lambda row: get_sort_key(row, args.category))
+    matches.sort(key=lambda row: get_sort_key(row, is_signature=False))
 
     if args.offset > 0:
         matches = matches[args.offset:]
@@ -444,12 +496,7 @@ def main():
             location = f"{row['file_path']}:{start}"
         else:
             location = f"{row['file_path']}:{start}-{end}"
-
-        if args.category == "signature":
-            # For signatures, append the signature text after a pipe separator
-            print(f"{location}|{row['signature']}")
-        else:
-            print(location)
+        print(location)
 
 if __name__ == "__main__":
     main()

@@ -101,8 +101,8 @@ echo.
 echo ============================================================
 echo INTERFACE USAGE
 echo ============================================================
-echo --- IMyPhysics interface usage (limit 5) ---
-uv run search_code.py -l 5 interface usage IMyPhysics
+echo --- IMyEntity interface usage (limit 5) ---
+uv run search_code.py -l 5 interface usage IMyEntity
 echo.
 
 echo ============================================================
@@ -182,22 +182,19 @@ echo ============================================================
 echo METHOD SIGNATURE SEARCH
 echo ============================================================
 echo --- Activate method signature ---
-uv run search_code.py -l 5 signature declaration Activate
+uv run search_code.py -l 5 method signature Activate
 echo.
 echo --- Build method signature (limit 5) ---
-uv run search_code.py -l 5 signature declaration "re:^Build$"
+uv run search_code.py -l 5 method signature "re:^Build$"
 echo.
 echo --- Abs method signature in VRageMath namespace ---
-uv run search_code.py -n VRageMath signature declaration "re:^Abs$"
+uv run search_code.py -n VRageMath method signature "re:^Abs$"
 echo.
 echo --- Count of GetPosition method signatures ---
-uv run search_code.py -c signature declaration GetPosition
+uv run search_code.py -c method signature GetPosition
 echo.
 echo --- Signature containing both "Get" and "Position" ---
-uv run search_code.py -l 5 signature declaration Get Position
-echo.
-echo --- Signature usage (should return NO-MATCHES) ---
-uv run search_code.py signature usage Activate
+uv run search_code.py -l 5 method signature Get Position
 echo.
 
 echo ============================================================

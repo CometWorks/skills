@@ -39,10 +39,10 @@ uv run search_code.py method declaration GetPosition
 ### Find Method Signatures
 
 ```bash
-uv run search_code.py signature declaration GetPosition
+uv run search_code.py method signature GetPosition
 ```
 
-Shows full method signatures including parameters.
+Shows full method signatures including parameters and return types. See `CodeSearch.md` for more details.
 
 ### Find Class Hierarchy
 

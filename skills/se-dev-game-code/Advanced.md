@@ -150,19 +150,39 @@ uv run search_code.py class implements "re:^My.*Block$"
 
 ## Signature Search Strategies
 
-Signature searches show full method declarations including attributes and parameters:
+Signature searches are useful for understanding method overloads and parameter types. For basic usage, see `CodeSearch.md`.
+
+### Advanced Signature Patterns
 
 ```bash
-# Find overloaded methods
-uv run search_code.py signature declaration Build
-# Compare different parameter lists
+# Find overloaded methods by comparing parameter lists
+uv run search_code.py -l 20 method signature Build
+# Review different overloads of Build methods
 
-# Find methods with specific patterns
-uv run search_code.py signature declaration "re:.*Vector3D.*"
-# See all methods taking Vector3D parameters
+# Find methods accepting specific parameter types
+uv run search_code.py method signature "re:.*Vector3D.*"
+# Matches method names containing "Vector3D" - review signatures for actual parameters
 
-# Find static methods (appears in signature)
-uv run search_code.py -n VRageMath signature declaration "" | grep "static"
+# Combine with namespace filtering for targeted search
+uv run search_code.py -n VRageMath method signature ""
+# Then filter output for "static" keyword to find static methods
+
+# Find methods with multiple pattern matches
+uv run search_code.py method signature Get Position
+# Both "Get" AND "Position" in method name - useful for parameter analysis
+```
+
+### Analyzing Method Overloads
+
+When exploring overloaded methods, use signature search to understand the variations:
+
+```bash
+# Get count of overloads
+uv run search_code.py -c method signature Constructor
+
+# Examine all variations
+uv run search_code.py method signature Constructor
+# Compare parameter types and modifiers across overloads
 ```
 
 ## Multi-Pattern Searches
