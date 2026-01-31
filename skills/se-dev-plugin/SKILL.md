@@ -3,9 +3,15 @@ name: se-dev-plugin
 description: Plugin development for Space Engineers version 1
 license: MIT
 ---
-Do the one-time preparation steps described in [Prepare.md](Prepare.md), but only if the `Prepare.DONE` file is missing.
+## Getting Started
 
-How to build custom tool script to conduct search and for other tasks:
+If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time preparation steps:
+1. Review the requirements and instructions in [Prepare.md](Prepare.md).
+2. Execute the preparation by running `.\Prepare.bat` from this folder.
+3. **IMPORTANT:** You are on Windows. Use `&` to chain commands in `cmd.exe` or `;` in PowerShell. Do NOT use `&&`.
+4. **DO NOT** create the `Prepare.DONE` file yourself. It is automatically created by `Prepare.bat` only upon a successful run. Creating it manually is "faking" success and will lead to errors.
+
+## Usage Guide
 - A Python virtual environment in this folder was made available by the preparation.
 - Use this Python virtual environment to write short, targeted, reusable utility scripts as needed. 
   Build a catalog of such scripts in [UtilityScripts.md](UtilityScripts.md) next to this skill file. 

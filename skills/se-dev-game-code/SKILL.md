@@ -6,7 +6,11 @@ license: MIT
 
 ## Getting Started
 
-If the `Prepare.DONE` file is missing, start by following the steps in [Prepare.md](Prepare.md) first.
+If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time preparation steps:
+1. Review the requirements and instructions in [Prepare.md](Prepare.md).
+2. Execute the preparation by running `.\Prepare.bat` from this folder.
+3. **IMPORTANT:** You are on Windows. Use `&` to chain commands in `cmd.exe` or `;` in PowerShell. Do NOT use `&&`.
+4. **DO NOT** create the `Prepare.DONE` file yourself. It is automatically created by `Prepare.bat` only upon a successful run. Creating it manually is "faking" success and will lead to errors.
 
 ## Code Search Documentation
 
