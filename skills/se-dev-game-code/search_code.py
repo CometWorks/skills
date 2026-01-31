@@ -43,7 +43,29 @@ def compile_pattern(pattern_str, case_insensitive=False):
     else:
         return ("text", pattern_str.lower() if case_insensitive else pattern_str, case_insensitive)
 
-def get_symbol_name(row, is_signature=False):
+def is_mangled_name(name):
+    """Check if a class name contains mangled/encoded characters."""
+    return "_003C" in name
+
+
+def strip_mangled_generics(name):
+    """
+    Extract the meaningful class name from a potentially mangled class name.
+
+    C# decompilers encode generic parameters using _003C for < and _003E for >.
+    Generated classes (like RPC callsites, serialization accessors) embed type
+    parameters, method signatures, or parent class names after _003C markers.
+
+    The safest approach is to take everything before the first _003C marker,
+    which gives us the base class/method name without any encoded type parameters.
+    """
+    # Find the first _003C which marks the start of any encoded content
+    idx = name.find("_003C")
+    if idx > 0:
+        return name[:idx]
+    return name
+
+def get_symbol_name(row, is_signature=False, strip_generics=False):
     if is_signature:
         return row["method_name"]
     elif "method" in row and row["method"]:  # For method index
@@ -51,7 +73,10 @@ def get_symbol_name(row, is_signature=False):
     elif "symbol_name" in row and row["symbol_name"]:  # For field index
         return row["symbol_name"]
     else:  # For class, interface, struct, enum indices
-        return row["declaring_type"]
+        name = row["declaring_type"]
+        if strip_generics:
+            name = strip_mangled_generics(name)
+        return name
 
 def matches_pattern(name, pattern):
     if pattern[0] == "regex":
@@ -63,6 +88,21 @@ def matches_pattern(name, pattern):
             return search_text in name.lower()
         else:
             return search_text in name
+
+
+def matches_pattern_prefix(name, pattern):
+    """Match pattern at the start of name only (for mangled/generated class names)."""
+    if pattern[0] == "regex":
+        # For regex, require match at start
+        regex_obj = pattern[1]
+        match = regex_obj.search(name)
+        return match is not None and match.start() == 0
+    else:  # text pattern
+        _, search_text, case_insensitive = pattern
+        if case_insensitive:
+            return name.lower().startswith(search_text)
+        else:
+            return name.startswith(search_text)
 
 def get_depth(row, is_signature=False):
     depth = 0
@@ -462,6 +502,13 @@ def main():
     patterns = [compile_pattern(p, args.case_insensitive) for p in args.patterns]
     ns_filter = args.namespace.lower() if args.namespace else ""
 
+    # For type declarations (class/struct/interface/enum), strip mangled generics
+    # to avoid matching against encoded generic type parameters
+    strip_generics = (
+        args.symbol_type == "declaration"
+        and args.category in ("class", "struct", "interface", "enum")
+    )
+
     matches = []
     with open(index_file, "r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
@@ -470,8 +517,14 @@ def main():
                 row_ns = row["namespace"].lower()
                 if not (row_ns == ns_filter or row_ns.startswith(ns_filter + ".")):
                     continue
-            name = get_symbol_name(row, is_signature=False)
-            if all(matches_pattern(name, p) for p in patterns):
+            name = get_symbol_name(row, is_signature=False, strip_generics=strip_generics)
+
+            # For mangled type declarations, use prefix matching to avoid false positives
+            # from namespace prefixes embedded in generated class names
+            if strip_generics and is_mangled_name(row.get("declaring_type", "")):
+                if all(matches_pattern_prefix(name, p) for p in patterns):
+                    matches.append(row)
+            elif all(matches_pattern(name, p) for p in patterns):
                 matches.append(row)
 
     if not matches:
