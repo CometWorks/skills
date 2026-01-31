@@ -15,8 +15,8 @@ The hierarchy system tracks:
 
 Quick visual overview of the complete hierarchies:
 
-- **`CodeIndex/class_hierarchy.txt`** - Full class inheritance tree
-- **`CodeIndex/interface_hierarchy.txt`** - Full interface inheritance tree
+- **`CodeIndex/class_hierarchy.txt`** - Full class inheritance tree (large, do not load at once)
+- **`CodeIndex/interface_hierarchy.txt`** - Full interface inheritance tree (very large, do not load at once)
 
 These files use tree-style formatting similar to the `tree` command with fully-qualified type names.
 
@@ -217,11 +217,11 @@ uv run search_code.py interface children IMyCubeBlock
 
 ## Best Practices
 
-1. **Start with tree files** - Get overview with `class_hierarchy.txt` and `interface_hierarchy.txt`
+1. **Start searching for what you already know** - Start by searching for what you already know from the task description
 2. **Then drill down** - Use search commands for specific relationships
 3. **Iterate for depth** - Each query returns only direct relationships
-4. **Count first** - Check `-c` before fetching large result sets
-5. **Filter smartly** - Use `-n` to focus on specific namespaces
+4. **Filter smartly** - Use `-n` to focus on specific namespaces
+5. **Count first** - Check `-c` before fetching if you expect large result sets
 6. **Combine searches** - After finding a class, use standard search to explore its members
 
 ## Next Steps
