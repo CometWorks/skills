@@ -12,20 +12,28 @@ If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time 
 3. **IMPORTANT:** You are on Windows. Use `&` to chain commands in `cmd.exe` or `;` in PowerShell. Do NOT use `&&`.
 4. **DO NOT** create the `Prepare.DONE` file yourself. It is automatically created by `Prepare.bat` only upon a successful run. Creating it manually is "faking" success and will lead to errors.
 
+To check if preparation is complete, use bash-compatible syntax:
+```bash
+test -f "C:\Users\viktor\.claude\skills\se-dev-game-code\Prepare.DONE" && echo READY || echo NOT_READY
+```
+
+## Code Search - Quick Reference
+
+Run searches from this skill folder using `uv run search_code.py`:
+
+Run `uv run search_code.py --help` to see its basic usage.
+
 ## Code Search Documentation
 
-Use the code search to explore Space Engineers' decompiled C# source code:
-
-- **[QuickStart.md](QuickStart.md)** - Start here! Essential commands to get going quickly
+- **[QuickStart.md](QuickStart.md)** - More examples and quick reference
 - **[CodeSearch.md](CodeSearch.md)** - Complete guide to searching classes, methods, fields, etc.
 - **[HierarchySearch.md](HierarchySearch.md)** - Finding class/interface inheritance and implementations
 - **[Advanced.md](Advanced.md)** - Power user techniques for complex searches
 - **[Implementation.md](Implementation.md)** - Technical details for skill contributors (optional)
 
 Always check the game code when:
-- You're unsure about internal APIs and how to interface with them
-- You want to understand existing mod, script, or plugin code
-- The inner workings of a Space Engineers data type are unclear
+- You're unsure about the game's internal APIs and how to interface with them.
+- The inner workings of Space Engineers is unclear.
 
 ## Custom Scripting
 
