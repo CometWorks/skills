@@ -43,7 +43,29 @@ def compile_pattern(pattern_str, case_insensitive=False):
     else:
         return ("text", pattern_str.lower() if case_insensitive else pattern_str, case_insensitive)
 
-def get_symbol_name(row, is_signature=False):
+def is_mangled_name(name):
+    """Check if a class name contains mangled/encoded characters."""
+    return "_003C" in name
+
+
+def strip_mangled_generics(name):
+    """
+    Extract the meaningful class name from a potentially mangled class name.
+
+    C# decompilers encode generic parameters using _003C for < and _003E for >.
+    Generated classes (like RPC callsites, serialization accessors) embed type
+    parameters, method signatures, or parent class names after _003C markers.
+
+    The safest approach is to take everything before the first _003C marker,
+    which gives us the base class/method name without any encoded type parameters.
+    """
+    # Find the first _003C which marks the start of any encoded content
+    idx = name.find("_003C")
+    if idx > 0:
+        return name[:idx]
+    return name
+
+def get_symbol_name(row, is_signature=False, strip_generics=False):
     if is_signature:
         return row["method_name"]
     elif "method" in row and row["method"]:  # For method index
@@ -51,7 +73,10 @@ def get_symbol_name(row, is_signature=False):
     elif "symbol_name" in row and row["symbol_name"]:  # For field index
         return row["symbol_name"]
     else:  # For class, interface, struct, enum indices
-        return row["declaring_type"]
+        name = row["declaring_type"]
+        if strip_generics:
+            name = strip_mangled_generics(name)
+        return name
 
 def matches_pattern(name, pattern):
     if pattern[0] == "regex":
@@ -63,6 +88,21 @@ def matches_pattern(name, pattern):
             return search_text in name.lower()
         else:
             return search_text in name
+
+
+def matches_pattern_prefix(name, pattern):
+    """Match pattern at the start of name only (for mangled/generated class names)."""
+    if pattern[0] == "regex":
+        # For regex, require match at start
+        regex_obj = pattern[1]
+        match = regex_obj.search(name)
+        return match is not None and match.start() == 0
+    else:  # text pattern
+        _, search_text, case_insensitive = pattern
+        if case_insensitive:
+            return name.lower().startswith(search_text)
+        else:
+            return name.startswith(search_text)
 
 def get_depth(row, is_signature=False):
     depth = 0
@@ -201,101 +241,49 @@ def search_class_implements(patterns, ns_filter):
 
 def compress_namespace_hierarchy(fqn_list):
     """
-    Compress a list of fully-qualified names into hierarchical namespace structure.
+    Group types by their full namespace path and format with single-level nesting.
+    
+    This limits output to only one level of parentheses (for types in the same namespace),
+    preventing deeply nested structures that create very long lines.
     
     Example input: ['A.B.C.Class1', 'A.B.C.Class2', 'A.B.D.Class3', 'X.Y.Class4']
-    Example output: 'A.B.(C.(Class1,Class2),D.Class3),X.Y.Class4'
+    Example output: ['A.B.C.(Class1,Class2)', 'A.B.D.Class3', 'X.Y.Class4']
     """
     if not fqn_list:
-        return ""
+        return []
     
-    # Parse FQNs into namespace path + class name
-    parsed = []
+    # Group types by their complete namespace path
+    namespace_groups = defaultdict(list)
+    
     for fqn in fqn_list:
-        parts = fqn.split(".")
-        if len(parts) == 1:
-            # No namespace, just class name
-            parsed.append(([], parts[0]))
+        if "." in fqn:
+            # Split into namespace and type name
+            namespace, type_name = fqn.rsplit(".", 1)
+            namespace_groups[namespace].append(type_name)
         else:
-            # namespace parts + class name
-            parsed.append((parts[:-1], parts[-1]))
+            # No namespace, just type name
+            namespace_groups[""].append(fqn)
     
-    # Build a tree structure
-    def build_tree(items):
-        """Build a nested dict tree from (namespace_parts, class_name) tuples"""
-        tree = {}
-        for ns_parts, class_name in items:
-            if not ns_parts:
-                # Top-level class (no namespace)
-                tree[class_name] = None
+    # Format each namespace group
+    results = []
+    for namespace in sorted(namespace_groups.keys()):
+        types = sorted(namespace_groups[namespace])
+        
+        if len(types) == 1:
+            # Single type - no parentheses needed
+            if namespace:
+                results.append(f"{namespace}.{types[0]}")
             else:
-                # Has namespace - group by first namespace part
-                first_ns = ns_parts[0]
-                if first_ns not in tree:
-                    tree[first_ns] = []
-                tree[first_ns].append((ns_parts[1:], class_name))
-        
-        # Recursively build subtrees for namespace groups
-        result = {}
-        for key, value in tree.items():
-            if value is None:
-                # Leaf node (class name)
-                result[key] = None
-            else:
-                # Namespace node - recurse
-                result[key] = build_tree(value)
-        
-        return result
-    
-    def format_tree(tree, depth=0):
-        """Format tree into compressed string representation"""
-        if not tree:
-            return ""
-        
-        parts = []
-        for key in sorted(tree.keys()):
-            value = tree[key]
-            if value is None:
-                # Leaf node (class name)
-                parts.append(key)
-            else:
-                # Namespace node - try to flatten single-child chains
-                flattened = flatten_single_chain(key, value)
-                if flattened:
-                    # Was able to flatten into dotted path
-                    parts.append(flattened)
-                else:
-                    # Has multiple children - use parentheses
-                    children_str = format_tree(value, depth + 1)
-                    parts.append(f"{key}.({children_str})")
-        
-        return ",".join(parts)
-    
-    def flatten_single_chain(prefix, subtree):
-        """
-        Try to flatten a single-child chain into a dotted path.
-        Returns the flattened string or None if can't flatten.
-        """
-        if len(subtree) != 1:
-            return None
-        
-        child_key = list(subtree.keys())[0]
-        child_value = subtree[child_key]
-        
-        if child_value is None:
-            # Single leaf child - flatten
-            return f"{prefix}.{child_key}"
+                results.append(types[0])
         else:
-            # Single namespace child - recurse
-            flattened_child = flatten_single_chain(child_key, child_value)
-            if flattened_child:
-                return f"{prefix}.{flattened_child}"
+            # Multiple types - use single level of parentheses
+            types_str = ",".join(types)
+            if namespace:
+                results.append(f"{namespace}.({types_str})")
             else:
-                # Child has multiple children, can't flatten further
-                return None
+                results.append(f"({types_str})")
     
-    tree = build_tree(parsed)
-    return format_tree(tree)
+    return results
 
 def search_interface_implementors(patterns, ns_filter):
     """Search for classes implementing matching interfaces"""
@@ -433,9 +421,11 @@ def main():
                 # One-to-one: child:parent or class:interfaces
                 print(f"{match[0]}:{match[1]}")
             else:  # children or implementors
-                # One-to-many: parent|child1,child2,...
-                compressed = compress_namespace_hierarchy(match[1])
-                print(f"{match[0]}|{compressed}")
+                # One-to-many: parent|namespace.Type or parent|namespace.(Type1,Type2,...)
+                # compress_namespace_hierarchy returns a list, output one line per namespace group
+                compressed_list = compress_namespace_hierarchy(match[1])
+                for compressed in compressed_list:
+                    print(f"{match[0]}|{compressed}")
         
         sys.exit(0)
     
@@ -462,6 +452,13 @@ def main():
     patterns = [compile_pattern(p, args.case_insensitive) for p in args.patterns]
     ns_filter = args.namespace.lower() if args.namespace else ""
 
+    # For type declarations (class/struct/interface/enum), strip mangled generics
+    # to avoid matching against encoded generic type parameters
+    strip_generics = (
+        args.symbol_type == "declaration"
+        and args.category in ("class", "struct", "interface", "enum")
+    )
+
     matches = []
     with open(index_file, "r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
@@ -470,8 +467,14 @@ def main():
                 row_ns = row["namespace"].lower()
                 if not (row_ns == ns_filter or row_ns.startswith(ns_filter + ".")):
                     continue
-            name = get_symbol_name(row, is_signature=False)
-            if all(matches_pattern(name, p) for p in patterns):
+            name = get_symbol_name(row, is_signature=False, strip_generics=strip_generics)
+
+            # For mangled type declarations, use prefix matching to avoid false positives
+            # from namespace prefixes embedded in generated class names
+            if strip_generics and is_mangled_name(row.get("declaring_type", "")):
+                if all(matches_pattern_prefix(name, p) for p in patterns):
+                    matches.append(row)
+            elif all(matches_pattern(name, p) for p in patterns):
                 matches.append(row)
 
     if not matches:

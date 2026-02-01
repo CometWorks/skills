@@ -51,7 +51,7 @@ for %%S in (%SKILLS%) do (
         echo [SKIP] %%S - already exists
     ) else (
         echo [INSTALL] %%S
-        mklink /J "!LINK!" "!SOURCE!" >nul 2>&1
+        mklink /J "!LINK!" "!SOURCE!"
         if errorlevel 1 (
             echo   ERROR: Failed to create junction point
             echo   You may need to run this script as Administrator
