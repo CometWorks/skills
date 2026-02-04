@@ -1,27 +1,36 @@
 ---
 name: se-dev-game-code
-description: Allows reading the decompiled C# code of Space Engineers version 1.  
+description: Allows reading the decompiled C# code of Space Engineers version 1
+argument-hint: prepare | bash | search | test
 license: MIT
 ---
 
+# SE Dev Game Code Skill
+
+Allows reading the decompiled C# code of Space Engineers version 1.
+
+**Actions:**
+
+- **prepare**: Run the one-time preparation (Prepare.bat)
+- **bash**: Run UNIX shell commands via busybox
+- **search**: Run code searches using `search_code.py`
+- **test**: Test this skill by running `test_search.bat`
+
+## Routing Decision
+
+Check these patterns **in order** - first match wins:
+
+| Priority | Pattern | Example | Route |
+|----------|---------|---------|-------|
+| 1 | Empty or bare invocation | `se-dev-game-code` | Show this help |
+| 2 | Prepare keywords | `se-dev-game-code prepare`, `se-dev-game-code setup`, `se-dev-game-code init` | prepare |
+| 3 | Bash/shell keywords | `se-dev-game-code bash`, `se-dev-game-code grep`, `se-dev-game-code cat` | bash |
+| 4 | Search keywords | `se-dev-game-code search`, `se-dev-game-code find class`, `se-dev-game-code lookup` | search |
+| 5 | Test keywords | `se-dev-game-code test`, `se-dev-game-code verify`, `se-dev-game-code check` | test |
+
 ## Getting Started
 
-If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time preparation steps:
-1. Review the requirements and instructions in [Prepare.md](Prepare.md).
-2. Execute the preparation by running `.\Prepare.bat` from this folder.
-3. **IMPORTANT:** You are on Windows. Use `&` to chain commands in `cmd.exe` or `;` in PowerShell. Do NOT use `&&`.
-4. **DO NOT** create the `Prepare.DONE` file yourself. It is automatically created by `Prepare.bat` only upon a successful run. Creating it manually is "faking" success and will lead to errors.
-
-To check if preparation is complete, use bash-compatible syntax:
-```bash
-test -f "C:\Users\viktor\.claude\skills\se-dev-game-code\Prepare.DONE" && echo READY || echo NOT_READY
-```
-
-## Code Search - Quick Reference
-
-Run searches from this skill folder using `uv run search_code.py`:
-
-Run `uv run search_code.py --help` to see its basic usage.
+If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time preparation steps first. See the [prepare action](./actions/prepare.md).
 
 ## Code Search Documentation
 
@@ -55,3 +64,12 @@ The textual part of the game's `Content` is copied into the `Content` folder for
 - In the `Content` folder search the files appropriate for the task. See [ContentTypes.md](ContentTypes.md) for the list of types.
 - Do not search for decompiled game code outside the `Decompiled` folder which is at the same level as this skill file. The decompiled game source tree must be there if the preparation succeeded.
 - Do not search for game content data outside the `Content` folder which is at the same level as this skill file. The copied game content must be there if the preparation succeeded.
+
+## Action References
+
+Follow the detailed instructions in:
+
+- [prepare action](./actions/prepare.md) - One-time preparation
+- [bash action](./actions/bash.md) - Running UNIX shell commands via busybox
+- [search action](./actions/search.md) - Running code searches
+- [test action](./actions/test.md) - Testing this skill
