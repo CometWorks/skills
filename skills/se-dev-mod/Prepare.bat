@@ -62,6 +62,10 @@ echo ERROR: Missing local Mods folder, this should not happen
 goto failed
 :skip_local_mods
 
+echo Indexing mod code (this may take a while)
+uv run index_mods.py
+if %ERRORLEVEL% NEQ 0 goto failed
+
 echo DONE
 del "\\?\%cd%\nul" 2>error.txt
 del error.txt

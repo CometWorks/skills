@@ -1,7 +1,7 @@
 ---
 name: se-dev-script
-description: In-game (programmable block, aka PB) script development for Space Engineers version 1
-argument-hint: prepare | bash
+description: In-game (programmable block, aka PB) script development for Space Engineers version 1. Search script code for examples and patterns.
+argument-hint: prepare | bash | search
 license: MIT
 ---
 
@@ -13,6 +13,7 @@ In-game (programmable block, aka PB) script development for Space Engineers vers
 
 - **prepare**: Run the one-time preparation (Prepare.bat)
 - **bash**: Run UNIX shell commands via busybox
+- **search**: Search script code using `search_scripts.py`
 
 ## Routing Decision
 
@@ -22,7 +23,8 @@ Check these patterns **in order** - first match wins:
 |----------|---------|---------|-------|
 | 1 | Empty or bare invocation | `se-dev-script` | Show this help |
 | 2 | Prepare keywords | `se-dev-script prepare`, `se-dev-script setup`, `se-dev-script init` | prepare |
-| 3 | Bash/shell keywords | `se-dev-script bash`, `se-dev-script grep`, `se-dev-script find` | bash |
+| 3 | Bash/shell keywords | `se-dev-script bash`, `se-dev-script grep`, `se-dev-script cat` | bash |
+| 4 | Search keywords | `se-dev-script search`, `se-dev-script find class`, `se-dev-script lookup` | search |
 
 ## Getting Started
 
@@ -61,9 +63,31 @@ searches corresponding to names on the PB API whitelist for efficiency.
 - [Programmable Block API](https://malforge.github.io/spaceengineers/pbapi)
 - [Wiki on Scripting](https://spaceengineers.wiki.gg/wiki/Scripting)
 
+## Script Code Search
+
+Search the source code of Steam and local PB scripts for examples and patterns:
+
+```cmd
+uv run search_scripts.py class declaration Program
+uv run search_scripts.py method usage Main
+uv run search_scripts.py class children MyGridProgram
+```
+
+Before searching, ensure the index exists. If `ScriptCodeIndex/` is missing, run:
+```cmd
+uv run index_scripts.py
+```
+
+**Re-indexing after new subscriptions:** When you subscribe to new scripts on Steam Workshop,
+load them in a world once (so the game downloads them), then re-run `uv run index_scripts.py`
+to make the new script code available for search.
+
+See [search action](./actions/search.md) for complete documentation.
+
 ## Action References
 
 Follow the detailed instructions in:
 
 - [prepare action](./actions/prepare.md) - One-time preparation
 - [bash action](./actions/bash.md) - Running UNIX shell commands via busybox
+- [search action](./actions/search.md) - Search script code for examples

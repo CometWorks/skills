@@ -1,7 +1,7 @@
 ---
 name: se-dev-mod
-description: Mod development for Space Engineers version 1
-argument-hint: prepare | bash 
+description: Mod development for Space Engineers version 1. Search mod code for examples and patterns.
+argument-hint: prepare | bash | search
 license: MIT
 ---
 
@@ -13,6 +13,7 @@ Mod development for Space Engineers version 1.
 
 - **prepare**: Run the one-time preparation (Prepare.bat)
 - **bash**: Run UNIX shell commands via busybox
+- **search**: Search mod code using `search_mods.py`
 
 ## Routing Decision
 
@@ -22,7 +23,8 @@ Check these patterns **in order** - first match wins:
 |----------|---------|---------|-------|
 | 1 | Empty or bare invocation | `se-dev-mod` | Show this help |
 | 2 | Prepare keywords | `se-dev-mod prepare`, `se-dev-mod setup`, `se-dev-mod init` | prepare |
-| 3 | Bash/shell keywords | `se-dev-mod bash`, `se-dev-mod grep`, `se-dev-mod find` | bash |
+| 3 | Bash/shell keywords | `se-dev-mod bash`, `se-dev-mod grep`, `se-dev-mod cat` | bash |
+| 4 | Search keywords | `se-dev-mod search`, `se-dev-mod find class`, `se-dev-mod lookup` | search |
 
 ## Getting Started
 
@@ -53,9 +55,31 @@ game code searches corresponding to names on the Mod API whitelist for efficienc
 - [Mod API documentation by Keen Software House](https://github.com/KeenSoftwareHouse/SpaceEngineersModAPI) May be outdated
 - [Mod Development Kit (MDK2)](https://github.com/malforge/mdk2) Mod development tooling mostly for VS2022
 
+## Mod Code Search
+
+Search the source code of Steam and local mods for examples and patterns:
+
+```cmd
+uv run search_mods.py class declaration MyBlock
+uv run search_mods.py method usage Update
+uv run search_mods.py class children MyGameLogicComponent
+```
+
+Before searching, ensure the index exists. If `ModCodeIndex/` is missing, run:
+```cmd
+uv run index_mods.py
+```
+
+**Re-indexing after new subscriptions:** When you subscribe to new mods on Steam Workshop,
+load them in a world once (so the game downloads them), then re-run `uv run index_mods.py`
+to make the new mod code available for search.
+
+See [search action](./actions/search.md) for complete documentation.
+
 ## Action References
 
 Follow the detailed instructions in:
 
 - [prepare action](./actions/prepare.md) - One-time preparation
 - [bash action](./actions/bash.md) - Running UNIX shell commands via busybox
+- [search action](./actions/search.md) - Search mod code for examples

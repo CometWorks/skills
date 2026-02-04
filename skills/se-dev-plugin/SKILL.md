@@ -1,7 +1,7 @@
 ---
 name: se-dev-plugin
-description: Plugin development for Space Engineers version 1
-argument-hint: prepare | bash
+description: Plugin development for Space Engineers version 1. Search plugin code from PluginHub for examples and patterns.
+argument-hint: prepare | bash | search
 license: MIT
 ---
 
@@ -13,6 +13,7 @@ Plugin development for Space Engineers version 1.
 
 - **prepare**: Run the one-time preparation (Prepare.bat)
 - **bash**: Run UNIX shell commands via busybox
+- **search**: Search plugin code using `search_plugins.py`
 
 ## Routing Decision
 
@@ -22,7 +23,8 @@ Check these patterns **in order** - first match wins:
 |----------|---------|---------|-------|
 | 1 | Empty or bare invocation | `se-dev-plugin` | Show this help |
 | 2 | Prepare keywords | `se-dev-plugin prepare`, `se-dev-plugin setup`, `se-dev-plugin init` | prepare |
-| 3 | Bash/shell keywords | `se-dev-plugin bash`, `se-dev-plugin grep`, `se-dev-plugin find` | bash |
+| 3 | Bash/shell keywords | `se-dev-plugin bash`, `se-dev-plugin grep`, `se-dev-plugin cat` | bash |
+| 4 | Search keywords | `se-dev-plugin search`, `se-dev-plugin find class`, `se-dev-plugin lookup` | search |
 
 ## Getting Started
 
@@ -54,9 +56,35 @@ understand how the game's internals work and how to interface with it and patch 
 - [Pulsar Installer](https://github.com/StarCpt/Pulsar-Installer) Installer for Pulsar on Windows
 - [PluginHub](https://github.com/StarCpt/PluginHub/) Public plugin registry for Pulsar
 
+## Plugin Code Search
+
+Search the source code of plugins from PluginHub for examples and patterns:
+
+```cmd
+# List available plugins
+uv run list_plugins.py
+uv run list_plugins.py --search "camera"
+
+# Download a plugin's source code
+uv run download_plugin_source.py "Tool Switcher"
+
+# Index downloaded plugins
+uv run index_plugins.py
+
+# Search plugin code
+uv run search_plugins.py class declaration Plugin
+uv run search_plugins.py method signature Patch
+```
+
+The PluginHub contains descriptions of all available plugins. Download sources for plugins
+that may help with your task, then index and search them.
+
+See [search action](./actions/search.md) for complete documentation.
+
 ## Action References
 
 Follow the detailed instructions in:
 
 - [prepare action](./actions/prepare.md) - One-time preparation
 - [bash action](./actions/bash.md) - Running UNIX shell commands via busybox
+- [search action](./actions/search.md) - Search plugin code for examples
