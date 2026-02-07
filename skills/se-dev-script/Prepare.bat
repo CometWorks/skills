@@ -62,6 +62,10 @@ echo ERROR: Missing local IngameScripts\local folder, this should not happen
 goto failed
 :skip_local_scripts
 
+echo Indexing script code (this may take a while)
+uv run index_scripts.py
+if %ERRORLEVEL% NEQ 0 goto failed
+
 echo DONE
 del "\\?\%cd%\nul" 2>error.txt
 del error.txt

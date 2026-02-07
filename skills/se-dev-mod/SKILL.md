@@ -1,29 +1,49 @@
 ---
 name: se-dev-mod
-description: Mod development for Space Engineers version 1
+description: Mod development for Space Engineers version 1. Search mod code for examples and patterns.
+argument-hint: prepare | bash | search
 license: MIT
 ---
+
+# SE Dev Mod Skill
+
+Mod development for Space Engineers version 1.
+
+**⚠️ CRITICAL: Commands run in a UNIX shell (busybox), NOT Windows CMD. Use bash syntax!**
+
+Examples:
+- ✅ `test -f file.txt && echo exists`
+- ✅ `ls -la | head -10`
+- ❌ `if exist file.txt (echo exists)` - This will NOT work
+
+**Actions:**
+
+- **prepare**: Run the one-time preparation (Prepare.bat)
+- **bash**: Run UNIX shell commands via busybox
+- **search**: Search mod code using `search_mods.py`
+
+## Routing Decision
+
+Check these patterns **in order** - first match wins:
+
+| Priority | Pattern | Example | Route |
+|----------|---------|---------|-------|
+| 1 | Empty or bare invocation | `se-dev-mod` | Show this help |
+| 2 | Prepare keywords | `se-dev-mod prepare`, `se-dev-mod setup`, `se-dev-mod init` | prepare |
+| 3 | Bash/shell keywords | `se-dev-mod bash`, `se-dev-mod grep`, `se-dev-mod cat` | bash |
+| 4 | Search keywords | `se-dev-mod search`, `se-dev-mod find class`, `se-dev-mod lookup` | search |
+
 ## Getting Started
 
-If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time preparation steps:
-1. Review the requirements and instructions in [Prepare.md](Prepare.md).
-2. Execute the preparation by running `.\Prepare.bat` from this folder.
-3. **IMPORTANT:** You are on Windows. Use `&` to chain commands in `cmd.exe` or `;` in PowerShell. Do NOT use `&&`.
-4. **DO NOT** create the `Prepare.DONE` file yourself. It is automatically created by `Prepare.bat` only upon a successful run. Creating it manually is "faking" success and will lead to errors.
+**⚠️ CRITICAL: Before running ANY commands, read [CommandExecution.md](CommandExecution.md) to avoid common mistakes that cause command failures.**
 
-## Usage Guide
-- A Python virtual environment in this folder was made available by the preparation.
-- Use this Python virtual environment to write short, targeted, reusable utility scripts as needed. 
-  Build a catalog of such scripts in [UtilityScripts.md](UtilityScripts.md) next to this skill file. 
-- Use `uv run script_name.py` in this folder (as CWD) to run your scripts.
-- **IMPORTANT: Space Engineers modding is done on Windows.** All commands must work on Windows.
-- Use `busybox.exe` as a prefix to run individual UNIX-like commands, for example: `busybox.exe grep -r "pattern" folder`.
-- Do NOT open a bash shell with `busybox bash`. Run busybox commands directly from cmd or PowerShell instead.
-- **CRITICAL: Always use forward slashes (`/`) in file paths passed to busybox.** Backslashes are interpreted as escape characters by bash and will be silently removed, mangling paths. Windows accepts forward slashes. Correct: `busybox.exe grep "pattern" C:/Users/name/folder` — Wrong: `C:\Users\name\folder`.
-- Alternatively use Windows PowerShell, which handles backslash paths natively.
-- See the list of available Python packages in `pyproject.toml`.
-- The `SteamMods` folder contains game content (mods, scripts, blueprints) the player downloaded. Filter mods by the existence of a non-empty `Data/Scripts` folder inside the numbered content folder. 
-- The `LocalMods` folder contains mods the player is developing. It is a link to `%AppData%/SpaceEngineers/Mods`.
+If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time preparation steps first. See the [prepare action](./actions/prepare.md).
+
+## Essential Documentation
+
+- **[CommandExecution.md](CommandExecution.md)** - ⚠️ **READ THIS FIRST** - How to run commands correctly on Windows
+
+## Mod Development
 
 Use only names matching the Mod API whitelist: [ModApiWhitelist.txt](ModApiWhitelist.txt)
 The whitelist was exported from game version `1.208.015` using MDK2's `Mdk.Extractor`.
@@ -36,8 +56,50 @@ Use the `se-dev-game-code` skill to search the game's decompiled code. You may n
 understand how the game's internals work and how to interface with it properly. Stick to
 game code searches corresponding to names on the Mod API whitelist for efficiency.
 
-References:
+## Folder Structure
+
+- `SteamMods` - Game content (mods, scripts, blueprints) the player downloaded. Filter mods by the existence of a non-empty `Data/Scripts` folder inside the numbered content folder.
+- `LocalMods` - Mods the player is developing. Link to `%AppData%/SpaceEngineers/Mods`.
+
+## References
+
 - [Mod Template repo](https://github.com/viktor-ferenczi/se-mod-template) Mod template repository to start a new mod project which will include scripts. See [ModTemplate.md](ModTemplate.md)
 - [Mod API for script mods](https://malforge.github.io/spaceengineers/modapi/index.html) Structured Mod API documentation
 - [Mod API documentation by Keen Software House](https://github.com/KeenSoftwareHouse/SpaceEngineersModAPI) May be outdated
 - [Mod Development Kit (MDK2)](https://github.com/malforge/mdk2) Mod development tooling mostly for VS2022
+
+## Mod Code Search
+
+Search the source code of Steam and local mods for examples and patterns:
+
+```bash
+# Search for patterns
+uv run search_mods.py class declaration MyBlock
+uv run search_mods.py method usage Update
+uv run search_mods.py class children MyGameLogicComponent
+
+# Count results before viewing (useful for large result sets)
+uv run search_mods.py class usage Init --count
+
+# Limit number of results
+uv run search_mods.py class usage Init --limit 50
+```
+
+Before searching, ensure the index exists. If `ModCodeIndex/` is missing, run:
+```bash
+uv run index_mods.py
+```
+
+**Re-indexing after new subscriptions:** When you subscribe to new mods on Steam Workshop,
+load them in a world once (so the game downloads them), then re-run `uv run index_mods.py`
+to make the new mod code available for search.
+
+See [search action](./actions/search.md) for complete documentation.
+
+## Action References
+
+Follow the detailed instructions in:
+
+- [prepare action](./actions/prepare.md) - One-time preparation
+- [bash action](./actions/bash.md) - Running UNIX shell commands via busybox
+- [search action](./actions/search.md) - Search mod code for examples
