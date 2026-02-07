@@ -1,4 +1,5 @@
 @echo off
+rmdir /s /q __pycache__
 rmdir /s /q CodeIndex
 rmdir /s /q Content
 rmdir /s /q Decompiled
