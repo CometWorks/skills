@@ -36,6 +36,7 @@ if %ERRORLEVEL% NEQ 0 goto failed
 
 echo Indexing plugin code (skipped if no sources downloaded yet)
 uv run index_plugins.py
+if %ERRORLEVEL% NEQ 0 goto failed
 
 echo DONE
 echo DONE >Prepare.DONE
