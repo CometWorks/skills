@@ -9,6 +9,13 @@ license: MIT
 
 Mod development for Space Engineers version 1.
 
+**⚠️ CRITICAL: Commands run in a UNIX shell (busybox), NOT Windows CMD. Use bash syntax!**
+
+Examples:
+- ✅ `test -f file.txt && echo exists`
+- ✅ `ls -la | head -10`
+- ❌ `if exist file.txt (echo exists)` - This will NOT work
+
 **Actions:**
 
 - **prepare**: Run the one-time preparation (Prepare.bat)
@@ -65,14 +72,21 @@ game code searches corresponding to names on the Mod API whitelist for efficienc
 
 Search the source code of Steam and local mods for examples and patterns:
 
-```cmd
+```bash
+# Search for patterns
 uv run search_mods.py class declaration MyBlock
 uv run search_mods.py method usage Update
 uv run search_mods.py class children MyGameLogicComponent
+
+# Count results before viewing (useful for large result sets)
+uv run search_mods.py class usage Init --count
+
+# Limit number of results
+uv run search_mods.py class usage Init --limit 50
 ```
 
 Before searching, ensure the index exists. If `ModCodeIndex/` is missing, run:
-```cmd
+```bash
 uv run index_mods.py
 ```
 

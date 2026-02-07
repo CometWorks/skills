@@ -9,6 +9,13 @@ license: MIT
 
 Allows reading the decompiled C# code of Space Engineers version 1.
 
+**⚠️ CRITICAL: Commands run in a UNIX shell (busybox), NOT Windows CMD. Use bash syntax!**
+
+Examples:
+- ✅ `test -f file.txt && echo exists`
+- ✅ `ls -la | head -10`
+- ❌ `if exist file.txt (echo exists)` - This will NOT work
+
 **Actions:**
 
 - **prepare**: Run the one-time preparation (Prepare.bat)
@@ -44,7 +51,31 @@ If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time 
 - **[CodeSearch.md](CodeSearch.md)** - Complete guide to searching classes, methods, fields, etc.
 - **[HierarchySearch.md](HierarchySearch.md)** - Finding class/interface inheritance and implementations
 - **[Advanced.md](Advanced.md)** - Power user techniques for complex searches
+- **[Troubleshooting.md](Troubleshooting.md)** - What to do when searches return NO-MATCHES or too many results
 - **[Implementation.md](Implementation.md)** - Technical details for skill contributors (optional)
+
+## Quick Search Examples
+
+```bash
+# Find class declarations
+uv run search_code.py class declaration MyCubeBlock
+
+# Find method signatures
+uv run search_code.py method signature UpdateBeforeSimulation
+
+# Find class hierarchy
+uv run search_code.py class children MyTerminalBlock
+
+# Count results before viewing (useful for large result sets)
+uv run search_code.py class usage MyEntity --count
+
+# Limit number of results
+uv run search_code.py class usage MyEntity --limit 50
+
+# Paginate through results
+uv run search_code.py class usage MyEntity --limit 100 --offset 0
+uv run search_code.py class usage MyEntity --limit 100 --offset 100
+```
 
 Always check the game code when:
 - You're unsure about the game's internal APIs and how to interface with them.

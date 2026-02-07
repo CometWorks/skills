@@ -8,14 +8,18 @@ Run `Prepare.bat` to set up the skill environment. This is required before using
 
 ## Quick Check Status
 
+**IMPORTANT**: Use bash syntax, NOT Windows CMD syntax. Commands run through busybox (UNIX shell).
+
 ```bash
-# Using bash syntax
+# ✅ CORRECT - Use bash syntax
 test -f "Prepare.DONE" && echo "READY" || echo "NOT_READY"
 ```
 
-```cmd
-# Using CMD
-if exist Prepare.DONE (echo READY) else (echo NOT_READY)
+**Alternative**: Use the Glob tool to check for file existence instead of bash commands.
+
+```bash
+# ❌ WRONG - Don't use Windows CMD syntax (will NOT work)
+# if exist Prepare.DONE (echo READY) else (echo NOT_READY)
 ```
 
 ## Running Preparation

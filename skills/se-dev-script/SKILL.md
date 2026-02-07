@@ -9,6 +9,13 @@ license: MIT
 
 In-game (programmable block, aka PB) script development for Space Engineers version 1.
 
+**⚠️ CRITICAL: Commands run in a UNIX shell (busybox), NOT Windows CMD. Use bash syntax!**
+
+Examples:
+- ✅ `test -f file.txt && echo exists`
+- ✅ `ls -la | head -10`
+- ❌ `if exist file.txt (echo exists)` - This will NOT work
+
 **Actions:**
 
 - **prepare**: Run the one-time preparation (Prepare.bat)
@@ -73,14 +80,21 @@ searches corresponding to names on the PB API whitelist for efficiency.
 
 Search the source code of Steam and local PB scripts for examples and patterns:
 
-```cmd
+```bash
+# Search for patterns
 uv run search_scripts.py class declaration Program
 uv run search_scripts.py method usage Main
 uv run search_scripts.py class children MyGridProgram
+
+# Count results before viewing (useful for large result sets)
+uv run search_scripts.py class usage Program --count
+
+# Limit number of results
+uv run search_scripts.py class usage GridTerminalSystem --limit 30
 ```
 
 Before searching, ensure the index exists. If `ScriptCodeIndex/` is missing, run:
-```cmd
+```bash
 uv run index_scripts.py
 ```
 

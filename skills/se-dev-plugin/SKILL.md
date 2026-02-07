@@ -9,6 +9,13 @@ license: MIT
 
 Plugin development for Space Engineers version 1.
 
+**⚠️ CRITICAL: Commands run in a UNIX shell (busybox), NOT Windows CMD. Use bash syntax!**
+
+Examples:
+- ✅ `test -f file.txt && echo exists`
+- ✅ `ls -la | head -10`
+- ❌ `if exist file.txt (echo exists)` - This will NOT work
+
 **Actions:**
 
 - **prepare**: Run the one-time preparation (Prepare.bat)
@@ -66,20 +73,26 @@ understand how the game's internals work and how to interface with it and patch 
 
 Search the source code of plugins from PluginHub for examples and patterns:
 
-```cmd
+```bash
 # List available plugins
 uv run list_plugins.py
 uv run list_plugins.py --search "camera"
 
-# Download a plugin's source code
+# Download a plugin's source code (use EXACT name from list)
 uv run download_plugin_source.py "Tool Switcher"
 
-# Index downloaded plugins
+# Index downloaded plugins (automatic after download)
 uv run index_plugins.py
 
 # Search plugin code
 uv run search_plugins.py class declaration Plugin
 uv run search_plugins.py method signature Patch
+
+# Count results before viewing (useful for large result sets)
+uv run search_plugins.py class usage Plugin --count
+
+# Limit number of results
+uv run search_plugins.py class usage IPlugin --limit 20
 ```
 
 The PluginHub contains descriptions of all available plugins. Download sources for plugins
