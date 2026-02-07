@@ -2,30 +2,46 @@
 
 > **Part of the se-dev-script skill.** Invoked when running UNIX shell commands.
 
-Run UNIX-like commands using `busybox.exe` as a prefix.
+**⚠️ IMPORTANT: Read [CommandExecution.md](../CommandExecution.md) for complete guidance on running commands correctly.**
 
-## Usage
+## Quick Reference
 
-Run individual UNIX commands directly from cmd or PowerShell:
+Run UNIX-like commands using `busybox.exe` as a prefix:
 
-```cmd
+```bash
 busybox.exe grep -r "pattern" folder
 busybox.exe find . -name "*.cs"
 busybox.exe cat file.txt
 ```
 
-## Critical Rules
+## Critical Rules (Summary)
 
-1. **Do NOT open a bash shell** with `busybox bash`. Run commands directly instead.
+1. **ALWAYS use forward slashes (`/`) in paths** when using busybox
+   - ✅ Correct: `busybox.exe grep "pattern" C:/Users/name/folder`
+   - ❌ Wrong: `busybox.exe grep "pattern" C:\Users\name\folder`
 
-2. **Always use forward slashes (`/`) in file paths passed to busybox.** Backslashes are interpreted as escape characters by bash and will be silently removed, mangling paths.
+2. **Use the skill folder as working directory**
+   - Best approach: Use the `workdir` parameter in your bash tool
+   - Alternative: Change to skill folder first, then run commands
 
-   - Correct: `busybox.exe grep "pattern" C:/Users/name/folder`
-   - Wrong: `busybox.exe grep "pattern" C:\Users\name\folder`
+3. **Run commands directly** - Don't open an interactive bash shell unless needed
 
-3. Windows accepts forward slashes, so this works system-wide.
+4. **Windows accepts forward slashes natively** - This works everywhere on Windows
 
-4. Alternatively use Windows PowerShell, which handles backslash paths natively.
+## Alternative: Use PowerShell
+
+If busybox doesn't work for a specific task, use PowerShell instead:
+
+```powershell
+Get-ChildItem -Recurse -Filter "*.cs" | Select-String "pattern"
+```
+
+PowerShell handles backslash paths correctly.
+
+## Complete Documentation
+
+For detailed examples, troubleshooting, and best practices, see:
+- **[CommandExecution.md](../CommandExecution.md)** - Complete command execution guide
 
 ## Available Commands
 

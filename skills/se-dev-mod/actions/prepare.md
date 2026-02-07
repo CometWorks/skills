@@ -2,19 +2,20 @@
 
 > **Part of the se-dev-mod skill.** Invoked to run the one-time preparation.
 
+**⚠️ IMPORTANT: Read [CommandExecution.md](../CommandExecution.md) for complete guidance on running commands correctly.**
+
 Run `Prepare.bat` to set up the skill environment. This is required before using the skill.
 
-## Checking Status
+## Quick Check Status
 
-Check if preparation is complete:
-
-```cmd
-if exist Prepare.DONE (echo READY) else (echo NOT_READY)
+```bash
+# Using bash syntax
+test -f "Prepare.DONE" && echo "READY" || echo "NOT_READY"
 ```
 
-Or using bash-compatible syntax:
-```bash
-test -f "Prepare.DONE" && echo READY || echo NOT_READY
+```cmd
+# Using CMD
+if exist Prepare.DONE (echo READY) else (echo NOT_READY)
 ```
 
 ## Running Preparation
@@ -22,8 +23,31 @@ test -f "Prepare.DONE" && echo READY || echo NOT_READY
 If `Prepare.DONE` is missing:
 
 1. Review the requirements and instructions in [Prepare.md](../Prepare.md).
-2. Execute the preparation by running `.\Prepare.bat` from this folder.
-3. **IMPORTANT:** You are on Windows. Use `&` to chain commands in `cmd.exe` or `;` in PowerShell. Do NOT use `&&`.
+2. Execute preparation using the skill folder as working directory:
+
+**Recommended approach (using workdir parameter):**
+```bash
+./Prepare.bat (with workdir set to skill folder)
+```
+
+**Alternative approaches:**
+
+Using PowerShell:
+```powershell
+cd C:\path\to\skill\folder
+.\Prepare.bat
+```
+
+Using CMD (change directory first):
+```cmd
+cd /d C:\path\to\skill\folder
+Prepare.bat
+```
+
+**⚠️ CRITICAL:** See [CommandExecution.md](../CommandExecution.md) for details on:
+- Why `&&` doesn't work in CMD
+- How to use the workdir parameter correctly
+- Common mistakes and how to avoid them
 
 ## Critical Rules
 

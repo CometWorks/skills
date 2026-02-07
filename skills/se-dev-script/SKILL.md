@@ -28,7 +28,13 @@ Check these patterns **in order** - first match wins:
 
 ## Getting Started
 
+**⚠️ CRITICAL: Before running ANY commands, read [CommandExecution.md](CommandExecution.md) to avoid common mistakes that cause command failures.**
+
 If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time preparation steps first. See the [prepare action](./actions/prepare.md).
+
+## Essential Documentation
+
+- **[CommandExecution.md](CommandExecution.md)** - ⚠️ **READ THIS FIRST** - How to run commands correctly on Windows
 
 ## Script Development
 
