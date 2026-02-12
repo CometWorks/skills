@@ -53,6 +53,17 @@ Read the appropriate documents for further details:
 - [Publicizer.md](Publicizer.md) How to use the Krafs publicizer to access internal, protected or private members in the original game code (optional).
 - [OtherPluginsAsExamples.md](OtherPluginsAsExamples.md) How to look into the source code of other plugins as examples.
 
+## Harmony Patching Documentation
+
+Progressive documentation for Harmony patching (start with basics, then read advanced topics as needed):
+
+1. **[Patching.md](Patching.md)** - Start here: patch types, prefix/postfix basics, common patterns
+2. **[PatchInjections.md](PatchInjections.md)** - Special parameters: `__instance`, `__result`, `___fields`, `__state`
+3. **[AccessTools.md](AccessTools.md)** - Reflection utilities for finding methods, fields, and types
+4. **[TranspilerPatching.md](TranspilerPatching.md)** - IL-level patching for complex modifications
+5. **[PatchingSpecialCases.md](PatchingSpecialCases.md)** - Finalizers, reverse patches, auxiliary methods, priority
+6. **[PreloaderPatching.md](PreloaderPatching.md)** - Pre-JIT patching (Mono.Cecil, client only)
+
 ## Plugin Distribution
 
 Plugins are released exclusively on the PluginHub. All plugins must be open source, since they are compiled on

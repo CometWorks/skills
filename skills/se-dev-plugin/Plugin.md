@@ -18,6 +18,8 @@ General instructions:
 
 Runtime patching:
 - For details on patching the game's code using Harmony, see [Patching.md](Patching.md).
+- For reflection utilities (finding private fields/methods), see [AccessTools.md](AccessTools.md).
+- For special patch parameters (`__instance`, `__result`, etc.), see [PatchInjections.md](PatchInjections.md).
 
 Where to get inspiration and existing knowledge from:
 - Documentation of the Harmony patching library: https://harmony.pardeike.net/api/index.html
