@@ -2,6 +2,7 @@
 name: se-dev-plugin
 description: Plugin development for Space Engineers version 1. Search plugin code from PluginHub for examples and patterns.
 argument-hint: prepare | bash | search
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*Clean.bat*), Bash(*run_prepare.sh*), Bash(*uv run search_plugins.py *), Bash(*uv run index_plugins.py*), Bash(*uv run list_plugins.py*), Bash(*uv run download_plugin_source.py *), Bash(*uv run download_pluginhub.py*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 license: MIT
 ---
 

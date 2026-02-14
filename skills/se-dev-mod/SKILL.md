@@ -2,6 +2,7 @@
 name: se-dev-mod
 description: Mod development for Space Engineers version 1. Search mod code for examples and patterns.
 argument-hint: prepare | bash | search
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*Clean.bat*), Bash(*run_prepare.sh*), Bash(*uv run search_mods.py *), Bash(*uv run index_mods.py*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 license: MIT
 ---
 
