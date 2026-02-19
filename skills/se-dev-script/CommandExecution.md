@@ -11,7 +11,7 @@ This guide explains how to correctly execute commands on Windows when using this
 1. **Check if prepared:** Look for `Prepare.DONE` file in skill folder
 2. **If not prepared, run preparation:**
    ```bash
-   ./Prepare.bat (with workdir set to C:\Users\viktor\.config\opencode\skills\se-dev-script)
+   ./Prepare.bat (with workdir set to where this documentation files is located)
    ```
 3. **Search script code:**
    ```bash
