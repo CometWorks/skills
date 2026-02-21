@@ -118,3 +118,7 @@ Follow the detailed instructions in:
 - [prepare action](./actions/prepare.md) - One-time preparation
 - [bash action](./actions/bash.md) - Running UNIX shell commands via busybox
 - [search action](./actions/search.md) - Search plugin code for examples
+
+## Remarks
+
+The original source of this skill: https://github.com/viktor-ferenczi/se-dev-skills

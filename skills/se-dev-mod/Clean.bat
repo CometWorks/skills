@@ -7,3 +7,4 @@ rmdir /s /q .venv
 del busybox.exe
 del Prepare.log
 del Prepare.DONE
+exit /b 0

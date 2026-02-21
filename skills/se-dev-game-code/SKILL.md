@@ -110,3 +110,7 @@ Follow the detailed instructions in:
 - [bash action](./actions/bash.md) - Running UNIX shell commands via busybox
 - [search action](./actions/search.md) - Running code searches
 - [test action](./actions/test.md) - Testing this skill
+
+## Remarks
+
+The original source of this skill: https://github.com/viktor-ferenczi/se-dev-skills
