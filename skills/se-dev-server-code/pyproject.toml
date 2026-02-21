@@ -1,0 +1,17 @@
+[project]
+name = "se-dev-game-code"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "lxml",
+    "requests>=2.32.5",
+    "tree-sitter>=0.25.2",
+    "tree-sitter-c-sharp>=0.23.1",
+    "tree-sitter-hlsl>=0.2.0",
+    "tree-sitter-json>=0.24.8",
+    "tree-sitter-markdown>=0.5.1",
+    "tree-sitter-python>=0.25.0",
+    "tree-sitter-xml>=0.7.0",
+]
