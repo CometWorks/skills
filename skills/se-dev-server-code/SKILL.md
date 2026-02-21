@@ -1,13 +1,13 @@
 ---
-name: se-dev-game-code
-description: Allows reading the decompiled C# code of Space Engineers version 1
+name: se-dev-server-code
+description: Allows reading the decompiled C# code of the Space Engineers Dedicated Server
 license: MIT
 allowed-tools: Read, Bash(*Prepare.bat*), Bash(*Clean.bat*), Bash(*run_prepare.sh*), Bash(*test_search.bat*), Bash(*uv run search_code.py *), Bash(*uv run index_code.py *), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
-# SE Dev Game Code Skill
+# SE Dev Server Code Skill
 
-Allows reading the decompiled C# code of Space Engineers version 1.
+Allows reading the decompiled C# code of the Space Engineers Dedicated Server. The "game logic" of the server is largely the same as the game (client) is running. The entry point (main executable), some aspects of logging and configuration differ. Also, some of the libraries are not used by the server, but they may still present to provide the necessary data structures and some backend functionality.
 
 **⚠️ CRITICAL: Commands run in a UNIX shell (busybox), NOT Windows CMD. Use bash syntax!**
 
@@ -29,11 +29,11 @@ Check these patterns **in order** - first match wins:
 
 | Priority | Pattern | Example | Route |
 |----------|---------|---------|-------|
-| 1 | Empty or bare invocation | `se-dev-game-code` | Show this help |
-| 2 | Prepare keywords | `se-dev-game-code prepare`, `se-dev-game-code setup`, `se-dev-game-code init` | prepare |
-| 3 | Bash/shell keywords | `se-dev-game-code bash`, `se-dev-game-code grep`, `se-dev-game-code cat` | bash |
-| 4 | Search keywords | `se-dev-game-code search`, `se-dev-game-code find class`, `se-dev-game-code lookup` | search |
-| 5 | Test keywords | `se-dev-game-code test`, `se-dev-game-code verify`, `se-dev-game-code check` | test |
+| 1 | Empty or bare invocation | `se-dev-server-code` | Show this help |
+| 2 | Prepare keywords | `se-dev-server-code prepare`, `se-dev-server-code setup`, `se-dev-server-code init` | prepare |
+| 3 | Bash/shell keywords | `se-dev-server-code bash`, `se-dev-server-code grep`, `se-dev-server-code cat` | bash |
+| 4 | Search keywords | `se-dev-server-code search`, `se-dev-server-code find class`, `se-dev-server-code lookup` | search |
+| 5 | Test keywords | `se-dev-server-code test`, `se-dev-server-code verify`, `se-dev-server-code check` | test |
 
 ## Getting Started
 
@@ -77,9 +77,9 @@ uv run search_code.py class usage MyEntity --limit 100 --offset 0
 uv run search_code.py class usage MyEntity --limit 100 --offset 100
 ```
 
-Always check the game code when:
-- You're unsure about the game's internal APIs and how to interface with them.
-- The inner workings of Space Engineers is unclear.
+Always check the server code when:
+- You're unsure about the server's internal APIs and how to interface with them.
+- The inner workings of the Space Engineers Dedicated Server is unclear.
 
 ## Custom Scripting
 
@@ -87,20 +87,57 @@ For building your own utility scripts to work with the indexes and decompiled co
 
 - **[ScriptingGuide.md](ScriptingGuide.md)** - How to write Python scripts, use BusyBox, handle Windows paths
 
-## Game Content Data
+## Server Content Data
 
-The textual part of the game's `Content` is copied into the `Content` folder for free text search:
+The textual part of the server's `Content` is copied into the `Content` folder for free text search:
 - Language translations, including the string IDs
 - Block and other entity definitions
 - Default blueprints and scenarios
 - See [ContentTypes.md](ContentTypes.md) for the full list of content types
 
+## Running the Dedicated Server
+
+The server executable is `SpaceEngineersDedicated.exe` in the `DedicatedServer64` folder.
+
+### Headless Mode (No UI)
+
+```
+SpaceEngineersDedicated.exe -console
+```
+
+This bypasses the Telerik WinForms configuration UI and runs the server directly.
+
+### Configuration
+
+The server is configured via XML files. The primary configuration file is `SpaceEngineers-Dedicated.cfg` located in the server's AppData directory (typically `%APPDATA%\SpaceEngineersDedicated\`).
+
+Key configuration areas:
+- **Server settings** (name, world, mods, max players)
+- **World settings** (game mode, inventory size, welding speed)
+- **Network settings** (port, public/private)
+
+Configuration should be done by editing the XML files directly or with utility Python scripts. See below for planned utilities.
+
+### Planned Utility Scripts (Not Yet Implemented)
+
+- **config_editor.py** — Read and modify `SpaceEngineers-Dedicated.cfg` values from the command line (e.g. set server name, max players, world name)
+- **world_manager.py** — List, backup, and manage saved worlds in the server data directory
+- **mod_manager.py** — List and validate mods referenced in the configuration
+
+### Server-Only Assemblies
+
+| Assembly | Description |
+|----------|-------------|
+| `SpaceEngineersDedicated` | Server entry point (replaces `SpaceEngineers.exe`) |
+| `VRage.Dedicated` | Dedicated server framework, lifecycle, and configuration |
+| `VRage.RemoteClient.Core` | Remote client support (RCON-like functionality) |
+
 ## General Rules
 
 - In the `Decompiled` folder search only inside the C# source files (*.cs) in general. If you work on transpiler or preloader patches, then also search in the IL code (*.il) files.
 - In the `Content` folder search the files appropriate for the task. See [ContentTypes.md](ContentTypes.md) for the list of types.
-- Do not search for decompiled game code outside the `Decompiled` folder which is at the same level as this skill file. The decompiled game source tree must be there if the preparation succeeded.
-- Do not search for game content data outside the `Content` folder which is at the same level as this skill file. The copied game content must be there if the preparation succeeded.
+- Do not search for decompiled server code outside the `Decompiled` folder which is at the same level as this skill file. The decompiled server source tree must be there if the preparation succeeded.
+- Do not search for server content data outside the `Content` folder which is at the same level as this skill file. The copied server content must be there if the preparation succeeded.
 
 ## Action References
 
