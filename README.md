@@ -47,6 +47,7 @@ If you want to use BusyBox in your other projects, then this is also available a
 * [se-dev-mod](skills/se-dev-mod/SKILL.md) – Mod development
 * [se-dev-plugin](skills/se-dev-plugin/SKILL.md) – Plugin development
 * [se-dev-game-code](skills/se-dev-game-code/SKILL.md) – Searchable decompiled C# game code (recommended companion for all the other skills)
+* [se-dev-server-code](skills/se-dev-server-code/SKILL.md) – Searchable decompiled C# Dedicated Server code (for server side mod and plugin development)
 
 _Enjoy!_
 
