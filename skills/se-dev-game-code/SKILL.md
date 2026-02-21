@@ -70,11 +70,11 @@ uv run search_code.py class children MyTerminalBlock
 uv run search_code.py class usage MyEntity --count
 
 # Limit number of results
-uv run search_code.py class usage MyEntity --limit 50
+uv run search_code.py class usage MyEntity --limit 10
 
 # Paginate through results
-uv run search_code.py class usage MyEntity --limit 100 --offset 0
-uv run search_code.py class usage MyEntity --limit 100 --offset 100
+uv run search_code.py class usage MyEntity --limit 10 --offset 0
+uv run search_code.py class usage MyEntity --limit 10 --offset 20
 ```
 
 Always check the game code when:

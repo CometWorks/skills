@@ -82,7 +82,7 @@ uv run search_mods.py class children MyGameLogicComponent
 uv run search_mods.py class usage Init --count
 
 # Limit number of results
-uv run search_mods.py class usage Init --limit 50
+uv run search_mods.py class usage Init --limit 10
 ```
 
 Before searching, ensure the index exists. If `ModCodeIndex/` is missing, run:

@@ -82,8 +82,8 @@ uv run search_mods.py method usage Update -n YourModNamespace
 
 ### 4. Paginate Through Results
 ```bash
-uv run search_mods.py class usage Init --limit 50 --offset 0
-uv run search_mods.py class usage Init --limit 50 --offset 50
+uv run search_mods.py class usage Init --limit 10 --offset 0
+uv run search_mods.py class usage Init --limit 10 --offset 20
 ```
 
 ## Index Issues

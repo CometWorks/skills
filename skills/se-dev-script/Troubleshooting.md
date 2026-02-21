@@ -82,8 +82,8 @@ uv run search_scripts.py method usage "Main.*void" --limit 20
 
 ### 4. Paginate Through Results
 ```bash
-uv run search_scripts.py class usage Program --limit 50 --offset 0
-uv run search_scripts.py class usage Program --limit 50 --offset 50
+uv run search_scripts.py class usage Program --limit 10 --offset 0
+uv run search_scripts.py class usage Program --limit 10 --offset 20
 ```
 
 ## Index Issues

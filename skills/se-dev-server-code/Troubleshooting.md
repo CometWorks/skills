@@ -87,13 +87,13 @@ Use offset to view results in batches:
 
 ```bash
 # First 100
-uv run search_code.py class usage MyEntity --limit 100 --offset 0
+uv run search_code.py class usage MyEntity --limit 10 --offset 0
 
 # Next 100
-uv run search_code.py class usage MyEntity --limit 100 --offset 100
+uv run search_code.py class usage MyEntity --limit 10 --offset 20
 
 # Third 100
-uv run search_code.py class usage MyEntity --limit 100 --offset 200
+uv run search_code.py class usage MyEntity --limit 10 --offset 20
 ```
 
 ## Index Issues
