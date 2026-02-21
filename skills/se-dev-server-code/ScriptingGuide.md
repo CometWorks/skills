@@ -153,7 +153,7 @@ with open(file_path, "r", encoding="utf-8") as f:
 
 ### Searching Content Data
 
-Game content is in `Content/` directory. See `ContentTypes.md` for structure.
+Server content is in `Content/` directory. See `ContentTypes.md` for structure.
 
 ```python
 from pathlib import Path

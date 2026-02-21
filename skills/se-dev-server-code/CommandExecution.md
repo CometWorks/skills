@@ -13,7 +13,7 @@ This guide explains how to correctly execute commands on Windows when using this
    ```bash
    ./Prepare.bat (with workdir set to where this documentation files is located)
    ```
-3. **Search game code:**
+3. **Search server code:**
    ```bash
    # Correct syntax: <category> <type> <pattern>
    uv run search_code.py class declaration MyCubeGrid

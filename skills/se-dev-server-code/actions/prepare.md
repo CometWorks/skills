@@ -1,6 +1,6 @@
 # Prepare Action
 
-> **Part of the se-dev-game-code skill.** Invoked to run the one-time preparation.
+> **Part of the se-dev-server-code skill.** Invoked to run the one-time preparation.
 
 **⚠️ IMPORTANT: Read [CommandExecution.md](../CommandExecution.md) for complete guidance on running commands correctly.**
 
@@ -64,7 +64,7 @@ Prepare.bat
 The preparation script:
 - Sets up the Python virtual environment
 - Downloads and installs required tools (busybox.exe, ILSpy)
-- Decompiles the game DLLs to C# and IL code
+- Decompiles the server DLLs to C# and IL code
 - Builds the code search index
-- Copies game content data
+- Copies server content data
 - Verifies the environment is ready for use

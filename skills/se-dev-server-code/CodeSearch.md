@@ -9,7 +9,7 @@ Search the decompiled Space Engineers C# codebase efficiently.
 Always change to this skill folder first:
 
 ```bash
-cd skills/se-dev-game-code
+cd skills/se-dev-server-code
 uv run search_code.py class declaration MyToolbar
 ```
 
@@ -178,6 +178,9 @@ The first folder indicates the assembly (DLL). From the second level, folders ma
 
 | Assembly | Contains |
 |----------|----------|
+| `SpaceEngineersDedicated` | Server entry point, startup, and configuration |
+| `VRage.Dedicated` | Dedicated server framework and lifecycle |
+| `VRage.RemoteClient.Core` | Remote client/RCON support |
 | `VRage.Math` | Math types: Vector3, Matrix, BoundingBox, etc. |
 | `VRage.Game` | Game definitions, object builders |
 | `VRage.Library` | Core utilities |

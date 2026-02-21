@@ -1,8 +1,8 @@
 # Test Action
 
-> **Part of the se-dev-game-code skill.** Invoked to run game code search tests and verify results.
+> **Part of the se-dev-server-code skill.** Invoked to run server code search tests and verify results.
 
-Run `test_search.bat` to verify the game code search functionality is working correctly.
+Run `test_search.bat` to verify the server code search functionality is working correctly.
 
 ## Running Tests
 
@@ -20,7 +20,7 @@ Or redirect output to a file for review:
 
 ## What the Tests Cover
 
-The test suite exercises all game code search capabilities:
+The test suite exercises all server code search capabilities:
 
 | Category | Tests |
 |----------|-------|

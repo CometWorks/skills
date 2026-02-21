@@ -1,6 +1,6 @@
 # Command Execution - Detailed Guide
 
-This document provides comprehensive details about command execution on Windows for the se-dev-game-code skill. For most use cases, refer to the Quick Start section in [CommandExecution.md](CommandExecution.md).
+This document provides comprehensive details about command execution on Windows for the se-dev-server-code skill. For most use cases, refer to the Quick Start section in [CommandExecution.md](CommandExecution.md).
 
 ## Recommended Approach
 
@@ -124,18 +124,18 @@ This ensures the correct Python virtual environment is used.
 ### ❌ Mistake 1: Using && in CMD
 
 ```cmd
-cd C:\skills\se-dev-game-code && Prepare.bat
+cd C:\skills\se-dev-server-code && Prepare.bat
 ```
 **Error:** `&&` is not recognized in CMD
 
 ✅ **Solution 1:** Use `&` instead:
 ```cmd
-cd C:\skills\se-dev-game-code & Prepare.bat
+cd C:\skills\se-dev-server-code & Prepare.bat
 ```
 
 ✅ **Solution 2:** Use separate commands:
 ```cmd
-cd C:\skills\se-dev-game-code
+cd C:\skills\se-dev-server-code
 Prepare.bat
 ```
 

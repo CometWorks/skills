@@ -1,6 +1,6 @@
 # Search Action
 
-> **Part of the se-dev-game-code skill.** Invoked when searching the game's decompiled code.
+> **Part of the se-dev-server-code skill.** Invoked when searching the server's decompiled code.
 
 Run searches using `uv run search_code.py` from this skill folder.
 
@@ -22,11 +22,11 @@ For complete search documentation, see:
 
 ## When to Search
 
-Always check the game code when:
-- You're unsure about the game's internal APIs and how to interface with them.
-- The inner workings of Space Engineers is unclear.
+Always check the server code when:
+- You're unsure about the server's internal APIs and how to interface with them.
+- The inner workings of the Space Engineers Dedicated Server is unclear.
 
 ## Search Targets
 
 - **Decompiled folder** - Search C# source files (*.cs) in general. For transpiler or preloader patches, also search IL code (*.il) files.
-- **Content folder** - Search game content data files. See [ContentTypes.md](../ContentTypes.md) for the list of types.
+- **Content folder** - Search server content data files. See [ContentTypes.md](../ContentTypes.md) for the list of types.

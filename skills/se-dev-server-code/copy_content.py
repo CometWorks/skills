@@ -5,7 +5,7 @@ from typing import Set
 
 
 def copy_content(subdir: str, allowed_extensions: Set[str], exclude: Set[str] = ()):
-    src_dir = Path(os.environ['SPACE_ENGINEERS_ROOT']) / 'Content' / subdir
+    src_dir = Path(os.environ['DEDICATED_SERVER_ROOT']) / 'Content' / subdir
     dst_dir = Path('Content') / subdir
     dst_dir.mkdir(parents=True, exist_ok=True)
     for src_path in src_dir.glob('**/*'):

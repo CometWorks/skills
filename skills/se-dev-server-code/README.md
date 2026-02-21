@@ -1,19 +1,19 @@
-# Space Engineers Game Code Skill
+# Space Engineers Dedicated Server Code Skill
 
-This skill provides access to decompiled C# source code from Space Engineers version 1, enabling code search and analysis for mod, plugin, and script development.
+This skill provides access to decompiled C# source code from the Space Engineers Dedicated Server, enabling code search and analysis for server mod, plugin, and script development.
 
 ## Overview
 
 The skill maintains:
 - **Decompiled/** - Full decompiled C# source organized by assembly
-- **Content/** - Game content files (definitions, translations, blueprints)
+- **Content/** - Server content files (definitions, translations, blueprints)
 - **CodeIndex/** - Pre-built CSV indexes for fast symbol lookup
 
 ## Setup
 
 Run the preparation steps in `Prepare.md` if `Prepare.DONE` is missing. This will:
-1. Decompile the game assemblies
-2. Copy game content
+1. Decompile the server assemblies
+2. Copy server content
 3. Build the code index
 
 ## Code Index
@@ -213,6 +213,9 @@ The first folder in the path indicates the assembly (DLL) containing the code.
 
 | Assembly | Contains |
 |----------|----------|
+| `SpaceEngineersDedicated` | Server entry point, startup, and configuration |
+| `VRage.Dedicated` | Dedicated server framework and lifecycle |
+| `VRage.RemoteClient.Core` | Remote client/RCON support |
 | `VRage.Math` | Math types (Vector3, Matrix, BoundingBox) |
 | `VRage.Game` | Game definitions, object builders |
 | `VRage.Library` | Core utilities |

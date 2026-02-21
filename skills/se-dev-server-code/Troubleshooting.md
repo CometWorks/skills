@@ -1,13 +1,13 @@
 # Troubleshooting Guide
 
-This guide helps you resolve common issues when searching game code.
+This guide helps you resolve common issues when searching server code.
 
 ## NO-MATCHES Results
 
 ### Common Causes
 
 1. **Wrong skill**: 
-   - Game classes like `MyCubeBlock` → use `se-dev-game-code` ✅
+   - Server classes like `MyCubeBlock` → use `se-dev-server-code` ✅
    - Mod code → use `se-dev-mod`
    - Plugin code → use `se-dev-plugin`
    - Script code → use `se-dev-script`
@@ -100,7 +100,7 @@ uv run search_code.py class usage MyEntity --limit 100 --offset 200
 
 ### Re-indexing
 
-If searches return unexpected results or after game updates:
+If searches return unexpected results or after server updates:
 
 ```bash
 # Delete old index
@@ -129,13 +129,13 @@ Each skill searches different code:
 
 | What you need | Skill to use |
 |---------------|--------------|
-| Base game classes (MyCubeBlock, MyEntity, etc.) | `se-dev-game-code` |
+| Dedicated server classes (MyCubeBlock, MyEntity, etc.) | `se-dev-server-code` |
 | Mod code examples from Steam Workshop | `se-dev-mod` |
 | Plugin code from PluginHub | `se-dev-plugin` |
 | PB script examples from Workshop | `se-dev-script` |
 
 If you're looking for examples of how others use game APIs, use `se-dev-mod` or `se-dev-script`.
-If you need to understand the game's internal implementation, use `se-dev-game-code`.
+If you need to understand the server's internal implementation, use `se-dev-server-code`.
 
 ## Search Tips
 
