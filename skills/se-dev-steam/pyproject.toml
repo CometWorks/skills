@@ -1,0 +1,11 @@
+[project]
+name = "se-dev-steam"
+version = "0.1.0"
+description = "Steam skill related to Space Engineers"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "lxml",
+	"defusedxml",
+    "requests>=2.32.5",
+]
