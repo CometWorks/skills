@@ -17,7 +17,7 @@ General instructions:
 - NEVER change the `AGENTS.md` or `copilot-instructions.md` files, UNLESS you're explicitly asked to do so.
 
 Runtime patching:
-- For details on patching the game's code using Harmony, see [Patching.md](Patching.md).
+- For details on patching the game's code using Harmony and the recommended Harmony version, see [Patching.md](Patching.md).
 - For reflection utilities (finding private fields/methods), see [AccessTools.md](AccessTools.md).
 - For special patch parameters (`__instance`, `__result`, etc.), see [PatchInjections.md](PatchInjections.md).
 
