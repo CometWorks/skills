@@ -28,7 +28,7 @@ def main():
     copy_content('Fonts', {'xml'})
     copy_content('Particles', {'mwl'})
     copy_content('Scenarios', {'scf', 'sbl', 'resx', 'vs'})
-    copy_content('Shaders', {'hlsi'})
+    copy_content('Shaders', {'hlsl'})
     copy_content('VisualScripts', {'vs', 'vsc', 'sbl', 'resx'})
 
 
