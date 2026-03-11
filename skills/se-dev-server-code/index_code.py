@@ -1375,6 +1375,39 @@ class CSharpIndexer:
         print(f"  - Interface implementations: {len(sorted_implementations)} entries")
 
 
+def extract_game_version(source_root: str, output_dir: str):
+    """Extract SE version numbers from SpaceEngineersGame.cs and write game_version.txt"""
+    version_file = os.path.join(
+        source_root,
+        "SpaceEngineers.Game", "SpaceEngineers", "Game", "SpaceEngineersGame.cs"
+    )
+    if not os.path.isfile(version_file):
+        print(f"Warning: Version file not found: {version_file}")
+        return
+
+    with open(version_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    fields = {}
+    for name in ("SE_VERSION", "CLIENT_BUILD_NUMBER", "SERVER_BUILD_NUMBER"):
+        match = re.search(rf'public\s+const\s+int\s+{name}\s*=\s*(\d+)\s*;', content)
+        if match:
+            fields[name] = match.group(1)
+        else:
+            print(f"Warning: Could not find {name} in {version_file}")
+            return
+
+    output_path = os.path.join(output_dir, "game_version.txt")
+    os.makedirs(output_dir, exist_ok=True)
+    with open(output_path, 'w', encoding='utf-8') as f:
+        for name, value in fields.items():
+            f.write(f"{name}={value}\n")
+
+    print(f"Game version file written: {output_path}")
+    for name, value in fields.items():
+        print(f"  {name}={value}")
+
+
 def main():
     if len(sys.argv) != 3:
         print("Usage: python index_code.py <source_root_path> <output_directory>")
@@ -1397,6 +1430,9 @@ def main():
     indexer = CSharpIndexer(source_root)
     indexer.index_directory()
     indexer.write_indices(Path(output_dir))
+
+    # Extract game version numbers
+    extract_game_version(source_root, output_dir)
 
     print("\nIndexing complete!")
 

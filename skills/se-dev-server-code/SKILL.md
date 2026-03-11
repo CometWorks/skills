@@ -41,6 +41,8 @@ Check these patterns **in order** - first match wins:
 
 If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time preparation steps first. See the [prepare action](./actions/prepare.md).
 
+During preparation the current game version is stored into `CodeIndex/game_version.txt`.
+
 ## Essential Documentation
 
 - **[CommandExecution.md](CommandExecution.md)** - ⚠️ **READ THIS FIRST** - How to run commands correctly on Windows
