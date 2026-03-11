@@ -64,7 +64,7 @@ Prepare.bat
 The preparation script:
 - Sets up the Python virtual environment
 - Downloads and installs required tools (busybox.exe, ILSpy)
-- Decompiles the game DLLs to C# and IL code
+- Decompiles the game DLLs to C# and optionally to IL code (needs uncommenting a line in `DecompileDll.sh` if this is required)
 - Builds the code search index
 - Copies game content data
 - Verifies the environment is ready for use

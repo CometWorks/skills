@@ -9,18 +9,16 @@ echo "Decompiling: $1"
 if [ -d "Decompiled/$1" ]; then
     echo "Directory Decompiled/$1 already exists. Skipping."
 else
-    # First ilspycmd execution
+    # First ilspycmd execution to decompile to C# code
     ilspycmd --project --nested-directories --referencepath Bin64 --languageversion CSharp11_0 --disable-updatecheck -o "Decompiled/$1" "$2"
-    
-    # Check exit status of the previous command ($?)
     if [ $? -ne 0 ]; then
         echo "Failed during project decompilation."
         exit 1
     fi
 
-    # Second ilspycmd execution
-    ilspycmd --ilcode --il-sequence-points -o "Decompiled/$1" "$2"
-    
+    # Second ilspycmd execution to decompile to IL code
+    # Uncomment the next line to produce IL code. These files are big and useful only for transpiler and preloader patch development.
+    #ilspycmd --ilcode --il-sequence-points -o "Decompiled/$1" "$2"
     if [ $? -ne 0 ]; then
         echo "Failed during IL code generation."
         exit 1

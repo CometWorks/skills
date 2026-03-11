@@ -6,6 +6,7 @@ rmdir /s /q Decompiled
 rmdir /s /q .venv
 del game_version.txt
 del busybox.exe
+del Decompile.log
 del Prepare.log
 del Prepare.DONE
 exit /b 0
