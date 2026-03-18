@@ -22,8 +22,11 @@ uv run search_code.py class declaration MyToolbar
 | `struct` | Struct declarations and usages |
 | `enum` | Enum declarations and usages |
 | `method` | Method declarations and usages |
-| `field` | Fields and properties (accessed identically) |
-| `signature` | Full method signatures with parameters |
+| `field` | Field declarations and usages |
+| `property` | Property declarations and usages |
+| `event` | Event declarations and usages |
+| `constructor` | Constructor declarations and usages |
+| `namespace` | Namespace declarations and usages |
 
 ## Basic Usage
 
@@ -40,6 +43,9 @@ uv run search_code.py interface declaration IMyTerminalBlock
 uv run search_code.py enum declaration MyRelationsBetweenPlayerAndBlock
 uv run search_code.py method declaration GetPosition
 uv run search_code.py field declaration AngularDamping
+uv run search_code.py property declaration IsWorking
+uv run search_code.py event declaration IsWorkingChanged
+uv run search_code.py constructor declaration MyCubeBlock
 ```
 
 ### Find Usages
@@ -115,8 +121,8 @@ Patterns match against the symbol name (not namespace):
 
 | Prefix | Behavior |
 |--------|----------|
-| `text:X` or just `X` | Case-insensitive substring match |
-| `re:X` | Case-insensitive regex (Python regex syntax) |
+| `text:X` or just `X` | Case-sensitive substring match (use `-i` for case-insensitive) |
+| `re:X` | Case-sensitive regex, Python regex syntax (use `-i` for case-insensitive) |
 
 Multiple patterns use AND logic (all must match).
 

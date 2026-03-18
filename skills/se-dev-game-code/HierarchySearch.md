@@ -153,8 +153,8 @@ Same as regular searches:
 
 | Prefix | Behavior |
 |--------|----------|
-| `text:X` or just `X` | Case-insensitive substring match |
-| `re:X` | Case-insensitive regex (Python regex) |
+| `text:X` or just `X` | Case-sensitive substring match (use `-i` for case-insensitive) |
+| `re:X` | Case-sensitive regex, Python regex syntax (use `-i` for case-insensitive) |
 
 Multiple patterns use AND logic.
 

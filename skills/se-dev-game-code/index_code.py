@@ -26,6 +26,7 @@ from tree_sitter_c_sharp import language
 @dataclass
 class IndexEntry:
     """Represents a single index entry for declarations or usages"""
+
     namespace: str
     declaring_type: str
     method: str
@@ -35,6 +36,12 @@ class IndexEntry:
     start_line: int
     end_line: int
     description: str
+    access: str = (
+        ""  # Access modifier: public, private, protected, internal, protected internal
+    )
+    modifiers: str = ""  # Other modifiers: static, readonly, const, virtual, override, etc. (space-separated)
+    member_type: str = ""  # C# type: int, string, List<int>, void, etc.
+    params: str = ""  # Parameter list for methods/constructors: (int x, string name)
 
     def to_csv_row(self) -> List[str]:
         """Convert to CSV row format"""
@@ -47,28 +54,37 @@ class IndexEntry:
             self.file_path,
             str(self.start_line),
             str(self.end_line),
-            self.description
+            self.description,
+            self.access,
+            self.modifiers,
+            self.member_type,
+            self.params,
         ]
 
     @staticmethod
     def csv_header() -> List[str]:
         """Return CSV header row"""
         return [
-            'namespace',
-            'declaring_type',
-            'method',
-            'symbol_name',
-            'type',
-            'file_path',
-            'start_line',
-            'end_line',
-            'description'
+            "namespace",
+            "declaring_type",
+            "method",
+            "symbol_name",
+            "type",
+            "file_path",
+            "start_line",
+            "end_line",
+            "description",
+            "access",
+            "modifiers",
+            "member_type",
+            "params",
         ]
 
 
 @dataclass
 class SignatureEntry:
     """Represents a method signature entry - different columns than IndexEntry"""
+
     namespace: str
     declaring_type: str
     method_name: str
@@ -88,26 +104,28 @@ class SignatureEntry:
             self.file_path,
             str(self.start_line),
             str(self.end_line),
-            self.description
+            self.description,
         ]
 
     @staticmethod
     def csv_header() -> List[str]:
         """Return CSV header row"""
         return [
-            'namespace',
-            'declaring_type',
-            'method_name',
-            'signature',
-            'file_path',
-            'start_line',
-            'end_line',
-            'description'
+            "namespace",
+            "declaring_type",
+            "method_name",
+            "signature",
+            "file_path",
+            "start_line",
+            "end_line",
+            "description",
         ]
+
 
 @dataclass
 class ClassHierarchyEntry:
     """Represents a class inheritance relationship"""
+
     child_namespace: str
     child_class: str
     parent_namespace: str
@@ -125,25 +143,27 @@ class ClassHierarchyEntry:
             self.parent_class,
             self.file_path,
             str(self.start_line),
-            str(self.end_line)
+            str(self.end_line),
         ]
 
     @staticmethod
     def csv_header() -> List[str]:
         """Return CSV header row"""
         return [
-            'child_namespace',
-            'child_class',
-            'parent_namespace',
-            'parent_class',
-            'file_path',
-            'start_line',
-            'end_line'
+            "child_namespace",
+            "child_class",
+            "parent_namespace",
+            "parent_class",
+            "file_path",
+            "start_line",
+            "end_line",
         ]
+
 
 @dataclass
 class InterfaceHierarchyEntry:
     """Represents an interface inheritance relationship"""
+
     child_namespace: str
     child_interface: str
     parent_namespace: str
@@ -161,25 +181,27 @@ class InterfaceHierarchyEntry:
             self.parent_interface,
             self.file_path,
             str(self.start_line),
-            str(self.end_line)
+            str(self.end_line),
         ]
 
     @staticmethod
     def csv_header() -> List[str]:
         """Return CSV header row"""
         return [
-            'child_namespace',
-            'child_interface',
-            'parent_namespace',
-            'parent_interface',
-            'file_path',
-            'start_line',
-            'end_line'
+            "child_namespace",
+            "child_interface",
+            "parent_namespace",
+            "parent_interface",
+            "file_path",
+            "start_line",
+            "end_line",
         ]
+
 
 @dataclass
 class InterfaceImplementationEntry:
     """Represents a class/struct implementing interfaces"""
+
     implementing_namespace: str
     implementing_type: str
     interfaces: str  # Comma-separated list of fully-qualified interface names
@@ -195,25 +217,26 @@ class InterfaceImplementationEntry:
             self.interfaces,
             self.file_path,
             str(self.start_line),
-            str(self.end_line)
+            str(self.end_line),
         ]
 
     @staticmethod
     def csv_header() -> List[str]:
         """Return CSV header row"""
         return [
-            'implementing_namespace',
-            'implementing_type',
-            'interfaces',
-            'file_path',
-            'start_line',
-            'end_line'
+            "implementing_namespace",
+            "implementing_type",
+            "interfaces",
+            "file_path",
+            "start_line",
+            "end_line",
         ]
 
 
 @dataclass
 class FileProcessingResult:
     """Results from processing a single file"""
+
     namespace_entries: List[IndexEntry] = field(default_factory=list)
     interface_entries: List[IndexEntry] = field(default_factory=list)
     class_entries: List[IndexEntry] = field(default_factory=list)
@@ -221,12 +244,19 @@ class FileProcessingResult:
     enum_entries: List[IndexEntry] = field(default_factory=list)
     method_entries: List[IndexEntry] = field(default_factory=list)
     field_entries: List[IndexEntry] = field(default_factory=list)
+    property_entries: List[IndexEntry] = field(default_factory=list)
+    event_entries: List[IndexEntry] = field(default_factory=list)
+    constructor_entries: List[IndexEntry] = field(default_factory=list)
     signature_entries: List[SignatureEntry] = field(default_factory=list)
-    
+
     # Hierarchy entries
     class_hierarchy_entries: List[ClassHierarchyEntry] = field(default_factory=list)
-    interface_hierarchy_entries: List[InterfaceHierarchyEntry] = field(default_factory=list)
-    interface_implementation_entries: List[InterfaceImplementationEntry] = field(default_factory=list)
+    interface_hierarchy_entries: List[InterfaceHierarchyEntry] = field(
+        default_factory=list
+    )
+    interface_implementation_entries: List[InterfaceImplementationEntry] = field(
+        default_factory=list
+    )
 
     # Declared names found in this file (for building shared state after pass 1)
     declared_namespaces: Set[str] = field(default_factory=set)
@@ -235,6 +265,9 @@ class FileProcessingResult:
     declared_structs: Dict[str, Set[tuple]] = field(default_factory=dict)
     declared_enums: Dict[str, Set[tuple]] = field(default_factory=dict)
     declared_methods: Dict[str, Set[tuple]] = field(default_factory=dict)
+    declared_properties: Dict[str, Set[tuple]] = field(default_factory=dict)
+    declared_events: Dict[str, Set[tuple]] = field(default_factory=dict)
+    declared_constructors: Dict[str, Set[tuple]] = field(default_factory=dict)
 
 
 def _process_batch_worker(args: Tuple) -> List[FileProcessingResult]:
@@ -248,12 +281,15 @@ def _process_batch_worker(args: Tuple) -> List[FileProcessingResult]:
 
     if collect_usages and shared_declarations:
         # Pass 2: use shared declarations
-        processor.declared_namespaces = shared_declarations['namespaces']
-        processor.declared_interfaces = shared_declarations['interfaces']
-        processor.declared_classes = shared_declarations['classes']
-        processor.declared_structs = shared_declarations['structs']
-        processor.declared_enums = shared_declarations['enums']
-        processor.declared_methods = shared_declarations['methods']
+        processor.declared_namespaces = shared_declarations["namespaces"]
+        processor.declared_interfaces = shared_declarations["interfaces"]
+        processor.declared_classes = shared_declarations["classes"]
+        processor.declared_structs = shared_declarations["structs"]
+        processor.declared_enums = shared_declarations["enums"]
+        processor.declared_methods = shared_declarations["methods"]
+        processor.declared_properties = shared_declarations["properties"]
+        processor.declared_events = shared_declarations["events"]
+        processor.declared_constructors = shared_declarations["constructors"]
 
     results = []
     for file_path in file_paths:
@@ -280,31 +316,36 @@ class FileProcessor:
         self.declared_structs: Dict[str, Set[tuple]] = {}
         self.declared_enums: Dict[str, Set[tuple]] = {}
         self.declared_methods: Dict[str, Set[tuple]] = {}
+        self.declared_properties: Dict[str, Set[tuple]] = {}
+        self.declared_events: Dict[str, Set[tuple]] = {}
+        self.declared_constructors: Dict[str, Set[tuple]] = {}
 
-    def process_file(self, file_path: Path, collect_usages: bool) -> FileProcessingResult:
+    def process_file(
+        self, file_path: Path, collect_usages: bool
+    ) -> FileProcessingResult:
         """Process a single C# file and return results"""
         result = FileProcessingResult()
 
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 source_code = f.read()
         except UnicodeDecodeError:
-            with open(file_path, 'r', encoding='latin-1') as f:
+            with open(file_path, "r", encoding="latin-1") as f:
                 source_code = f.read()
 
-        tree = self.parser.parse(bytes(source_code, 'utf-8'))
+        tree = self.parser.parse(bytes(source_code, "utf-8"))
         relative_path = str(file_path.relative_to(self.root_path))
 
-        source_lines = source_code.split('\n')
+        source_lines = source_code.split("\n")
 
         context = {
-            'namespace': '',
-            'declaring_type': '',
-            'method': '',
-            'file_path': relative_path,
-            'source_lines': source_lines,
-            'collect_usages': collect_usages,
-            'result': result
+            "namespace": "",
+            "declaring_type": "",
+            "method": "",
+            "file_path": relative_path,
+            "source_lines": source_lines,
+            "collect_usages": collect_usages,
+            "result": result,
         }
 
         self._traverse_tree(tree.root_node, context)
@@ -312,75 +353,84 @@ class FileProcessor:
 
     def _traverse_tree(self, node: Node, context: Dict):
         """Recursively traverse the syntax tree"""
-        prev_namespace = context['namespace']
-        prev_declaring_type = context['declaring_type']
-        prev_method = context['method']
+        prev_namespace = context["namespace"]
+        prev_declaring_type = context["declaring_type"]
+        prev_method = context["method"]
         is_file_scoped_namespace = False
-        result = context['result']
+        result = context["result"]
 
-        if context['collect_usages']:
-            if node.type == 'file_scoped_namespace_declaration':
+        if context["collect_usages"]:
+            if node.type == "file_scoped_namespace_declaration":
                 name = self._get_identifier_name(node)
                 if name:
-                    context['namespace'] = name
+                    context["namespace"] = name
                     is_file_scoped_namespace = True
-            elif node.type == 'namespace_declaration':
+            elif node.type == "namespace_declaration":
                 name = self._get_identifier_name(node)
                 if name:
-                    context['namespace'] = self._build_namespace(context['namespace'], name)
-            elif node.type in ('interface_declaration', 'class_declaration', 'struct_declaration',
-                             'record_declaration', 'enum_declaration'):
+                    context["namespace"] = self._build_namespace(
+                        context["namespace"], name
+                    )
+            elif node.type in (
+                "interface_declaration",
+                "class_declaration",
+                "struct_declaration",
+                "record_declaration",
+                "enum_declaration",
+            ):
                 name = self._get_identifier_name(node)
                 if name:
-                    context['declaring_type'] = name
-            elif node.type in ('method_declaration', 'constructor_declaration'):
+                    context["declaring_type"] = name
+            elif node.type in ("method_declaration", "constructor_declaration"):
                 name = self._get_identifier_name(node)
                 if name:
-                    context['method'] = name
-            elif node.type == 'identifier':
+                    context["method"] = name
+            elif node.type == "identifier":
                 self._process_identifier_usage(node, context, result)
         else:
-            if node.type == 'file_scoped_namespace_declaration':
+            if node.type == "file_scoped_namespace_declaration":
                 self._process_file_scoped_namespace(node, context, result)
                 is_file_scoped_namespace = True
-            elif node.type == 'namespace_declaration':
+            elif node.type == "namespace_declaration":
                 self._process_namespace(node, context, result)
-            elif node.type == 'interface_declaration':
+            elif node.type == "interface_declaration":
                 self._process_interface(node, context, result)
-            elif node.type == 'class_declaration':
+            elif node.type == "class_declaration":
                 self._process_class(node, context, result)
-            elif node.type == 'struct_declaration':
+            elif node.type == "struct_declaration":
                 self._process_struct(node, context, result)
-            elif node.type == 'enum_declaration':
+            elif node.type == "enum_declaration":
                 self._process_enum(node, context, result)
-            elif node.type == 'record_declaration':
+            elif node.type == "record_declaration":
                 self._process_class(node, context, result)
-            elif node.type in ('method_declaration', 'constructor_declaration'):
+            elif node.type in ("method_declaration", "constructor_declaration"):
                 self._process_method(node, context, result)
-            elif node.type == 'field_declaration':
+            elif node.type == "field_declaration":
                 self._process_field(node, context, result)
-            elif node.type == 'property_declaration':
+            elif node.type == "property_declaration":
                 self._process_property(node, context, result)
+            elif node.type in ("event_field_declaration", "event_declaration"):
+                self._process_event(node, context, result)
 
         for child in node.children:
             self._traverse_tree(child, context)
 
         if not is_file_scoped_namespace:
-            context['namespace'] = prev_namespace
-        context['declaring_type'] = prev_declaring_type
-        context['method'] = prev_method
+            context["namespace"] = prev_namespace
+        context["declaring_type"] = prev_declaring_type
+        context["method"] = prev_method
 
     def _get_identifier_name(self, node: Node) -> Optional[str]:
         """Extract identifier name from a node"""
         # For method/constructor declarations, we need the identifier right before the parameter list
         # (not the return type which comes first)
-        if node.type in ('method_declaration', 'constructor_declaration'):
+        if node.type in ("method_declaration", "constructor_declaration"):
             # Find the identifier that comes right before the parameter_list
             identifiers = []
             for child in node.children:
-                if child.type == 'identifier':
-                    identifiers.append(child.text.decode('utf-8'))
-                elif child.type == 'parameter_list' and identifiers:
+                if child.type == "identifier":
+                    identifiers.append(child.text.decode("utf-8"))
+                elif child.type == "parameter_list" and identifiers:
                     # The last identifier before parameter_list is the method name
                     return identifiers[-1]
             # Fallback: return last identifier if no parameter_list found
@@ -389,10 +439,10 @@ class FileProcessor:
         else:
             # For other node types, return first identifier as before
             for child in node.children:
-                if child.type == 'identifier':
-                    return child.text.decode('utf-8')
-                elif child.type == 'qualified_name':
-                    return child.text.decode('utf-8')
+                if child.type == "identifier":
+                    return child.text.decode("utf-8")
+                elif child.type == "qualified_name":
+                    return child.text.decode("utf-8")
         return None
 
     def _build_namespace(self, current: str, new: str) -> str:
@@ -406,7 +456,7 @@ class FileProcessor:
         start_line = node.start_point[0]
 
         if start_line == 0:
-            return ''
+            return ""
 
         comment_lines = []
         current_line = start_line - 1
@@ -414,17 +464,22 @@ class FileProcessor:
         while current_line >= 0:
             line = source_lines[current_line].strip()
 
-            if line.startswith('//'):
+            if line.startswith("//"):
                 comment_lines.insert(0, line[2:].strip())
                 current_line -= 1
-            elif line.endswith('*/'):
+            elif line.endswith("*/"):
                 multi_line_parts = []
                 while current_line >= 0:
                     line = source_lines[current_line].strip()
-                    line = line.replace('/*', '').replace('*/', '').replace('*', '').strip()
+                    line = (
+                        line.replace("/*", "")
+                        .replace("*/", "")
+                        .replace("*", "")
+                        .strip()
+                    )
                     if line:
                         multi_line_parts.insert(0, line)
-                    if '/*' in source_lines[current_line]:
+                    if "/*" in source_lines[current_line]:
                         break
                     current_line -= 1
                 comment_lines = multi_line_parts + comment_lines
@@ -434,32 +489,103 @@ class FileProcessor:
             else:
                 break
 
-        return ' '.join(comment_lines)
+        return " ".join(comment_lines)
+
+    # Access modifier keywords recognized by C#
+    _ACCESS_KEYWORDS = frozenset({"public", "private", "protected", "internal"})
+
+    # Other modifier keywords (non-access)
+    _MODIFIER_KEYWORDS = frozenset(
+        {
+            "static",
+            "readonly",
+            "const",
+            "volatile",
+            "virtual",
+            "override",
+            "abstract",
+            "sealed",
+            "async",
+            "extern",
+            "new",
+            "unsafe",
+            "partial",
+        }
+    )
+
+    def _extract_modifiers(self, node: Node) -> tuple:
+        """
+        Extract access and other modifiers from a declaration node.
+        Returns (access: str, modifiers: str).
+
+        Access is a single string like 'public', 'private', 'protected internal'.
+        Modifiers is a space-separated string of non-access modifiers like 'static readonly'.
+        """
+        access_parts = []
+        modifier_parts = []
+        for child in node.children:
+            if child.type == "modifier":
+                # The modifier node wraps a keyword child
+                for kw in child.children:
+                    keyword = kw.type
+                    if keyword in self._ACCESS_KEYWORDS:
+                        access_parts.append(keyword)
+                    elif keyword in self._MODIFIER_KEYWORDS:
+                        modifier_parts.append(keyword)
+        return (" ".join(access_parts), " ".join(modifier_parts))
+
+    @staticmethod
+    def _extract_full_type_text(type_node: Node) -> str:
+        """
+        Extract the full text of a C# type node, preserving generics.
+        E.g. 'List<int>', 'Dictionary<string, List<int>>', 'int', 'void'.
+        """
+        if type_node is None:
+            return ""
+        text = type_node.text
+        if text:
+            return text.decode("utf-8")
+        return ""
+
+    @staticmethod
+    def _extract_params_text(node: Node) -> str:
+        """
+        Extract the full parameter list text from a method/constructor node.
+        Returns the text including parentheses, e.g. '(int x, string name)'.
+        """
+        for child in node.children:
+            if child.type == "parameter_list":
+                text = child.text
+                if text:
+                    # Normalize whitespace within the parameter list
+                    raw = text.decode("utf-8")
+                    return re.sub(r"\s+", " ", raw).strip()
+        return ""
 
     def _extract_type_name(self, node: Node) -> Optional[str]:
         """Extract type name from a type node, stripping generic parameters"""
-        if node.type == 'identifier':
+        if node.type == "identifier":
             text = node.text
             if text:
-                return text.decode('utf-8')
-        elif node.type == 'qualified_name':
+                return text.decode("utf-8")
+        elif node.type == "qualified_name":
             text = node.text
             if text:
-                return text.decode('utf-8')
-        elif node.type == 'generic_name':
+                return text.decode("utf-8")
+        elif node.type == "generic_name":
             # For generic types, extract just the base name
             for child in node.children:
-                if child.type == 'identifier':
+                if child.type == "identifier":
                     text = child.text
                     if text:
-                        return text.decode('utf-8')
+                        return text.decode("utf-8")
         return None
 
     def _get_base_list_types(self, node: Node) -> List[str]:
         """Extract all type names from a base_list node"""
         types = []
         for child in node.children:
-            if child.type in ('identifier', 'qualified_name', 'generic_name'):
+            if child.type in ("identifier", "qualified_name", "generic_name"):
                 type_name = self._extract_type_name(child)
                 if type_name:
                     types.append(type_name)
@@ -468,7 +594,7 @@ class FileProcessor:
     def _find_base_list(self, node: Node) -> Optional[Node]:
         """Find the base_list child node"""
         for child in node.children:
-            if child.type == 'base_list':
+            if child.type == "base_list":
                 return child
         return None
 
@@ -478,12 +604,14 @@ class FileProcessor:
         Returns the best-guess fully-qualified name.
         """
         # If already qualified (contains a dot), return as-is
-        if '.' in type_name:
+        if "." in type_name:
             return type_name
-        
+
         # Check if it's in the current namespace
-        full_name = f"{current_namespace}.{type_name}" if current_namespace else type_name
-        
+        full_name = (
+            f"{current_namespace}.{type_name}" if current_namespace else type_name
+        )
+
         # Try to match against known types in declared sets
         if type_name in self.declared_interfaces:
             # Find matching namespace
@@ -495,7 +623,7 @@ class FileProcessor:
             if locations:
                 ns, _ = next(iter(locations))
                 return f"{ns}.{type_name}" if ns else type_name
-        
+
         if type_name in self.declared_classes:
             locations = self.declared_classes[type_name]
             for ns, _ in locations:
@@ -504,7 +632,7 @@ class FileProcessor:
             if locations:
                 ns, _ = next(iter(locations))
                 return f"{ns}.{type_name}" if ns else type_name
-        
+
         if type_name in self.declared_structs:
             locations = self.declared_structs[type_name]
             for ns, _ in locations:
@@ -513,18 +641,20 @@ class FileProcessor:
             if locations:
                 ns, _ = next(iter(locations))
                 return f"{ns}.{type_name}" if ns else type_name
-        
+
         # Default: assume it's in current namespace
         return full_name
 
     def _split_namespace_and_type(self, fully_qualified: str) -> Tuple[str, str]:
         """Split a fully-qualified type name into namespace and type name"""
-        if '.' not in fully_qualified:
-            return ('', fully_qualified)
-        parts = fully_qualified.rsplit('.', 1)
+        if "." not in fully_qualified:
+            return ("", fully_qualified)
+        parts = fully_qualified.rsplit(".", 1)
         return (parts[0], parts[1])
 
-    def _extract_method_signature(self, node: Node, source_lines: List[str]) -> Tuple[str, int, int]:
+    def _extract_method_signature(
+        self, node: Node, source_lines: List[str]
+    ) -> Tuple[str, int, int]:
         """
         Extract the method signature (everything before the body).
         Returns (signature_text, start_line, end_line) where lines are 1-indexed.
@@ -537,13 +667,13 @@ class FileProcessor:
         body_node = None
         semicolon_pos = None
         for child in node.children:
-            if child.type == 'block':
+            if child.type == "block":
                 body_node = child
                 break
-            elif child.type == 'arrow_expression_clause':
+            elif child.type == "arrow_expression_clause":
                 body_node = child
                 break
-            elif child.type == ';':
+            elif child.type == ";":
                 # Abstract method or interface method (no body, ends with semicolon)
                 semicolon_pos = (child.start_point[0], child.start_point[1])
 
@@ -558,7 +688,9 @@ class FileProcessor:
         else:
             # Fallback: use the whole first line of the method
             end_line = start_line
-            end_col = len(source_lines[start_line]) if start_line < len(source_lines) else 0
+            end_col = (
+                len(source_lines[start_line]) if start_line < len(source_lines) else 0
+            )
 
         # Extract signature text from source lines
         sig_parts = []
@@ -577,9 +709,9 @@ class FileProcessor:
                 sig_parts.append(line)
 
         # Join and normalize whitespace
-        raw_signature = ' '.join(sig_parts)
+        raw_signature = " ".join(sig_parts)
         # Normalize: replace multiple whitespace with single space, strip
-        normalized = re.sub(r'\s+', ' ', raw_signature).strip()
+        normalized = re.sub(r"\s+", " ", raw_signature).strip()
 
         # Calculate 1-indexed end line (inclusive)
         # If the body/semicolon is on a different line than the signature start,
@@ -592,79 +724,85 @@ class FileProcessor:
 
         return (normalized, start_line + 1, sig_end_line)
 
-    def _process_file_scoped_namespace(self, node: Node, context: Dict, result: FileProcessingResult):
+    def _process_file_scoped_namespace(
+        self, node: Node, context: Dict, result: FileProcessingResult
+    ):
         """Process file-scoped namespace declaration"""
         name = self._get_identifier_name(node)
         if not name:
             return
 
-        context['namespace'] = name
+        context["namespace"] = name
         result.declared_namespaces.add(name)
 
-        description = self._get_preceding_comment(node, context['source_lines'])
+        description = self._get_preceding_comment(node, context["source_lines"])
 
         entry = IndexEntry(
             namespace=name,
-            declaring_type='',
-            method='',
-            symbol_name='',
-            entry_type='declaration',
-            file_path=context['file_path'],
+            declaring_type="",
+            method="",
+            symbol_name="",
+            entry_type="declaration",
+            file_path=context["file_path"],
             start_line=node.start_point[0] + 1,
             end_line=node.end_point[0] + 1,
-            description=description
+            description=description,
         )
         result.namespace_entries.append(entry)
 
-    def _process_namespace(self, node: Node, context: Dict, result: FileProcessingResult):
+    def _process_namespace(
+        self, node: Node, context: Dict, result: FileProcessingResult
+    ):
         """Process namespace declaration"""
         name = self._get_identifier_name(node)
         if not name:
             return
 
-        full_namespace = self._build_namespace(context['namespace'], name)
-        context['namespace'] = full_namespace
+        full_namespace = self._build_namespace(context["namespace"], name)
+        context["namespace"] = full_namespace
         result.declared_namespaces.add(full_namespace)
 
-        description = self._get_preceding_comment(node, context['source_lines'])
+        description = self._get_preceding_comment(node, context["source_lines"])
 
         entry = IndexEntry(
             namespace=full_namespace,
-            declaring_type='',
-            method='',
-            symbol_name='',
-            entry_type='declaration',
-            file_path=context['file_path'],
+            declaring_type="",
+            method="",
+            symbol_name="",
+            entry_type="declaration",
+            file_path=context["file_path"],
             start_line=node.start_point[0] + 1,
             end_line=node.end_point[0] + 1,
-            description=description
+            description=description,
         )
         result.namespace_entries.append(entry)
 
-    def _process_interface(self, node: Node, context: Dict, result: FileProcessingResult):
+    def _process_interface(
+        self, node: Node, context: Dict, result: FileProcessingResult
+    ):
         """Process interface declaration"""
         name = self._get_identifier_name(node)
         if not name:
             return
 
-        context['declaring_type'] = name
+        context["declaring_type"] = name
 
         if name not in result.declared_interfaces:
             result.declared_interfaces[name] = set()
-        result.declared_interfaces[name].add((context['namespace'], ''))
+        result.declared_interfaces[name].add((context["namespace"], ""))
 
-        description = self._get_preceding_comment(node, context['source_lines'])
+        description = self._get_preceding_comment(node, context["source_lines"])
 
         entry = IndexEntry(
-            namespace=context['namespace'],
+            namespace=context["namespace"],
             declaring_type=name,
-            method='',
-            symbol_name='',
-            entry_type='declaration',
-            file_path=context['file_path'],
+            method="",
+            symbol_name="",
+            entry_type="declaration",
+            file_path=context["file_path"],
             start_line=node.start_point[0] + 1,
             end_line=node.end_point[0] + 1,
-            description=description
+            description=description,
         )
         result.interface_entries.append(entry)
 
@@ -674,17 +812,19 @@ class FileProcessor:
             parent_types = self._get_base_list_types(base_list)
             for parent_type in parent_types:
                 # All items in interface base list are parent interfaces
-                parent_fqn = self._resolve_type_namespace(parent_type, context['namespace'])
+                parent_fqn = self._resolve_type_namespace(
+                    parent_type, context["namespace"]
+                )
                 parent_ns, parent_name = self._split_namespace_and_type(parent_fqn)
-                
+
                 hier_entry = InterfaceHierarchyEntry(
-                    child_namespace=context['namespace'],
+                    child_namespace=context["namespace"],
                     child_interface=name,
                     parent_namespace=parent_ns,
                     parent_interface=parent_name,
-                    file_path=context['file_path'],
+                    file_path=context["file_path"],
                     start_line=node.start_point[0] + 1,
-                    end_line=node.end_point[0] + 1
+                    end_line=node.end_point[0] + 1,
                 )
                 result.interface_hierarchy_entries.append(hier_entry)
 
@@ -694,24 +834,24 @@ class FileProcessor:
         if not name:
             return
 
-        context['declaring_type'] = name
+        context["declaring_type"] = name
 
         if name not in result.declared_classes:
             result.declared_classes[name] = set()
-        result.declared_classes[name].add((context['namespace'], ''))
+        result.declared_classes[name].add((context["namespace"], ""))
 
-        description = self._get_preceding_comment(node, context['source_lines'])
+        description = self._get_preceding_comment(node, context["source_lines"])
 
         entry = IndexEntry(
-            namespace=context['namespace'],
+            namespace=context["namespace"],
             declaring_type=name,
-            method='',
-            symbol_name='',
-            entry_type='declaration',
-            file_path=context['file_path'],
+            method="",
+            symbol_name="",
+            entry_type="declaration",
+            file_path=context["file_path"],
             start_line=node.start_point[0] + 1,
             end_line=node.end_point[0] + 1,
-            description=description
+            description=description,
         )
         result.class_entries.append(entry)
 
@@ -722,12 +862,14 @@ class FileProcessor:
             if base_types:
                 # First item could be base class or interface
                 first_type = base_types[0]
-                first_fqn = self._resolve_type_namespace(first_type, context['namespace'])
+                first_fqn = self._resolve_type_namespace(
+                    first_type, context["namespace"]
+                )
                 first_ns, first_name = self._split_namespace_and_type(first_fqn)
-                
+
                 # Check if first type is an interface (check declared_interfaces)
                 is_interface = first_name in self.declared_interfaces
-                
+
                 interfaces = []
                 if is_interface:
                     # All items are interfaces
@@ -736,34 +878,36 @@ class FileProcessor:
                     # First item is base class, rest are interfaces
                     parent_fqn = first_fqn
                     parent_ns, parent_name = first_ns, first_name
-                    
+
                     hier_entry = ClassHierarchyEntry(
-                        child_namespace=context['namespace'],
+                        child_namespace=context["namespace"],
                         child_class=name,
                         parent_namespace=parent_ns,
                         parent_class=parent_name,
-                        file_path=context['file_path'],
+                        file_path=context["file_path"],
                         start_line=node.start_point[0] + 1,
-                        end_line=node.end_point[0] + 1
+                        end_line=node.end_point[0] + 1,
                     )
                     result.class_hierarchy_entries.append(hier_entry)
-                    
+
                     interfaces = base_types[1:]
-                
+
                 # Process interfaces
                 if interfaces:
                     interface_fqns = []
                     for iface in interfaces:
-                        iface_fqn = self._resolve_type_namespace(iface, context['namespace'])
+                        iface_fqn = self._resolve_type_namespace(
+                            iface, context["namespace"]
+                        )
                         interface_fqns.append(iface_fqn)
-                    
+
                     impl_entry = InterfaceImplementationEntry(
-                        implementing_namespace=context['namespace'],
+                        implementing_namespace=context["namespace"],
                         implementing_type=name,
-                        interfaces=','.join(interface_fqns),
-                        file_path=context['file_path'],
+                        interfaces=",".join(interface_fqns),
+                        file_path=context["file_path"],
                         start_line=node.start_point[0] + 1,
-                        end_line=node.end_point[0] + 1
+                        end_line=node.end_point[0] + 1,
                     )
                     result.interface_implementation_entries.append(impl_entry)
 
@@ -773,24 +917,24 @@ class FileProcessor:
         if not name:
             return
 
-        context['declaring_type'] = name
+        context["declaring_type"] = name
 
         if name not in result.declared_structs:
             result.declared_structs[name] = set()
-        result.declared_structs[name].add((context['namespace'], ''))
+        result.declared_structs[name].add((context["namespace"], ""))
 
-        description = self._get_preceding_comment(node, context['source_lines'])
+        description = self._get_preceding_comment(node, context["source_lines"])
 
         entry = IndexEntry(
-            namespace=context['namespace'],
+            namespace=context["namespace"],
             declaring_type=name,
-            method='',
-            symbol_name='',
-            entry_type='declaration',
-            file_path=context['file_path'],
+            method="",
+            symbol_name="",
+            entry_type="declaration",
+            file_path=context["file_path"],
             start_line=node.start_point[0] + 1,
             end_line=node.end_point[0] + 1,
-            description=description
+            description=description,
         )
         result.struct_entries.append(entry)
 
@@ -801,16 +945,18 @@ class FileProcessor:
             if interfaces:
                 interface_fqns = []
                 for iface in interfaces:
-                    iface_fqn = self._resolve_type_namespace(iface, context['namespace'])
+                    iface_fqn = self._resolve_type_namespace(
+                        iface, context["namespace"]
+                    )
                     interface_fqns.append(iface_fqn)
-                
+
                 impl_entry = InterfaceImplementationEntry(
-                    implementing_namespace=context['namespace'],
+                    implementing_namespace=context["namespace"],
                     implementing_type=name,
-                    interfaces=','.join(interface_fqns),
-                    file_path=context['file_path'],
+                    interfaces=",".join(interface_fqns),
+                    file_path=context["file_path"],
                     start_line=node.start_point[0] + 1,
-                    end_line=node.end_point[0] + 1
+                    end_line=node.end_point[0] + 1,
                 )
                 result.interface_implementation_entries.append(impl_entry)
 
@@ -820,24 +966,24 @@ class FileProcessor:
         if not name:
             return
 
-        context['declaring_type'] = name
+        context["declaring_type"] = name
 
         if name not in result.declared_enums:
             result.declared_enums[name] = set()
-        result.declared_enums[name].add((context['namespace'], ''))
+        result.declared_enums[name].add((context["namespace"], ""))
 
-        description = self._get_preceding_comment(node, context['source_lines'])
+        description = self._get_preceding_comment(node, context["source_lines"])
 
         entry = IndexEntry(
-            namespace=context['namespace'],
+            namespace=context["namespace"],
             declaring_type=name,
-            method='',
-            symbol_name='',
-            entry_type='declaration',
-            file_path=context['file_path'],
+            method="",
+            symbol_name="",
+            entry_type="declaration",
+            file_path=context["file_path"],
             start_line=node.start_point[0] + 1,
             end_line=node.end_point[0] + 1,
-            description=description
+            description=description,
         )
         result.enum_entries.append(entry)
 
@@ -847,111 +993,280 @@ class FileProcessor:
         if not name:
             return
 
-        context['method'] = name
+        is_constructor = node.type == "constructor_declaration"
+
+        context["method"] = name
 
         if name not in result.declared_methods:
             result.declared_methods[name] = set()
-        result.declared_methods[name].add((context['namespace'], context['declaring_type']))
+        result.declared_methods[name].add(
+            (context["namespace"], context["declaring_type"])
+        )
 
-        description = self._get_preceding_comment(node, context['source_lines'])
+        if is_constructor:
+            if name not in result.declared_constructors:
+                result.declared_constructors[name] = set()
+            result.declared_constructors[name].add(
+                (context["namespace"], context["declaring_type"])
+            )
+
+        access, modifiers = self._extract_modifiers(node)
+        params_text = self._extract_params_text(node)
+
+        # Extract return type (methods only — constructors have no return type)
+        return_type = ""
+        if not is_constructor:
+            # The return type node has field name [returns] and comes before the method name
+            # In the tree: modifier* return_type method_name parameter_list body
+            found_type = False
+            for child in node.children:
+                if child.type == "modifier":
+                    continue
+                if not found_type and child.type != "identifier":
+                    # First non-modifier, non-identifier child is the return type
+                    return_type = self._extract_full_type_text(child)
+                    found_type = True
+                elif child.type == "identifier":
+                    break  # We've hit the method name, stop
+
+        description = self._get_preceding_comment(node, context["source_lines"])
 
         entry = IndexEntry(
-            namespace=context['namespace'],
-            declaring_type=context['declaring_type'],
+            namespace=context["namespace"],
+            declaring_type=context["declaring_type"],
             method=name,
-            symbol_name='',
-            entry_type='declaration',
-            file_path=context['file_path'],
+            symbol_name="",
+            entry_type="declaration",
+            file_path=context["file_path"],
             start_line=node.start_point[0] + 1,
             end_line=node.end_point[0] + 1,
-            description=description
+            description=description,
+            access=access,
+            modifiers=modifiers,
+            member_type=return_type,
+            params=params_text,
         )
-        result.method_entries.append(entry)
+
+        if is_constructor:
+            result.constructor_entries.append(entry)
+        else:
+            result.method_entries.append(entry)
 
         # Also create a signature entry
         signature_text, sig_start, sig_end = self._extract_method_signature(
-            node, context['source_lines']
+            node, context["source_lines"]
         )
         sig_entry = SignatureEntry(
-            namespace=context['namespace'],
-            declaring_type=context['declaring_type'],
+            namespace=context["namespace"],
+            declaring_type=context["declaring_type"],
             method_name=name,
             signature=signature_text,
-            file_path=context['file_path'],
+            file_path=context["file_path"],
             start_line=sig_start,
             end_line=sig_end,
-            description=description
+            description=description,
         )
         result.signature_entries.append(sig_entry)
 
     def _process_field(self, node: Node, context: Dict, result: FileProcessingResult):
         """Process field (member variable) declaration"""
+        access, modifiers = self._extract_modifiers(node)
+
         for child in node.children:
-            if child.type == 'variable_declaration':
+            if child.type == "variable_declaration":
+                # Extract the type from the variable_declaration
+                type_text = ""
+                for vc in child.children:
+                    if vc.type not in ("variable_declarator", ",", ";"):
+                        # This is the type node
+                        type_text = self._extract_full_type_text(vc)
+                        break
                 for declarator in child.children:
-                    if declarator.type == 'variable_declarator':
+                    if declarator.type == "variable_declarator":
                         name = self._get_identifier_name(declarator)
                         if name:
-                            description = self._get_preceding_comment(node, context['source_lines'])
+                            description = self._get_preceding_comment(
+                                node, context["source_lines"]
+                            )
 
                             entry = IndexEntry(
-                                namespace=context['namespace'],
-                                declaring_type=context['declaring_type'],
-                                method='',
+                                namespace=context["namespace"],
+                                declaring_type=context["declaring_type"],
+                                method="",
                                 symbol_name=name,
-                                entry_type='declaration',
-                                file_path=context['file_path'],
+                                entry_type="declaration",
+                                file_path=context["file_path"],
                                 start_line=node.start_point[0] + 1,
                                 end_line=node.end_point[0] + 1,
-                                description=description
+                                description=description,
+                                access=access,
+                                modifiers=modifiers,
+                                member_type=type_text,
                             )
                             result.field_entries.append(entry)
 
-    def _process_property(self, node: Node, context: Dict, result: FileProcessingResult):
+    def _process_property(
+        self, node: Node, context: Dict, result: FileProcessingResult
+    ):
         """Process property declaration"""
         name = self._get_identifier_name(node)
         if not name:
             return
 
-        description = self._get_preceding_comment(node, context['source_lines'])
+        if name not in result.declared_properties:
+            result.declared_properties[name] = set()
+        result.declared_properties[name].add(
+            (context["namespace"], context["declaring_type"])
+        )
+
+        access, modifiers = self._extract_modifiers(node)
+
+        # Property type is a direct child with field name [type]
+        type_text = ""
+        for child in node.children:
+            if child.type not in (
+                "modifier",
+                "identifier",
+                "accessor_list",
+                "arrow_expression_clause",
+                "=",
+                ";",
+                "{",
+                "}",
+            ):
+                # This should be the type node
+                type_text = self._extract_full_type_text(child)
+                break
+
+        description = self._get_preceding_comment(node, context["source_lines"])
 
         entry = IndexEntry(
-            namespace=context['namespace'],
-            declaring_type=context['declaring_type'],
-            method='',
+            namespace=context["namespace"],
+            declaring_type=context["declaring_type"],
+            method="",
             symbol_name=name,
-            entry_type='declaration',
-            file_path=context['file_path'],
+            entry_type="declaration",
+            file_path=context["file_path"],
             start_line=node.start_point[0] + 1,
             end_line=node.end_point[0] + 1,
-            description=description
+            description=description,
+            access=access,
+            modifiers=modifiers,
+            member_type=type_text,
         )
-        result.field_entries.append(entry)
+        result.property_entries.append(entry)
 
-    def _process_identifier_usage(self, node: Node, context: Dict, result: FileProcessingResult):
+    def _process_event(self, node: Node, context: Dict, result: FileProcessingResult):
+        """Process event declaration (event_field_declaration or event_declaration)"""
+        access, modifiers = self._extract_modifiers(node)
+
+        if node.type == "event_field_declaration":
+            # event_field_declaration has: modifier* event variable_declaration ;
+            # The type and name are inside variable_declaration
+            for child in node.children:
+                if child.type == "variable_declaration":
+                    type_text = ""
+                    for vc in child.children:
+                        if vc.type not in ("variable_declarator", ",", ";"):
+                            # This is the type node
+                            type_text = self._extract_full_type_text(vc)
+                    for vc in child.children:
+                        if vc.type == "variable_declarator":
+                            name = self._get_identifier_name(vc)
+                            if name:
+                                if name not in result.declared_events:
+                                    result.declared_events[name] = set()
+                                result.declared_events[name].add(
+                                    (context["namespace"], context["declaring_type"])
+                                )
+                                description = self._get_preceding_comment(
+                                    node, context["source_lines"]
+                                )
+                                entry = IndexEntry(
+                                    namespace=context["namespace"],
+                                    declaring_type=context["declaring_type"],
+                                    method="",
+                                    symbol_name=name,
+                                    entry_type="declaration",
+                                    file_path=context["file_path"],
+                                    start_line=node.start_point[0] + 1,
+                                    end_line=node.end_point[0] + 1,
+                                    description=description,
+                                    access=access,
+                                    modifiers=modifiers,
+                                    member_type=type_text,
+                                )
+                                result.event_entries.append(entry)
+        else:
+            # event_declaration has: modifier* event type name accessor_list
+            # (event with explicit add/remove accessors)
+            name = self._get_identifier_name(node)
+            if not name:
+                return
+
+            if name not in result.declared_events:
+                result.declared_events[name] = set()
+            result.declared_events[name].add(
+                (context["namespace"], context["declaring_type"])
+            )
+
+            # Find the type node (comes after 'event' keyword, before the identifier)
+            type_text = ""
+            found_event_keyword = False
+            for child in node.children:
+                if child.type == "event":
+                    found_event_keyword = True
+                elif (
+                    found_event_keyword
+                    and child.type != "identifier"
+                    and child.type != "accessor_list"
+                    and child.type != ";"
+                ):
+                    type_text = self._extract_full_type_text(child)
+                    break
+            description = self._get_preceding_comment(node, context["source_lines"])
+            entry = IndexEntry(
+                namespace=context["namespace"],
+                declaring_type=context["declaring_type"],
+                method="",
+                symbol_name=name,
+                entry_type="declaration",
+                file_path=context["file_path"],
+                start_line=node.start_point[0] + 1,
+                end_line=node.end_point[0] + 1,
+                description=description,
+                access=access,
+                modifiers=modifiers,
+                member_type=type_text,
+            )
+            result.event_entries.append(entry)
+
+    def _process_identifier_usage(
+        self, node: Node, context: Dict, result: FileProcessingResult
+    ):
         """Process identifier usage (not a declaration)"""
         parent = node.parent
         if not parent:
             return
 
         declaration_types = {
-            'namespace_declaration',
-            'interface_declaration',
-            'class_declaration',
-            'struct_declaration',
-            'record_declaration',
-            'enum_declaration',
-            'method_declaration',
-            'constructor_declaration',
-            'field_declaration',
-            'property_declaration',
-            'variable_declaration',
-            'variable_declarator',
-            'parameter',
-            'type_parameter',
-            'using_directive',
-            'qualified_name',
-            'member_access_expression'
+            "namespace_declaration",
+            "interface_declaration",
+            "class_declaration",
+            "struct_declaration",
+            "record_declaration",
+            "enum_declaration",
+            "method_declaration",
+            "constructor_declaration",
+            "field_declaration",
+            "property_declaration",
+            "variable_declaration",
+            "variable_declarator",
+            "parameter",
+            "type_parameter",
+            "using_directive",
+            "qualified_name",
+            "member_access_expression",
         }
 
         if parent.type in declaration_types:
@@ -961,110 +1276,167 @@ class FileProcessor:
         if grandparent and grandparent.type in declaration_types:
             return
 
-        name = node.text.decode('utf-8')
+        name = node.text.decode("utf-8")
         added = False
 
         if name in self.declared_namespaces:
             entry = IndexEntry(
                 namespace=name,
-                declaring_type='',
-                method='',
-                symbol_name='',
-                entry_type='usage',
-                file_path=context['file_path'],
+                declaring_type="",
+                method="",
+                symbol_name="",
+                entry_type="usage",
+                file_path=context["file_path"],
                 start_line=node.start_point[0] + 1,
                 end_line=node.end_point[0] + 1,
-                description=''
+                description="",
             )
             result.namespace_entries.append(entry)
             added = True
 
         if name in self.declared_interfaces:
             entry = IndexEntry(
-                namespace=context['namespace'],
+                namespace=context["namespace"],
                 declaring_type=name,
-                method=context['method'],
-                symbol_name='',
-                entry_type='usage',
-                file_path=context['file_path'],
+                method=context["method"],
+                symbol_name="",
+                entry_type="usage",
+                file_path=context["file_path"],
                 start_line=node.start_point[0] + 1,
                 end_line=node.end_point[0] + 1,
-                description=''
+                description="",
             )
             result.interface_entries.append(entry)
             added = True
 
         if name in self.declared_classes:
             entry = IndexEntry(
-                namespace=context['namespace'],
+                namespace=context["namespace"],
                 declaring_type=name,
-                method=context['method'],
-                symbol_name='',
-                entry_type='usage',
-                file_path=context['file_path'],
+                method=context["method"],
+                symbol_name="",
+                entry_type="usage",
+                file_path=context["file_path"],
                 start_line=node.start_point[0] + 1,
                 end_line=node.end_point[0] + 1,
-                description=''
+                description="",
             )
             result.class_entries.append(entry)
             added = True
 
         if name in self.declared_structs:
             entry = IndexEntry(
-                namespace=context['namespace'],
+                namespace=context["namespace"],
                 declaring_type=name,
-                method=context['method'],
-                symbol_name='',
-                entry_type='usage',
-                file_path=context['file_path'],
+                method=context["method"],
+                symbol_name="",
+                entry_type="usage",
+                file_path=context["file_path"],
                 start_line=node.start_point[0] + 1,
                 end_line=node.end_point[0] + 1,
-                description=''
+                description="",
             )
             result.struct_entries.append(entry)
             added = True
 
         if name in self.declared_enums:
             entry = IndexEntry(
-                namespace=context['namespace'],
+                namespace=context["namespace"],
                 declaring_type=name,
-                method=context['method'],
-                symbol_name='',
-                entry_type='usage',
-                file_path=context['file_path'],
+                method=context["method"],
+                symbol_name="",
+                entry_type="usage",
+                file_path=context["file_path"],
                 start_line=node.start_point[0] + 1,
                 end_line=node.end_point[0] + 1,
-                description=''
+                description="",
             )
             result.enum_entries.append(entry)
             added = True
 
         if name in self.declared_methods:
             entry = IndexEntry(
-                namespace=context['namespace'],
-                declaring_type=context['declaring_type'],
+                namespace=context["namespace"],
+                declaring_type=context["declaring_type"],
                 method=name,
-                symbol_name='',
-                entry_type='usage',
-                file_path=context['file_path'],
+                symbol_name="",
+                entry_type="usage",
+                file_path=context["file_path"],
                 start_line=node.start_point[0] + 1,
                 end_line=node.end_point[0] + 1,
-                description=''
+                description="",
             )
             result.method_entries.append(entry)
             added = True
 
-        if not added:
+        # Constructor usage: identifier inside object_creation_expression (new Foo())
+        if name in self.declared_constructors:
+            is_constructor_usage = False
+            p = parent
+            while p:
+                if p.type == "object_creation_expression":
+                    is_constructor_usage = True
+                    break
+                if p.type in ("argument_list", "qualified_name"):
+                    p = p.parent
+                else:
+                    break
+            if is_constructor_usage:
+                entry = IndexEntry(
+                    namespace=context["namespace"],
+                    declaring_type=context["declaring_type"],
+                    method=name,
+                    symbol_name="",
+                    entry_type="usage",
+                    file_path=context["file_path"],
+                    start_line=node.start_point[0] + 1,
+                    end_line=node.end_point[0] + 1,
+                    description="",
+                )
+                result.constructor_entries.append(entry)
+                added = True
+
+        if name in self.declared_properties:
             entry = IndexEntry(
-                namespace=context['namespace'],
-                declaring_type=context['declaring_type'],
-                method=context['method'],
+                namespace=context["namespace"],
+                declaring_type=context["declaring_type"],
+                method=context["method"],
                 symbol_name=name,
-                entry_type='usage',
-                file_path=context['file_path'],
+                entry_type="usage",
+                file_path=context["file_path"],
                 start_line=node.start_point[0] + 1,
                 end_line=node.end_point[0] + 1,
-                description=''
+                description="",
+            )
+            result.property_entries.append(entry)
+            added = True
+
+        if name in self.declared_events:
+            entry = IndexEntry(
+                namespace=context["namespace"],
+                declaring_type=context["declaring_type"],
+                method=context["method"],
+                symbol_name=name,
+                entry_type="usage",
+                file_path=context["file_path"],
+                start_line=node.start_point[0] + 1,
+                end_line=node.end_point[0] + 1,
+                description="",
+            )
+            result.event_entries.append(entry)
+            added = True
+
+        if not added:
+            entry = IndexEntry(
+                namespace=context["namespace"],
+                declaring_type=context["declaring_type"],
+                method=context["method"],
+                symbol_name=name,
+                entry_type="usage",
+                file_path=context["file_path"],
+                start_line=node.start_point[0] + 1,
+                end_line=node.end_point[0] + 1,
+                description="",
             )
             result.field_entries.append(entry)
 
@@ -1083,8 +1455,11 @@ class CSharpIndexer:
         self.enum_index: List[IndexEntry] = []
         self.method_index: List[IndexEntry] = []
         self.field_index: List[IndexEntry] = []
+        self.property_index: List[IndexEntry] = []
+        self.event_index: List[IndexEntry] = []
+        self.constructor_index: List[IndexEntry] = []
         self.signature_index: List[SignatureEntry] = []
-        
+
         # Hierarchy indices
         self.class_hierarchy_index: List[ClassHierarchyEntry] = []
         self.interface_hierarchy_index: List[InterfaceHierarchyEntry] = []
@@ -1097,6 +1472,9 @@ class CSharpIndexer:
         self.declared_structs: Dict[str, Set[tuple]] = {}
         self.declared_enums: Dict[str, Set[tuple]] = {}
         self.declared_methods: Dict[str, Set[tuple]] = {}
+        self.declared_properties: Dict[str, Set[tuple]] = {}
+        self.declared_events: Dict[str, Set[tuple]] = {}
+        self.declared_constructors: Dict[str, Set[tuple]] = {}
 
         # Number of parallel workers (2x CPU cores)
         self.num_workers = cpu_count() * 2
@@ -1106,7 +1484,7 @@ class CSharpIndexer:
         """Split files into batches of specified size"""
         batches = []
         for i in range(0, len(files), batch_size):
-            batches.append(files[i:i + batch_size])
+            batches.append(files[i : i + batch_size])
         return batches
 
     def _merge_batch_results(self, batch_results: List[List[FileProcessingResult]]):
@@ -1120,12 +1498,21 @@ class CSharpIndexer:
                 self.enum_index.extend(result.enum_entries)
                 self.method_index.extend(result.method_entries)
                 self.field_index.extend(result.field_entries)
+                self.property_index.extend(result.property_entries)
+                self.event_index.extend(result.event_entries)
+                self.constructor_index.extend(result.constructor_entries)
                 self.signature_index.extend(result.signature_entries)
                 self.class_hierarchy_index.extend(result.class_hierarchy_entries)
-                self.interface_hierarchy_index.extend(result.interface_hierarchy_entries)
-                self.interface_implementation_index.extend(result.interface_implementation_entries)
+                self.interface_hierarchy_index.extend(
+                    result.interface_hierarchy_entries
+                )
+                self.interface_implementation_index.extend(
+                    result.interface_implementation_entries
+                )
 
-    def _merge_batch_declarations(self, batch_results: List[List[FileProcessingResult]]):
+    def _merge_batch_declarations(
+        self, batch_results: List[List[FileProcessingResult]]
+    ):
         """Merge declared names from batched pass 1 results"""
         for batch in batch_results:
             for result in batch:
@@ -1156,9 +1543,24 @@ class CSharpIndexer:
                         self.declared_methods[name] = set()
                     self.declared_methods[name].update(locations)
 
+                for name, locations in result.declared_properties.items():
+                    if name not in self.declared_properties:
+                        self.declared_properties[name] = set()
+                    self.declared_properties[name].update(locations)
+
+                for name, locations in result.declared_events.items():
+                    if name not in self.declared_events:
+                        self.declared_events[name] = set()
+                    self.declared_events[name].update(locations)
+
+                for name, locations in result.declared_constructors.items():
+                    if name not in self.declared_constructors:
+                        self.declared_constructors[name] = set()
+                    self.declared_constructors[name].update(locations)
+
     def index_directory(self):
         """Recursively index all C# files in the directory using parallel processing"""
-        cs_files = list(self.root_path.rglob('*.cs'))
+        cs_files = list(self.root_path.rglob("*.cs"))
         total_files = len(cs_files)
 
         print(f"Found {total_files} C# files to index...")
@@ -1187,17 +1589,22 @@ class CSharpIndexer:
 
         # Build shared declarations dict for pass 2
         shared_declarations = {
-            'namespaces': self.declared_namespaces,
-            'interfaces': self.declared_interfaces,
-            'classes': self.declared_classes,
-            'structs': self.declared_structs,
-            'enums': self.declared_enums,
-            'methods': self.declared_methods
+            "namespaces": self.declared_namespaces,
+            "interfaces": self.declared_interfaces,
+            "classes": self.declared_classes,
+            "structs": self.declared_structs,
+            "enums": self.declared_enums,
+            "methods": self.declared_methods,
+            "properties": self.declared_properties,
+            "events": self.declared_events,
+            "constructors": self.declared_constructors,
         }
 
         # Second pass: collect usages in parallel
         print("\nPass 2: Collecting usages...")
-        pass2_args = [(batch, root_path_str, True, shared_declarations) for batch in batches]
+        pass2_args = [
+            (batch, root_path_str, True, shared_declarations) for batch in batches
+        ]
 
         with Pool(processes=self.num_workers) as pool:
             pass2_results = list(pool.imap_unordered(_process_batch_worker, pass2_args))
@@ -1212,19 +1619,22 @@ class CSharpIndexer:
 
         # Split entries into declarations and usages for each category
         def split_entries(entries):
-            declarations = [e for e in entries if e.entry_type == 'declaration']
-            usages = [e for e in entries if e.entry_type == 'usage']
+            declarations = [e for e in entries if e.entry_type == "declaration"]
+            usages = [e for e in entries if e.entry_type == "usage"]
             return declarations, usages
 
         # Define categories with their indices (singular form for filename)
         categories = [
-            ('namespace', self.namespace_index),
-            ('interface', self.interface_index),
-            ('class', self.class_index),
-            ('struct', self.struct_index),
-            ('enum', self.enum_index),
-            ('method', self.method_index),
-            ('field', self.field_index)
+            ("namespace", self.namespace_index),
+            ("interface", self.interface_index),
+            ("class", self.class_index),
+            ("struct", self.struct_index),
+            ("enum", self.enum_index),
+            ("method", self.method_index),
+            ("field", self.field_index),
+            ("property", self.property_index),
+            ("event", self.event_index),
+            ("constructor", self.constructor_index),
         ]
 
         total_declarations = 0
@@ -1244,7 +1654,7 @@ class CSharpIndexer:
                     e.symbol_name,
                     e.file_path,
                     e.start_line,
-                    e.end_line
+                    e.end_line,
                 )
 
             sorted_declarations = sorted(declarations, key=sort_key)
@@ -1253,9 +1663,11 @@ class CSharpIndexer:
             # Write declarations file
             decl_filename = f"{category_name}_declarations.csv"
             decl_path = output_dir / decl_filename
-            print(f"Writing {len(sorted_declarations)} declaration entries to {decl_path}...")
+            print(
+                f"Writing {len(sorted_declarations)} declaration entries to {decl_path}..."
+            )
 
-            with open(decl_path, 'w', newline='', encoding='utf-8') as f:
+            with open(decl_path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow(IndexEntry.csv_header())
                 for entry in sorted_declarations:
@@ -1266,7 +1678,7 @@ class CSharpIndexer:
             usage_path = output_dir / usage_filename
             print(f"Writing {len(sorted_usages)} usage entries to {usage_path}...")
 
-            with open(usage_path, 'w', newline='', encoding='utf-8') as f:
+            with open(usage_path, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow(IndexEntry.csv_header())
                 for entry in sorted_usages:
@@ -1280,7 +1692,7 @@ class CSharpIndexer:
                 e.method_name,
                 e.file_path,
                 e.start_line,
-                e.end_line
+                e.end_line,
             )
 
         sorted_signatures = sorted(self.signature_index, key=sig_sort_key)
@@ -1288,7 +1700,7 @@ class CSharpIndexer:
         sig_path = output_dir / sig_filename
         print(f"Writing {len(sorted_signatures)} signature entries to {sig_path}...")
 
-        with open(sig_path, 'w', newline='', encoding='utf-8') as f:
+        with open(sig_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(SignatureEntry.csv_header())
             for entry in sorted_signatures:
@@ -1296,52 +1708,74 @@ class CSharpIndexer:
 
         # Write hierarchy CSV files
         def hier_sort_key_class(e):
-            return (e.child_namespace, e.child_class, e.parent_namespace, e.parent_class)
-        
+            return (
+                e.child_namespace,
+                e.child_class,
+                e.parent_namespace,
+                e.parent_class,
+            )
+
         def hier_sort_key_interface(e):
-            return (e.child_namespace, e.child_interface, e.parent_namespace, e.parent_interface)
-        
+            return (
+                e.child_namespace,
+                e.child_interface,
+                e.parent_namespace,
+                e.parent_interface,
+            )
+
         def impl_sort_key(e):
             return (e.implementing_namespace, e.implementing_type, e.interfaces)
-        
+
         # Class hierarchy
-        sorted_class_hierarchy = sorted(self.class_hierarchy_index, key=hier_sort_key_class)
+        sorted_class_hierarchy = sorted(
+            self.class_hierarchy_index, key=hier_sort_key_class
+        )
         class_hier_path = output_dir / "class_hierarchy.csv"
-        print(f"Writing {len(sorted_class_hierarchy)} class hierarchy entries to {class_hier_path}...")
-        
-        with open(class_hier_path, 'w', newline='', encoding='utf-8') as f:
+        print(
+            f"Writing {len(sorted_class_hierarchy)} class hierarchy entries to {class_hier_path}..."
+        )
+
+        with open(class_hier_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(ClassHierarchyEntry.csv_header())
             for entry in sorted_class_hierarchy:
                 writer.writerow(entry.to_csv_row())
-        
+
         # Interface hierarchy
-        sorted_interface_hierarchy = sorted(self.interface_hierarchy_index, key=hier_sort_key_interface)
+        sorted_interface_hierarchy = sorted(
+            self.interface_hierarchy_index, key=hier_sort_key_interface
+        )
         interface_hier_path = output_dir / "interface_hierarchy.csv"
-        print(f"Writing {len(sorted_interface_hierarchy)} interface hierarchy entries to {interface_hier_path}...")
-        
-        with open(interface_hier_path, 'w', newline='', encoding='utf-8') as f:
+        print(
+            f"Writing {len(sorted_interface_hierarchy)} interface hierarchy entries to {interface_hier_path}..."
+        )
+
+        with open(interface_hier_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(InterfaceHierarchyEntry.csv_header())
             for entry in sorted_interface_hierarchy:
                 writer.writerow(entry.to_csv_row())
-        
+
         # Interface implementations
-        sorted_implementations = sorted(self.interface_implementation_index, key=impl_sort_key)
+        sorted_implementations = sorted(
+            self.interface_implementation_index, key=impl_sort_key
+        )
         impl_path = output_dir / "interface_implementation.csv"
-        print(f"Writing {len(sorted_implementations)} interface implementation entries to {impl_path}...")
-        
-        with open(impl_path, 'w', newline='', encoding='utf-8') as f:
+        print(
+            f"Writing {len(sorted_implementations)} interface implementation entries to {impl_path}..."
+        )
+
+        with open(impl_path, "w", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow(InterfaceImplementationEntry.csv_header())
             for entry in sorted_implementations:
                 writer.writerow(entry.to_csv_row())
-        
+
         # Generate tree text files
         print("\nGenerating hierarchy tree visualizations...")
-        
+
         from hierarchy_tree import build_class_tree, build_interface_tree
-        
+
         # Class hierarchy tree
         if sorted_class_hierarchy:
             class_tree_data = [
@@ -1350,19 +1784,24 @@ class CSharpIndexer:
             ]
             class_tree_text = build_class_tree(class_tree_data)
             class_tree_path = output_dir / "class_hierarchy.txt"
-            with open(class_tree_path, 'w', encoding='utf-8') as f:
+            with open(class_tree_path, "w", encoding="utf-8") as f:
                 f.write(class_tree_text)
             print(f"Written class hierarchy tree to {class_tree_path}")
-        
+
         # Interface hierarchy tree
         if sorted_interface_hierarchy:
             interface_tree_data = [
-                (e.child_namespace, e.child_interface, e.parent_namespace, e.parent_interface)
+                (
+                    e.child_namespace,
+                    e.child_interface,
+                    e.parent_namespace,
+                    e.parent_interface,
+                )
                 for e in sorted_interface_hierarchy
             ]
             interface_tree_text = build_interface_tree(interface_tree_data)
             interface_tree_path = output_dir / "interface_hierarchy.txt"
-            with open(interface_tree_path, 'w', encoding='utf-8') as f:
+            with open(interface_tree_path, "w", encoding="utf-8") as f:
                 f.write(interface_tree_text)
             print(f"Written interface hierarchy tree to {interface_tree_path}")
 
@@ -1379,18 +1818,21 @@ def extract_game_version(source_root: str, output_dir: str):
     """Extract SE version numbers from SpaceEngineersGame.cs and write game_version.txt"""
     version_file = os.path.join(
         source_root,
-        "SpaceEngineers.Game", "SpaceEngineers", "Game", "SpaceEngineersGame.cs"
+        "SpaceEngineers.Game",
+        "SpaceEngineers",
+        "Game",
+        "SpaceEngineersGame.cs",
     )
     if not os.path.isfile(version_file):
         print(f"Warning: Version file not found: {version_file}")
         return
 
-    with open(version_file, 'r', encoding='utf-8') as f:
+    with open(version_file, "r", encoding="utf-8") as f:
         content = f.read()
 
     fields = {}
     for name in ("SE_VERSION", "CLIENT_BUILD_NUMBER", "SERVER_BUILD_NUMBER"):
-        match = re.search(rf'public\s+const\s+int\s+{name}\s*=\s*(\d+)\s*;', content)
+        match = re.search(rf"public\s+const\s+int\s+{name}\s*=\s*(\d+)\s*;", content)
         if match:
             fields[name] = match.group(1)
         else:
@@ -1399,7 +1841,7 @@ def extract_game_version(source_root: str, output_dir: str):
 
     output_path = os.path.join(output_dir, "game_version.txt")
     os.makedirs(output_dir, exist_ok=True)
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         for name, value in fields.items():
             f.write(f"{name}={value}\n")
 
@@ -1437,5 +1879,5 @@ def main():
     print("\nIndexing complete!")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
