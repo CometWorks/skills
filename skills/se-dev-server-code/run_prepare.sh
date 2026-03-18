@@ -16,8 +16,8 @@ fi
 echo "Starting preparation... This may take 5-15 minutes."
 echo "---"
 
-# Run Prepare.bat and capture output
-if cmd //c Prepare.bat >Prepare.log 2>&1; then
+# Run Prepare.bat using full path (works from any shell on Windows)
+if cmd //c "$SCRIPT_DIR/Prepare.bat" >Prepare.log 2>&1; then
     if [ -f "Prepare.DONE" ]; then
         echo "---"
         echo "✓ Preparation completed successfully"
