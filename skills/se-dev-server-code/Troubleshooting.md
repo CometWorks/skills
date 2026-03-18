@@ -6,7 +6,7 @@ This guide helps you resolve common issues when searching server code.
 
 ### Common Causes
 
-1. **Wrong skill**: 
+1. **Wrong skill**:
    - Server classes like `MyCubeBlock` → use `se-dev-server-code` ✅
    - Mod code → use `se-dev-mod`
    - Plugin code → use `se-dev-plugin`
@@ -16,9 +16,9 @@ This guide helps you resolve common issues when searching server code.
    ```bash
    # Instead of exact match
    uv run search_code.py class declaration "MyGameLogic"
-   
+
    # Try broader pattern
-   uv run search_code.py class declaration ".*GameLogic.*"
+   uv run search_code.py class declaration "re:.*GameLogic.*"
    ```
 
 3. **Searching declarations instead of usages** (or vice versa):
@@ -40,7 +40,7 @@ This guide helps you resolve common issues when searching server code.
 uv run search_code.py class usage Entity --count
 
 # Step 2: If 0, try broader search with regex
-uv run search_code.py class usage ".*Entity.*" --count
+uv run search_code.py class usage "re:.*Entity.*" --count
 
 # Step 3: Check what files are available
 ls Decompiled/Sandbox.Game/Sandbox/Game/Entities/*.cs | head -10
@@ -143,13 +143,13 @@ If you need to understand the server's internal implementation, use `se-dev-serv
 
 ```bash
 # Start with count only
-uv run search_code.py class declaration ".*Physics.*" --count
+uv run search_code.py class declaration "re:.*Physics.*" --count
 
 # If too many, add namespace filter
-uv run search_code.py class declaration ".*Physics.*" -n Sandbox.Game --count
+uv run search_code.py class declaration "re:.*Physics.*" -n Sandbox.Game --count
 
 # View limited results
-uv run search_code.py class declaration ".*Physics.*" -n Sandbox.Game --limit 10
+uv run search_code.py class declaration "re:.*Physics.*" -n Sandbox.Game --limit 10
 ```
 
 ### 2. Use Case-Insensitive Search

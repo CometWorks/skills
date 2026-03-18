@@ -33,8 +33,12 @@ uv run search_scripts.py <category> <symbol_type> <pattern> [options]
 - `interface` - Interfaces
 - `struct` - Structs
 - `enum` - Enums
-- `method` - Methods and constructors
-- `field` - Fields and properties
+- `method` - Methods (excluding constructors)
+- `field` - Fields (member variables)
+- `property` - Properties
+- `event` - Events
+- `constructor` - Constructors
+- `namespace` - Namespaces
 
 ### Symbol Types
 - `declaration` - Where symbols are defined

@@ -3,7 +3,7 @@
 List Plugins from PluginHub
 
 Lists all available plugins from the PluginHub registry, showing which ones
-have their source code downloaded locally in PluginSources/.
+have their source code downloaded locally.
 
 Usage:
     python list_plugins.py [options]
@@ -20,10 +20,11 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+from plugin_paths import resolve_all_plugin_sources_dirs
+
 SCRIPT_DIR = Path(__file__).parent.resolve()
 PLUGINHUB_DIR = SCRIPT_DIR / "PluginHub"
 PLUGINS_DIR = PLUGINHUB_DIR / "Plugins"
-PLUGIN_SOURCES_DIR = SCRIPT_DIR / "PluginSources"
 
 
 def parse_plugin_xml(xml_file: Path) -> dict:
@@ -102,17 +103,23 @@ def load_all_plugins() -> list:
         print("Run: uv run download_pluginhub.py", file=sys.stderr)
         return []
 
+    source_dirs = resolve_all_plugin_sources_dirs()
+
     plugins = []
     for xml_file in PLUGINS_DIR.glob("*.xml"):
         plugin = parse_plugin_xml(xml_file)
         if plugin:
-            # Check if source is available locally
+            # Check if source is available locally in any source directory
             if plugin["id"]:
-                # Extract repo name from ID (e.g., "austinvaness/ToolSwitcherPlugin" -> "ToolSwitcherPlugin")
                 repo_name = plugin["id"].split("/")[-1] if "/" in plugin["id"] else plugin["id"]
-                local_path = PLUGIN_SOURCES_DIR / repo_name
-                plugin["local"] = local_path.exists()
-                plugin["local_path"] = str(local_path) if plugin["local"] else ""
+                plugin["local"] = False
+                plugin["local_path"] = ""
+                for src_dir in source_dirs:
+                    local_path = src_dir / repo_name
+                    if local_path.exists():
+                        plugin["local"] = True
+                        plugin["local_path"] = str(local_path)
+                        break
             plugins.append(plugin)
 
     return sorted(plugins, key=lambda p: p["name"].lower())

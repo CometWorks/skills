@@ -47,6 +47,10 @@ class IndexEntry:
     start_line: int
     end_line: int
     description: str
+    access: str = ""  # Access modifier: public, private, protected, internal, protected internal
+    modifiers: str = ""  # Other modifiers: static, readonly, const, virtual, override, etc. (space-separated)
+    member_type: str = ""  # C# type: int, string, List<int>, void, etc.
+    params: str = ""  # Parameter list for methods/constructors: (int x, string name)
 
     def to_csv_row(self) -> List[str]:
         """Convert to CSV row format"""
@@ -59,7 +63,11 @@ class IndexEntry:
             self.file_path,
             str(self.start_line),
             str(self.end_line),
-            self.description
+            self.description,
+            self.access,
+            self.modifiers,
+            self.member_type,
+            self.params,
         ]
 
     @staticmethod
@@ -74,7 +82,11 @@ class IndexEntry:
             'file_path',
             'start_line',
             'end_line',
-            'description'
+            'description',
+            'access',
+            'modifiers',
+            'member_type',
+            'params',
         ]
 
 
@@ -236,6 +248,9 @@ class FileProcessingResult:
     enum_entries: List[IndexEntry] = field(default_factory=list)
     method_entries: List[IndexEntry] = field(default_factory=list)
     field_entries: List[IndexEntry] = field(default_factory=list)
+    property_entries: List[IndexEntry] = field(default_factory=list)
+    event_entries: List[IndexEntry] = field(default_factory=list)
+    constructor_entries: List[IndexEntry] = field(default_factory=list)
     signature_entries: List[SignatureEntry] = field(default_factory=list)
 
     # Hierarchy entries
@@ -250,6 +265,9 @@ class FileProcessingResult:
     declared_structs: Dict[str, Set[tuple]] = field(default_factory=dict)
     declared_enums: Dict[str, Set[tuple]] = field(default_factory=dict)
     declared_methods: Dict[str, Set[tuple]] = field(default_factory=dict)
+    declared_properties: Dict[str, Set[tuple]] = field(default_factory=dict)
+    declared_events: Dict[str, Set[tuple]] = field(default_factory=dict)
+    declared_constructors: Dict[str, Set[tuple]] = field(default_factory=dict)
 
 
 def _process_batch_worker(args: Tuple) -> List[FileProcessingResult]:
@@ -267,6 +285,9 @@ def _process_batch_worker(args: Tuple) -> List[FileProcessingResult]:
         processor.declared_structs = shared_declarations['structs']
         processor.declared_enums = shared_declarations['enums']
         processor.declared_methods = shared_declarations['methods']
+        processor.declared_properties = shared_declarations['properties']
+        processor.declared_events = shared_declarations['events']
+        processor.declared_constructors = shared_declarations['constructors']
 
     results = []
     for file_path in file_paths:
@@ -292,6 +313,9 @@ class FileProcessor:
         self.declared_structs: Dict[str, Set[tuple]] = {}
         self.declared_enums: Dict[str, Set[tuple]] = {}
         self.declared_methods: Dict[str, Set[tuple]] = {}
+        self.declared_properties: Dict[str, Set[tuple]] = {}
+        self.declared_events: Dict[str, Set[tuple]] = {}
+        self.declared_constructors: Dict[str, Set[tuple]] = {}
 
     def process_file(self, file_path: Path, collect_usages: bool) -> FileProcessingResult:
         """Process a single C# file and return results"""
@@ -373,6 +397,8 @@ class FileProcessor:
                 self._process_field(node, context, result)
             elif node.type == 'property_declaration':
                 self._process_property(node, context, result)
+            elif node.type in ('event_field_declaration', 'event_declaration'):
+                self._process_event(node, context, result)
 
         for child in node.children:
             self._traverse_tree(child, context)
@@ -439,6 +465,75 @@ class FileProcessor:
                 break
 
         return ' '.join(comment_lines)
+
+    # Access modifier keywords recognized by C#
+    _ACCESS_KEYWORDS = frozenset({"public", "private", "protected", "internal"})
+
+    # Other modifier keywords (non-access)
+    _MODIFIER_KEYWORDS = frozenset(
+        {
+            "static",
+            "readonly",
+            "const",
+            "volatile",
+            "virtual",
+            "override",
+            "abstract",
+            "sealed",
+            "async",
+            "extern",
+            "new",
+            "unsafe",
+            "partial",
+        }
+    )
+
+    def _extract_modifiers(self, node: Node) -> tuple:
+        """
+        Extract access and other modifiers from a declaration node.
+        Returns (access: str, modifiers: str).
+
+        Access is a single string like 'public', 'private', 'protected internal'.
+        Modifiers is a space-separated string of non-access modifiers like 'static readonly'.
+        """
+        access_parts = []
+        modifier_parts = []
+        for child in node.children:
+            if child.type == "modifier":
+                for kw in child.children:
+                    keyword = kw.type
+                    if keyword in self._ACCESS_KEYWORDS:
+                        access_parts.append(keyword)
+                    elif keyword in self._MODIFIER_KEYWORDS:
+                        modifier_parts.append(keyword)
+        return (" ".join(access_parts), " ".join(modifier_parts))
+
+    @staticmethod
+    def _extract_full_type_text(type_node: Node) -> str:
+        """
+        Extract the full text of a C# type node, preserving generics.
+        E.g. 'List<int>', 'Dictionary<string, List<int>>', 'int', 'void'.
+        """
+        if type_node is None:
+            return ""
+        text = type_node.text
+        if text:
+            return text.decode("utf-8")
+        return ""
+
+    @staticmethod
+    def _extract_params_text(node: Node) -> str:
+        """
+        Extract the full parameter list text from a method/constructor node.
+        Returns the text including parentheses, e.g. '(int x, string name)'.
+        """
+        for child in node.children:
+            if child.type == "parameter_list":
+                text = child.text
+                if text:
+                    raw = text.decode("utf-8")
+                    return re.sub(r"\s+", " ", raw).strip()
+        return ""
 
     def _extract_type_name(self, node: Node) -> Optional[str]:
         if node.type == 'identifier':
@@ -748,11 +843,34 @@ class FileProcessor:
         if not name:
             return
 
+        is_constructor = node.type == "constructor_declaration"
+
         context['method'] = name
 
         if name not in result.declared_methods:
             result.declared_methods[name] = set()
         result.declared_methods[name].add((context['namespace'], context['declaring_type']))
+
+        if is_constructor:
+            if name not in result.declared_constructors:
+                result.declared_constructors[name] = set()
+            result.declared_constructors[name].add((context['namespace'], context['declaring_type']))
+
+        access, modifiers = self._extract_modifiers(node)
+        params_text = self._extract_params_text(node)
+
+        # Extract return type (methods only — constructors have no return type)
+        return_type = ""
+        if not is_constructor:
+            found_type = False
+            for child in node.children:
+                if child.type == "modifier":
+                    continue
+                if not found_type and child.type != "identifier":
+                    return_type = self._extract_full_type_text(child)
+                    found_type = True
+                elif child.type == "identifier":
+                    break
 
         description = self._get_preceding_comment(node, context['source_lines'])
 
@@ -761,9 +879,14 @@ class FileProcessor:
             method=name, symbol_name='', entry_type='declaration',
             file_path=context['file_path'],
             start_line=node.start_point[0] + 1, end_line=node.end_point[0] + 1,
-            description=description
+            description=description,
+            access=access, modifiers=modifiers, member_type=return_type, params=params_text,
         )
-        result.method_entries.append(entry)
+
+        if is_constructor:
+            result.constructor_entries.append(entry)
+        else:
+            result.method_entries.append(entry)
 
         signature_text, sig_start, sig_end = self._extract_method_signature(node, context['source_lines'])
         sig_entry = SignatureEntry(
@@ -774,8 +897,16 @@ class FileProcessor:
         result.signature_entries.append(sig_entry)
 
     def _process_field(self, node: Node, context: Dict, result: FileProcessingResult):
+        access, modifiers = self._extract_modifiers(node)
+
         for child in node.children:
             if child.type == 'variable_declaration':
+                # Extract the type from the variable_declaration
+                type_text = ""
+                for vc in child.children:
+                    if vc.type not in ("variable_declarator", ",", ";"):
+                        type_text = self._extract_full_type_text(vc)
+                        break
                 for declarator in child.children:
                     if declarator.type == 'variable_declarator':
                         name = self._get_identifier_name(declarator)
@@ -786,7 +917,8 @@ class FileProcessor:
                                 method='', symbol_name=name, entry_type='declaration',
                                 file_path=context['file_path'],
                                 start_line=node.start_point[0] + 1, end_line=node.end_point[0] + 1,
-                                description=description
+                                description=description,
+                                access=access, modifiers=modifiers, member_type=type_text,
                             )
                             result.field_entries.append(entry)
 
@@ -795,6 +927,22 @@ class FileProcessor:
         if not name:
             return
 
+        if name not in result.declared_properties:
+            result.declared_properties[name] = set()
+        result.declared_properties[name].add((context['namespace'], context['declaring_type']))
+
+        access, modifiers = self._extract_modifiers(node)
+
+        # Property type is a direct child with field name [type]
+        type_text = ""
+        for child in node.children:
+            if child.type not in (
+                "modifier", "identifier", "accessor_list",
+                "arrow_expression_clause", "=", ";", "{", "}",
+            ):
+                type_text = self._extract_full_type_text(child)
+                break
+
         description = self._get_preceding_comment(node, context['source_lines'])
 
         entry = IndexEntry(
@@ -802,9 +950,84 @@ class FileProcessor:
             method='', symbol_name=name, entry_type='declaration',
             file_path=context['file_path'],
             start_line=node.start_point[0] + 1, end_line=node.end_point[0] + 1,
-            description=description
+            description=description,
+            access=access, modifiers=modifiers, member_type=type_text,
         )
-        result.field_entries.append(entry)
+        result.property_entries.append(entry)
+
+    def _process_event(self, node: Node, context: Dict, result: FileProcessingResult):
+        """Process event declaration (event_field_declaration or event_declaration)"""
+        access, modifiers = self._extract_modifiers(node)
+
+        if node.type == "event_field_declaration":
+            # event_field_declaration has: modifier* event variable_declaration ;
+            for child in node.children:
+                if child.type == "variable_declaration":
+                    type_text = ""
+                    for vc in child.children:
+                        if vc.type not in ("variable_declarator", ",", ";"):
+                            type_text = self._extract_full_type_text(vc)
+                    for vc in child.children:
+                        if vc.type == "variable_declarator":
+                            name = self._get_identifier_name(vc)
+                            if name:
+                                if name not in result.declared_events:
+                                    result.declared_events[name] = set()
+                                result.declared_events[name].add(
+                                    (context['namespace'], context['declaring_type'])
+                                )
+                                description = self._get_preceding_comment(node, context['source_lines'])
+                                entry = IndexEntry(
+                                    namespace=context['namespace'],
+                                    declaring_type=context['declaring_type'],
+                                    method='', symbol_name=name,
+                                    entry_type='declaration',
+                                    file_path=context['file_path'],
+                                    start_line=node.start_point[0] + 1,
+                                    end_line=node.end_point[0] + 1,
+                                    description=description,
+                                    access=access, modifiers=modifiers, member_type=type_text,
+                                )
+                                result.event_entries.append(entry)
+        else:
+            # event_declaration has: modifier* event type name accessor_list
+            name = self._get_identifier_name(node)
+            if not name:
+                return
+
+            if name not in result.declared_events:
+                result.declared_events[name] = set()
+            result.declared_events[name].add(
+                (context['namespace'], context['declaring_type'])
+            )
+
+            # Find the type node (comes after 'event' keyword, before the identifier)
+            type_text = ""
+            found_event_keyword = False
+            for child in node.children:
+                if child.type == "event":
+                    found_event_keyword = True
+                elif (
+                    found_event_keyword
+                    and child.type != "identifier"
+                    and child.type != "accessor_list"
+                    and child.type != ";"
+                ):
+                    type_text = self._extract_full_type_text(child)
+                    break
+            description = self._get_preceding_comment(node, context['source_lines'])
+            entry = IndexEntry(
+                namespace=context['namespace'],
+                declaring_type=context['declaring_type'],
+                method='', symbol_name=name,
+                entry_type='declaration',
+                file_path=context['file_path'],
+                start_line=node.start_point[0] + 1,
+                end_line=node.end_point[0] + 1,
+                description=description,
+                access=access, modifiers=modifiers, member_type=type_text,
+            )
+            result.event_entries.append(entry)
 
     def _process_identifier_usage(self, node: Node, context: Dict, result: FileProcessingResult):
         parent = node.parent
@@ -895,6 +1118,51 @@ class FileProcessor:
             result.method_entries.append(entry)
             added = True
 
+        # Constructor usage: identifier inside object_creation_expression (new Foo())
+        if name in self.declared_constructors:
+            is_constructor_usage = False
+            p = parent
+            while p:
+                if p.type == "object_creation_expression":
+                    is_constructor_usage = True
+                    break
+                if p.type in ("argument_list", "qualified_name"):
+                    p = p.parent
+                else:
+                    break
+            if is_constructor_usage:
+                entry = IndexEntry(
+                    namespace=context['namespace'], declaring_type=context['declaring_type'],
+                    method=name, symbol_name='', entry_type='usage',
+                    file_path=context['file_path'],
+                    start_line=node.start_point[0] + 1, end_line=node.end_point[0] + 1,
+                    description=''
+                )
+                result.constructor_entries.append(entry)
+                added = True
+
+        if name in self.declared_properties:
+            entry = IndexEntry(
+                namespace=context['namespace'], declaring_type=context['declaring_type'],
+                method=context['method'], symbol_name=name, entry_type='usage',
+                file_path=context['file_path'],
+                start_line=node.start_point[0] + 1, end_line=node.end_point[0] + 1,
+                description=''
+            )
+            result.property_entries.append(entry)
+            added = True
+
+        if name in self.declared_events:
+            entry = IndexEntry(
+                namespace=context['namespace'], declaring_type=context['declaring_type'],
+                method=context['method'], symbol_name=name, entry_type='usage',
+                file_path=context['file_path'],
+                start_line=node.start_point[0] + 1, end_line=node.end_point[0] + 1,
+                description=''
+            )
+            result.event_entries.append(entry)
+            added = True
+
         if not added:
             entry = IndexEntry(
                 namespace=context['namespace'], declaring_type=context['declaring_type'],
@@ -956,6 +1224,9 @@ class ScriptCodeIndexer:
         self.enum_index: List[IndexEntry] = []
         self.method_index: List[IndexEntry] = []
         self.field_index: List[IndexEntry] = []
+        self.property_index: List[IndexEntry] = []
+        self.event_index: List[IndexEntry] = []
+        self.constructor_index: List[IndexEntry] = []
         self.signature_index: List[SignatureEntry] = []
 
         self.class_hierarchy_index: List[ClassHierarchyEntry] = []
@@ -968,6 +1239,9 @@ class ScriptCodeIndexer:
         self.declared_structs: Dict[str, Set[tuple]] = {}
         self.declared_enums: Dict[str, Set[tuple]] = {}
         self.declared_methods: Dict[str, Set[tuple]] = {}
+        self.declared_properties: Dict[str, Set[tuple]] = {}
+        self.declared_events: Dict[str, Set[tuple]] = {}
+        self.declared_constructors: Dict[str, Set[tuple]] = {}
 
         self.num_workers = cpu_count() * 2
 
@@ -988,6 +1262,9 @@ class ScriptCodeIndexer:
                 self.enum_index.extend(result.enum_entries)
                 self.method_index.extend(result.method_entries)
                 self.field_index.extend(result.field_entries)
+                self.property_index.extend(result.property_entries)
+                self.event_index.extend(result.event_entries)
+                self.constructor_index.extend(result.constructor_entries)
                 self.signature_index.extend(result.signature_entries)
                 self.class_hierarchy_index.extend(result.class_hierarchy_entries)
                 self.interface_hierarchy_index.extend(result.interface_hierarchy_entries)
@@ -1022,6 +1299,21 @@ class ScriptCodeIndexer:
                     if name not in self.declared_methods:
                         self.declared_methods[name] = set()
                     self.declared_methods[name].update(locations)
+
+                for name, locations in result.declared_properties.items():
+                    if name not in self.declared_properties:
+                        self.declared_properties[name] = set()
+                    self.declared_properties[name].update(locations)
+
+                for name, locations in result.declared_events.items():
+                    if name not in self.declared_events:
+                        self.declared_events[name] = set()
+                    self.declared_events[name].update(locations)
+
+                for name, locations in result.declared_constructors.items():
+                    if name not in self.declared_constructors:
+                        self.declared_constructors[name] = set()
+                    self.declared_constructors[name].update(locations)
 
     def collect_files(self) -> Tuple[List[Path], List[Dict]]:
         cs_files = []
@@ -1074,7 +1366,10 @@ class ScriptCodeIndexer:
             'classes': self.declared_classes,
             'structs': self.declared_structs,
             'enums': self.declared_enums,
-            'methods': self.declared_methods
+            'methods': self.declared_methods,
+            'properties': self.declared_properties,
+            'events': self.declared_events,
+            'constructors': self.declared_constructors,
         }
 
         print("\nPass 2: Collecting usages...")
@@ -1105,7 +1400,10 @@ class ScriptCodeIndexer:
             ('struct', self.struct_index),
             ('enum', self.enum_index),
             ('method', self.method_index),
-            ('field', self.field_index)
+            ('field', self.field_index),
+            ('property', self.property_index),
+            ('event', self.event_index),
+            ('constructor', self.constructor_index),
         ]
 
         total_declarations = 0

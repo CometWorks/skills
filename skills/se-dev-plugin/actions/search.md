@@ -37,7 +37,7 @@ uv run download_plugin_source.py ToolSwitcherPlugin
 uv run index_plugins.py
 ```
 
-This indexes all plugin source code from `PluginSources/` directory.
+This indexes all downloaded plugin source code.
 
 ## Quick Reference
 
@@ -56,8 +56,12 @@ uv run search_plugins.py <category> <symbol_type> <pattern> [options]
 - `interface` - Interfaces
 - `struct` - Structs
 - `enum` - Enums
-- `method` - Methods and constructors
-- `field` - Fields and properties
+- `method` - Methods
+- `field` - Fields (member variables)
+- `property` - Properties
+- `event` - Events
+- `constructor` - Constructors
+- `namespace` - Namespaces
 
 ### Symbol Types
 - `declaration` - Where symbols are defined
@@ -111,7 +115,7 @@ uv run search_plugins.py -i class declaration config
 ## Plugin List
 
 After indexing, `PluginCodeIndex/plugins.json` contains:
-- `indexed_plugins` - Plugins with source code in `PluginSources/`
+- `indexed_plugins` - Plugins with downloaded source code
 - `available_plugins` - All plugins from PluginHub (for downloading)
 
 ## Workflow

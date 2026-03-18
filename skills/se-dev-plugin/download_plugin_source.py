@@ -2,8 +2,13 @@
 """
 Download Plugin Source Code from GitHub
 
-Downloads the source code of a plugin from its GitHub repository into the
-PluginSources/ directory for indexing and searching.
+Downloads the source code of a plugin from its GitHub repository.
+
+The download folder is determined by (in priority order):
+1. SE_PLUGIN_DOWNLOAD_FOLDER environment variable
+2. plugin_download_folder setting in CLAUDE.md or AGENTS.md (in CWD)
+3. OS-specific temp folder: %TEMP%/se-dev-plugin/plugins/ (Windows)
+   or /tmp/se-dev-plugin/plugins/ (Linux)
 
 Usage:
     python download_plugin_source.py <plugin_id_or_name>
@@ -23,10 +28,11 @@ from pathlib import Path
 
 import requests
 
+from plugin_paths import ensure_plugin_sources_dir
+
 SCRIPT_DIR = Path(__file__).parent.resolve()
 PLUGINHUB_DIR = SCRIPT_DIR / "PluginHub"
 PLUGINS_DIR = PLUGINHUB_DIR / "Plugins"
-PLUGIN_SOURCES_DIR = SCRIPT_DIR / "PluginSources"
 
 
 def parse_plugin_xml(xml_file: Path) -> dict:
@@ -117,8 +123,9 @@ def download_plugin(plugin: dict) -> bool:
         print("Plugin has no GitHub ID", file=sys.stderr)
         return False
 
-    # Create PluginSources directory if needed
-    PLUGIN_SOURCES_DIR.mkdir(parents=True, exist_ok=True)
+    # Resolve and create the plugin sources directory
+    plugin_sources_dir = ensure_plugin_sources_dir()
+    print(f"Plugin sources directory: {plugin_sources_dir}")
 
     # Extract repo info
     parts = plugin["id"].split("/")
@@ -130,7 +137,7 @@ def download_plugin(plugin: dict) -> bool:
     commit = plugin.get("commit", "main")
 
     # Destination directory
-    dest_dir = PLUGIN_SOURCES_DIR / repo
+    dest_dir = plugin_sources_dir / repo
 
     # If already exists, remove it for fresh download
     if dest_dir.exists():
@@ -154,21 +161,21 @@ def download_plugin(plugin: dict) -> bool:
         return False
 
     # Save and extract ZIP
-    zip_path = PLUGIN_SOURCES_DIR / "temp_download.zip"
+    zip_path = plugin_sources_dir / "temp_download.zip"
     with open(zip_path, 'wb') as f:
         f.write(response.content)
 
     print("Extracting...")
     try:
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(PLUGIN_SOURCES_DIR)
+            zip_ref.extractall(plugin_sources_dir)
     except zipfile.BadZipFile as e:
         print(f"Failed to extract: {e}", file=sys.stderr)
         zip_path.unlink()
         return False
 
     # Rename extracted directory (GitHub adds commit hash to folder name)
-    for item in PLUGIN_SOURCES_DIR.iterdir():
+    for item in plugin_sources_dir.iterdir():
         if item.is_dir() and item.name.startswith(repo):
             item.rename(dest_dir)
             break

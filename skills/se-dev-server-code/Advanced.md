@@ -98,7 +98,7 @@ uv run search_code.py -n VRageMath class declaration ""
 uv run search_code.py -n VRageMath method declaration "" | grep Vector3D
 
 # 3. Find specific method details
-uv run search_code.py -n VRageMath signature declaration Normalize
+uv run search_code.py -n VRageMath method signature Normalize
 ```
 
 ## Combining Multiple Searches
@@ -124,7 +124,7 @@ uv run search_code.py -n Sandbox.Game method declaration Terminal
 
 ```bash
 # 1. Find method signature
-uv run search_code.py signature declaration GetPosition
+uv run search_code.py method signature GetPosition
 # See parameters and return types
 
 # 2. Find where it's called
@@ -132,7 +132,7 @@ uv run search_code.py -l 10 method usage GetPosition
 # Read call sites
 
 # 3. Find similar methods
-uv run search_code.py signature declaration "re:^Get.*Position"
+uv run search_code.py method signature "re:^Get.*Position"
 ```
 
 ### Exploring Class Families
