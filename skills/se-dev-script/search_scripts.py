@@ -30,6 +30,10 @@ CATEGORY_FILES = {
     "struct": ("struct_declarations.csv", "struct_usages.csv"),
     "interface": ("interface_declarations.csv", "interface_usages.csv"),
     "field": ("field_declarations.csv", "field_usages.csv"),
+    "property": ("property_declarations.csv", "property_usages.csv"),
+    "event": ("event_declarations.csv", "event_usages.csv"),
+    "constructor": ("constructor_declarations.csv", "constructor_usages.csv"),
+    "namespace": ("namespace_declarations.csv", "namespace_usages.csv"),
 }
 
 HIERARCHY_SUBCOMMANDS = {"parent", "children", "implements", "implementors"}
@@ -46,6 +50,9 @@ def parse_args():
     parser.add_argument("category", choices=list(CATEGORY_FILES.keys()), help="Symbol category")
     parser.add_argument("symbol_type", help="Symbol type (declaration/usage), method subcommand (signature), or hierarchy subcommand (parent/children/implements/implementors)")
     parser.add_argument("patterns", nargs="+", help="Search patterns (text:X or re:X)")
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(0)
     return parser.parse_args()
 
 
@@ -78,11 +85,13 @@ def get_symbol_name(row, is_signature=False, strip_generics=False):
         return row["method"]
     elif "symbol_name" in row and row["symbol_name"]:
         return row["symbol_name"]
-    else:
+    elif "declaring_type" in row and row["declaring_type"]:
         name = row["declaring_type"]
         if strip_generics:
             name = strip_mangled_generics(name)
         return name
+    else:  # For namespace indices (symbol is the namespace itself)
+        return row.get("namespace", "")
 
 
 def matches_pattern(name, pattern):

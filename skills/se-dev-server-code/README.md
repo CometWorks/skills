@@ -25,6 +25,7 @@ Located in `CodeIndex/` after preparation:
 | File | Contains |
 |------|----------|
 | `namespace_declarations.csv` | Namespace declarations |
+| `namespace_usages.csv` | Namespace usages |
 | `interface_declarations.csv` | Interface declarations |
 | `interface_usages.csv` | Interface usages |
 | `class_declarations.csv` | Class declarations |
@@ -36,15 +37,21 @@ Located in `CodeIndex/` after preparation:
 | `method_declarations.csv` | Method declarations |
 | `method_usages.csv` | Method usages |
 | `method_signatures.csv` | Method signatures (different columns, see below) |
-| `field_declarations.csv` | Fields and properties declarations |
-| `field_usages.csv` | Field/property usages |
+| `field_declarations.csv` | Field declarations |
+| `field_usages.csv` | Field usages |
+| `property_declarations.csv` | Property declarations |
+| `property_usages.csv` | Property usages |
+| `event_declarations.csv` | Event declarations |
+| `event_usages.csv` | Event usages |
+| `constructor_declarations.csv` | Constructor declarations |
+| `constructor_usages.csv` | Constructor usages |
 
 ### CSV Structure
 
 Most index files share this column structure:
 
 ```
-namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,description
+namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,description,access,modifiers,member_type,params
 ```
 
 | Column | Description |
@@ -52,12 +59,16 @@ namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,d
 | `namespace` | The namespace containing the symbol |
 | `declaring_type` | The class/struct/interface containing the symbol |
 | `method` | The method containing the symbol (empty for type-level items) |
-| `symbol_name` | Field/property name (for field index) |
+| `symbol_name` | Field/property/event name (for member indices) |
 | `type` | Either `declaration` or `usage` |
 | `file_path` | Relative path from `Decompiled/` folder |
 | `start_line` | Starting line number |
 | `end_line` | Ending line number |
 | `description` | XML doc comment (for declarations only) |
+| `access` | Access modifier: `public`, `private`, `protected`, `internal`, etc. (member declarations only) |
+| `modifiers` | Other modifiers: `static`, `virtual`, `override`, `abstract`, `readonly`, etc. (member declarations only) |
+| `member_type` | Return type (methods), field/property/event type (member declarations only) |
+| `params` | Parameter list including parentheses, e.g. `(int x, string name)` (methods/constructors only) |
 
 ### Method Signatures CSV Structure
 
@@ -106,11 +117,11 @@ uv run search_code.py [options] <category> <symbol_type> <patterns...>
 
 | Argument | Values | Description |
 |----------|--------|-------------|
-| `category` | `class`, `method`, `enum`, `struct`, `interface`, `field`, `signature` | Symbol category to search |
-| `symbol_type` | `declaration`, `usage` | Whether to find definitions or references |
+| `category` | `class`, `method`, `enum`, `struct`, `interface`, `field`, `property`, `event`, `constructor`, `namespace` | Symbol category to search |
+| `symbol_type` | `declaration`, `usage`, `signature` (method only), `parent`, `children`, `implements`, `implementors` (hierarchy) | What to search for |
 | `patterns` | One or more patterns | Search expressions (see below) |
 
-**Note:** The `signature` category only supports `declaration` (signatures are not tracked as usages).
+**Note:** `method signature` is a special subcommand that shows full method signatures with parameters. Hierarchy subcommands (`parent`, `children`, `implements`, `implementors`) work with `class` and `interface` categories.
 
 #### Options
 
@@ -128,8 +139,8 @@ Patterns match against the symbol name (not the namespace):
 
 | Prefix | Behavior |
 |--------|----------|
-| `text:X` or just `X` | Case-insensitive substring match |
-| `re:X` | Case-insensitive regex match (Python regex syntax) |
+| `text:X` or just `X` | Case-sensitive substring match (use `-i` for case-insensitive) |
+| `re:X` | Case-sensitive regex, Python regex syntax (use `-i` for case-insensitive) |
 
 Multiple patterns must all match (AND logic).
 
@@ -139,7 +150,7 @@ Multiple patterns must all match (AND logic).
 - Otherwise: prints `file_path:line` or `file_path:start-end` for each match (line ranges are inclusive)
 - Results sorted by code depth (namespace.class.method nesting), then alphabetically
 
-**Signature category special output:** For `signature` searches, the output includes the full signature text after the file location, separated by a pipe character:
+**Method signature output:** For `method signature` searches, the output includes the full signature text after the file location, separated by a pipe character:
 ```
 file_path:start-end|signature_text
 ```
@@ -186,7 +197,7 @@ uv run search_code.py -n VRage field declaration Entity
 
 Find method signatures containing "GetPosition":
 ```
-uv run search_code.py signature declaration GetPosition
+uv run search_code.py method signature GetPosition
 ```
 
 ## Direct grep Search
@@ -194,8 +205,8 @@ uv run search_code.py signature declaration GetPosition
 For simple lookups, direct grep can be faster:
 
 ```
-busybox.exe grep ",MyToolbar," CodeIndex/classes.csv | busybox.exe grep ",declaration,"
-busybox.exe grep ",GetPosition," CodeIndex/methods.csv | busybox.exe grep ",usage,"
+busybox.exe grep ",MyToolbar," CodeIndex/class_declarations.csv
+busybox.exe grep ",GetPosition," CodeIndex/method_usages.csv
 ```
 
 ## Reading Source Files
@@ -229,7 +240,7 @@ The first folder in the path indicates the assembly (DLL) containing the code.
 All commands run on Windows. Use `busybox.exe` for UNIX-like commands with forward slashes in paths:
 
 ```
-busybox.exe grep "pattern" CodeIndex/classes.csv
+busybox.exe grep "pattern" CodeIndex/class_declarations.csv
 ```
 
 Use `uv run` to execute Python scripts with the virtual environment.

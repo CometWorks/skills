@@ -11,7 +11,7 @@ All CSV files are located in `CodeIndex/` after preparation.
 Most index files use this column structure:
 
 ```csv
-namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,description
+namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,description,access,modifiers,member_type,params
 ```
 
 #### Column Descriptions
@@ -19,17 +19,22 @@ namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,d
 - `namespace` - The namespace containing the symbol
 - `declaring_type` - The class/struct/interface containing the symbol
 - `method` - The method containing the symbol (empty for type-level declarations)
-- `symbol_name` - Field/property name (for field index)
+- `symbol_name` - Field/property/event name (for member indices)
 - `type` - Either `declaration` or `usage`
 - `file_path` - Relative path from `Decompiled/` folder
 - `start_line`, `end_line` - Line range in source file (1-indexed, inclusive)
 - `description` - XML doc comment summary (for declarations only)
+- `access` - Access modifier: `public`, `private`, `protected`, `internal`, etc. (member declarations only)
+- `modifiers` - Other modifiers: `static`, `virtual`, `override`, `abstract`, `readonly`, etc. (member declarations only)
+- `member_type` - Return type (methods), field/property/event type (member declarations only)
+- `params` - Parameter list including parentheses, e.g. `(int x, string name)` (methods/constructors only)
 
 #### Files Using This Format
 
 | Index File | Contains |
 |------------|----------|
 | `namespace_declarations.csv` | Namespace declarations |
+| `namespace_usages.csv` | Namespace references |
 | `interface_declarations.csv` | Interface declarations |
 | `interface_usages.csv` | Interface references |
 | `class_declarations.csv` | Class declarations |
@@ -40,10 +45,16 @@ namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,d
 | `enum_usages.csv` | Enum references |
 | `method_declarations.csv` | Method declarations |
 | `method_usages.csv` | Method call sites |
-| `field_declarations.csv` | Fields and properties |
-| `field_usages.csv` | Field/property references |
+| `field_declarations.csv` | Field declarations |
+| `field_usages.csv` | Field references |
+| `property_declarations.csv` | Property declarations |
+| `property_usages.csv` | Property references |
+| `event_declarations.csv` | Event declarations |
+| `event_usages.csv` | Event references |
+| `constructor_declarations.csv` | Constructor declarations |
+| `constructor_usages.csv` | Constructor references |
 
-**Note:** The field index includes both fields and properties since they are accessed identically at usage sites.
+**Note:** The `access`, `modifiers`, `member_type`, and `params` columns are populated for member declarations (fields, properties, events, methods, constructors) and empty for type/namespace declarations and all usage entries.
 
 ### Method Signatures CSV
 
@@ -198,6 +209,10 @@ class IndexEntry:
     start_line: int
     end_line: int
     description: str
+    access: str = ""       # public, private, protected, internal
+    modifiers: str = ""    # static, virtual, override, abstract, readonly, etc.
+    member_type: str = ""  # return type (methods) or field/property/event type
+    params: str = ""       # parameter list with parens (methods/constructors only)
 
 @dataclass
 class SignatureEntry:
@@ -333,7 +348,10 @@ CATEGORY_FILES = {
     "struct": ("struct_declarations.csv", "struct_usages.csv"),
     "interface": ("interface_declarations.csv", "interface_usages.csv"),
     "field": ("field_declarations.csv", "field_usages.csv"),
-    "signature": ("method_signatures.csv", None),
+    "property": ("property_declarations.csv", "property_usages.csv"),
+    "event": ("event_declarations.csv", "event_usages.csv"),
+    "constructor": ("constructor_declarations.csv", "constructor_usages.csv"),
+    "namespace": ("namespace_declarations.csv", "namespace_usages.csv"),
 }
 ```
 

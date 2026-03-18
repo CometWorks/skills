@@ -57,8 +57,15 @@ then the `Id`) field will tell you the GitHub repository ID of the plugin.
 
 ## Plugin Storage
 
-**ALWAYS** extract plugin sources under the `PluginSources` folder, which is next to this skill file.
-The `download_plugin_source.py` script does this automatically.
+Plugin sources are downloaded to an OS-specific temp folder by default:
+- **Windows**: `%TEMP%/se-dev-plugin/plugins/`
+- **Linux**: `/tmp/se-dev-plugin/plugins/`
+
+You can override this by:
+1. Setting the `SE_PLUGIN_DOWNLOAD_FOLDER` environment variable
+2. Adding `plugin_download_folder: /path/to/folder` to `CLAUDE.md` or `AGENTS.md` in your project
+
+The `download_plugin_source.py` script handles this automatically.
 
 ## Examples of Finding Plugins
 

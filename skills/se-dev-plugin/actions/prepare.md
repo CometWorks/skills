@@ -64,5 +64,5 @@ Prepare.bat
 The preparation script:
 - Sets up the Python virtual environment
 - Downloads and installs required tools (busybox.exe)
-- Downloads plugin sources for examples
+- Downloads plugin sources for examples (to OS temp folder or configured location)
 - Verifies the environment is ready for use

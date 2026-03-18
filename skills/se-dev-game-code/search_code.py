@@ -16,22 +16,51 @@ CATEGORY_FILES = {
     "struct": ("struct_declarations.csv", "struct_usages.csv"),
     "interface": ("interface_declarations.csv", "interface_usages.csv"),
     "field": ("field_declarations.csv", "field_usages.csv"),
+    "property": ("property_declarations.csv", "property_usages.csv"),
+    "event": ("event_declarations.csv", "event_usages.csv"),
+    "constructor": ("constructor_declarations.csv", "constructor_usages.csv"),
+    "namespace": ("namespace_declarations.csv", "namespace_usages.csv"),
 }
 
 HIERARCHY_SUBCOMMANDS = {"parent", "children", "implements", "implementors"}
 METHOD_SUBCOMMANDS = {"signature"}
 
+
 def parse_args():
-    parser = argparse.ArgumentParser(description="Search C# code index")
-    parser.add_argument("-c", "--count", action="store_true", help="Print only the count of matches")
-    parser.add_argument("-l", "--limit", type=int, default=0, help="Limit number of results")
-    parser.add_argument("-o", "--offset", type=int, default=0, help="Skip first N results")
-    parser.add_argument("-n", "--namespace", type=str, default="", help="Filter by namespace prefix")
-    parser.add_argument("-i", "--case-insensitive", action="store_true", help="Make pattern matching case-insensitive (case-sensitive by default)")
-    parser.add_argument("category", choices=list(CATEGORY_FILES.keys()), help="Symbol category")
-    parser.add_argument("symbol_type", help="Symbol type (declaration/usage), method subcommand (signature), or hierarchy subcommand (parent/children/implements/implementors)")
+    parser = argparse.ArgumentParser(
+        description="Search C# code index",
+    )
+    parser.add_argument(
+        "-c", "--count", action="store_true", help="Print only the count of matches"
+    )
+    parser.add_argument(
+        "-l", "--limit", type=int, default=0, help="Limit number of results"
+    )
+    parser.add_argument(
+        "-o", "--offset", type=int, default=0, help="Skip first N results"
+    )
+    parser.add_argument(
+        "-n", "--namespace", type=str, default="", help="Filter by namespace prefix"
+    )
+    parser.add_argument(
+        "-i",
+        "--case-insensitive",
+        action="store_true",
+        help="Make pattern matching case-insensitive (case-sensitive by default)",
+    )
+    parser.add_argument(
+        "category", choices=list(CATEGORY_FILES.keys()), help="Symbol category"
+    )
+    parser.add_argument(
+        "symbol_type",
+        help="Symbol type (declaration/usage), method subcommand (signature), or hierarchy subcommand (parent/children/implements/implementors)",
+    )
     parser.add_argument("patterns", nargs="+", help="Search patterns (text:X or re:X)")
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(0)
     return parser.parse_args()
+
 
 def compile_pattern(pattern_str, case_insensitive=False):
     if pattern_str.startswith("re:"):
@@ -41,7 +70,12 @@ def compile_pattern(pattern_str, case_insensitive=False):
         text = pattern_str[5:]
         return ("text", text.lower() if case_insensitive else text, case_insensitive)
     else:
-        return ("text", pattern_str.lower() if case_insensitive else pattern_str, case_insensitive)
+        return (
+            "text",
+            pattern_str.lower() if case_insensitive else pattern_str,
+            case_insensitive,
+        )
+
 
 def is_mangled_name(name):
     """Check if a class name contains mangled/encoded characters."""
@@ -65,6 +99,7 @@ def strip_mangled_generics(name):
         return name[:idx]
     return name
 
+
 def get_symbol_name(row, is_signature=False, strip_generics=False):
     if is_signature:
         return row["method_name"]
@@ -72,11 +107,14 @@ def get_symbol_name(row, is_signature=False, strip_generics=False):
         return row["method"]
     elif "symbol_name" in row and row["symbol_name"]:  # For field index
         return row["symbol_name"]
-    else:  # For class, interface, struct, enum indices
+    elif "declaring_type" in row and row["declaring_type"]:  # For class, interface, struct, enum indices
         name = row["declaring_type"]
         if strip_generics:
             name = strip_mangled_generics(name)
         return name
+    else:  # For namespace indices (symbol is the namespace itself)
+        return row.get("namespace", "")
+
 
 def matches_pattern(name, pattern):
     if pattern[0] == "regex":
@@ -104,6 +142,7 @@ def matches_pattern_prefix(name, pattern):
         else:
             return name.startswith(search_text)
 
+
 def get_depth(row, is_signature=False):
     depth = 0
     if row["namespace"]:
@@ -115,6 +154,7 @@ def get_depth(row, is_signature=False):
     if row.get(method_col):
         depth += 1
     return depth
+
 
 def get_sort_key(row, is_signature=False):
     # Handle different column names for signature
@@ -129,6 +169,7 @@ def get_sort_key(row, is_signature=False):
         row["file_path"],
         int(row["start_line"]),
     )
+
 
 def search_hierarchy_parent(category, patterns, ns_filter):
     """Search for parent class/interface of matching types"""
@@ -147,11 +188,11 @@ def search_hierarchy_parent(category, patterns, ns_filter):
     else:
         print("NO-MATCHES")
         return
-    
+
     if not index_file.exists():
         print("NO-MATCHES")
         return
-    
+
     matches = []
     with open(index_file, "r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
@@ -162,12 +203,21 @@ def search_hierarchy_parent(category, patterns, ns_filter):
                     continue
             child_name = row[child_name_col]
             if all(matches_pattern(child_name, p) for p in patterns):
-                child_fqn = f"{row[child_ns_col]}.{child_name}" if row[child_ns_col] else child_name
-                parent_fqn = f"{row[parent_ns_col]}.{row[parent_name_col]}" if row[parent_ns_col] else row[parent_name_col]
+                child_fqn = (
+                    f"{row[child_ns_col]}.{child_name}"
+                    if row[child_ns_col]
+                    else child_name
+                )
+                parent_fqn = (
+                    f"{row[parent_ns_col]}.{row[parent_name_col]}"
+                    if row[parent_ns_col]
+                    else row[parent_name_col]
+                )
                 matches.append((child_fqn, parent_fqn))
-    
+
     matches.sort()
     return matches
+
 
 def search_hierarchy_children(category, patterns, ns_filter):
     """Search for children classes/interfaces of matching parents"""
@@ -186,11 +236,11 @@ def search_hierarchy_children(category, patterns, ns_filter):
     else:
         print("NO-MATCHES")
         return
-    
+
     if not index_file.exists():
         print("NO-MATCHES")
         return
-    
+
     # Build parent -> children map
     parent_children = defaultdict(list)
     with open(index_file, "r", encoding="utf-8", newline="") as f:
@@ -202,26 +252,35 @@ def search_hierarchy_children(category, patterns, ns_filter):
                     row_ns = row[parent_ns_col].lower()
                     if not (row_ns == ns_filter or row_ns.startswith(ns_filter + ".")):
                         continue
-                parent_fqn = f"{row[parent_ns_col]}.{parent_name}" if row[parent_ns_col] else parent_name
-                child_fqn = f"{row[child_ns_col]}.{row[child_name_col]}" if row[child_ns_col] else row[child_name_col]
+                parent_fqn = (
+                    f"{row[parent_ns_col]}.{parent_name}"
+                    if row[parent_ns_col]
+                    else parent_name
+                )
+                child_fqn = (
+                    f"{row[child_ns_col]}.{row[child_name_col]}"
+                    if row[child_ns_col]
+                    else row[child_name_col]
+                )
                 parent_children[parent_fqn].append(child_fqn)
-    
+
     # Sort and format results
     matches = []
     for parent_fqn in sorted(parent_children.keys()):
         children = sorted(parent_children[parent_fqn])
         matches.append((parent_fqn, children))
-    
+
     return matches
+
 
 def search_class_implements(patterns, ns_filter):
     """Search for interfaces implemented by matching classes"""
     index_file = INDEX_DIR / "interface_implementation.csv"
-    
+
     if not index_file.exists():
         print("NO-MATCHES")
         return
-    
+
     matches = []
     with open(index_file, "r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
@@ -232,29 +291,34 @@ def search_class_implements(patterns, ns_filter):
                     continue
             impl_type = row["implementing_type"]
             if all(matches_pattern(impl_type, p) for p in patterns):
-                impl_fqn = f"{row['implementing_namespace']}.{impl_type}" if row['implementing_namespace'] else impl_type
+                impl_fqn = (
+                    f"{row['implementing_namespace']}.{impl_type}"
+                    if row["implementing_namespace"]
+                    else impl_type
+                )
                 interfaces = row["interfaces"]
                 matches.append((impl_fqn, interfaces))
-    
+
     matches.sort()
     return matches
+
 
 def compress_namespace_hierarchy(fqn_list):
     """
     Group types by their full namespace path and format with single-level nesting.
-    
+
     This limits output to only one level of parentheses (for types in the same namespace),
     preventing deeply nested structures that create very long lines.
-    
+
     Example input: ['A.B.C.Class1', 'A.B.C.Class2', 'A.B.D.Class3', 'X.Y.Class4']
     Example output: ['A.B.C.(Class1,Class2)', 'A.B.D.Class3', 'X.Y.Class4']
     """
     if not fqn_list:
         return []
-    
+
     # Group types by their complete namespace path
     namespace_groups = defaultdict(list)
-    
+
     for fqn in fqn_list:
         if "." in fqn:
             # Split into namespace and type name
@@ -263,12 +327,12 @@ def compress_namespace_hierarchy(fqn_list):
         else:
             # No namespace, just type name
             namespace_groups[""].append(fqn)
-    
+
     # Format each namespace group
     results = []
     for namespace in sorted(namespace_groups.keys()):
         types = sorted(namespace_groups[namespace])
-        
+
         if len(types) == 1:
             # Single type - no parentheses needed
             if namespace:
@@ -282,90 +346,105 @@ def compress_namespace_hierarchy(fqn_list):
                 results.append(f"{namespace}.({types_str})")
             else:
                 results.append(f"({types_str})")
-    
+
     return results
+
 
 def search_interface_implementors(patterns, ns_filter):
     """Search for classes implementing matching interfaces"""
     index_file = INDEX_DIR / "interface_implementation.csv"
-    
+
     if not index_file.exists():
         print("NO-MATCHES")
         return
-    
+
     # Build interface -> implementors map
     interface_implementors = defaultdict(list)
     with open(index_file, "r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
             interfaces = row["interfaces"].split(",")
-            impl_fqn = f"{row['implementing_namespace']}.{row['implementing_type']}" if row['implementing_namespace'] else row['implementing_type']
-            
+            impl_fqn = (
+                f"{row['implementing_namespace']}.{row['implementing_type']}"
+                if row["implementing_namespace"]
+                else row["implementing_type"]
+            )
+
             for iface_fqn in interfaces:
                 iface_fqn = iface_fqn.strip()
                 # Extract just the interface name for pattern matching
                 iface_name = iface_fqn.split(".")[-1] if "." in iface_fqn else iface_fqn
-                
+
                 if all(matches_pattern(iface_name, p) for p in patterns):
                     # Apply namespace filter to interface
                     if ns_filter:
-                        iface_ns = iface_fqn.rsplit(".", 1)[0] if "." in iface_fqn else ""
+                        iface_ns = (
+                            iface_fqn.rsplit(".", 1)[0] if "." in iface_fqn else ""
+                        )
                         if iface_ns:
-                            if not (iface_ns.lower() == ns_filter or iface_ns.lower().startswith(ns_filter + ".")):
+                            if not (
+                                iface_ns.lower() == ns_filter
+                                or iface_ns.lower().startswith(ns_filter + ".")
+                            ):
                                 continue
-                    
+
                     interface_implementors[iface_fqn].append(impl_fqn)
-    
+
     # Sort and format results
     matches = []
     for iface_fqn in sorted(interface_implementors.keys()):
         implementors = sorted(interface_implementors[iface_fqn])
         matches.append((iface_fqn, implementors))
-    
+
     return matches
+
 
 def main():
     args = parse_args()
-    
+
     # Check if this is a method signature query (method signature <pattern>)
     if args.category == "method" and args.symbol_type in METHOD_SUBCOMMANDS:
         if args.symbol_type == "signature":
             index_file = INDEX_DIR / "method_signatures.csv"
-            
+
             if not index_file.exists():
                 print("NO-MATCHES")
                 sys.exit(0)
-            
-            patterns = [compile_pattern(p, args.case_insensitive) for p in args.patterns]
+
+            patterns = [
+                compile_pattern(p, args.case_insensitive) for p in args.patterns
+            ]
             ns_filter = args.namespace.lower() if args.namespace else ""
-            
+
             matches = []
             with open(index_file, "r", encoding="utf-8", newline="") as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     if ns_filter:
                         row_ns = row["namespace"].lower()
-                        if not (row_ns == ns_filter or row_ns.startswith(ns_filter + ".")):
+                        if not (
+                            row_ns == ns_filter or row_ns.startswith(ns_filter + ".")
+                        ):
                             continue
                     name = get_symbol_name(row, is_signature=True)
                     if all(matches_pattern(name, p) for p in patterns):
                         matches.append(row)
-            
+
             if not matches:
                 print("NO-MATCHES")
                 sys.exit(0)
-            
+
             if args.count:
                 print(len(matches))
                 sys.exit(0)
-            
+
             matches.sort(key=lambda row: get_sort_key(row, is_signature=True))
-            
+
             if args.offset > 0:
-                matches = matches[args.offset:]
+                matches = matches[args.offset :]
             if args.limit > 0:
-                matches = matches[:args.limit]
-            
+                matches = matches[: args.limit]
+
             for row in matches:
                 start = row["start_line"]
                 end = row["end_line"]
@@ -374,14 +453,14 @@ def main():
                 else:
                     location = f"{row['file_path']}:{start}-{end}"
                 print(f"{location}|{row['signature']}")
-            
+
             sys.exit(0)
-    
+
     # Check if this is a hierarchy query
     if args.symbol_type in HIERARCHY_SUBCOMMANDS:
         patterns = [compile_pattern(p, args.case_insensitive) for p in args.patterns]
         ns_filter = args.namespace.lower() if args.namespace else ""
-        
+
         # Route to appropriate hierarchy handler
         if args.symbol_type == "parent":
             matches = search_hierarchy_parent(args.category, patterns, ns_filter)
@@ -400,21 +479,21 @@ def main():
         else:
             print("NO-MATCHES")
             sys.exit(0)
-        
+
         if not matches:
             print("NO-MATCHES")
             sys.exit(0)
-        
+
         if args.count:
             print(len(matches))
             sys.exit(0)
-        
+
         # Apply offset and limit
         if args.offset > 0:
-            matches = matches[args.offset:]
+            matches = matches[args.offset :]
         if args.limit > 0:
-            matches = matches[:args.limit]
-        
+            matches = matches[: args.limit]
+
         # Output results
         for match in matches:
             if args.symbol_type in ("parent", "implements"):
@@ -426,14 +505,17 @@ def main():
                 compressed_list = compress_namespace_hierarchy(match[1])
                 for compressed in compressed_list:
                     print(f"{match[0]}|{compressed}")
-        
+
         sys.exit(0)
-    
+
     # Standard declaration/usage search
     if args.symbol_type not in ["declaration", "usage"]:
-        print(f"Error: Invalid symbol_type '{args.symbol_type}'. Must be 'declaration', 'usage', or one of: {', '.join(HIERARCHY_SUBCOMMANDS | METHOD_SUBCOMMANDS)}", file=sys.stderr)
+        print(
+            f"Error: Invalid symbol_type '{args.symbol_type}'. Must be 'declaration', 'usage', or one of: {', '.join(HIERARCHY_SUBCOMMANDS | METHOD_SUBCOMMANDS)}",
+            file=sys.stderr,
+        )
         sys.exit(1)
-    
+
     # Select the appropriate file based on symbol_type (declaration or usage)
     decl_file, usage_file = CATEGORY_FILES[args.category]
 
@@ -454,9 +536,11 @@ def main():
 
     # For type declarations (class/struct/interface/enum), strip mangled generics
     # to avoid matching against encoded generic type parameters
-    strip_generics = (
-        args.symbol_type == "declaration"
-        and args.category in ("class", "struct", "interface", "enum")
+    strip_generics = args.symbol_type == "declaration" and args.category in (
+        "class",
+        "struct",
+        "interface",
+        "enum",
     )
 
     matches = []
@@ -467,7 +551,9 @@ def main():
                 row_ns = row["namespace"].lower()
                 if not (row_ns == ns_filter or row_ns.startswith(ns_filter + ".")):
                     continue
-            name = get_symbol_name(row, is_signature=False, strip_generics=strip_generics)
+            name = get_symbol_name(
+                row, is_signature=False, strip_generics=strip_generics
+            )
 
             # For mangled type declarations, use prefix matching to avoid false positives
             # from namespace prefixes embedded in generated class names
@@ -488,9 +574,9 @@ def main():
     matches.sort(key=lambda row: get_sort_key(row, is_signature=False))
 
     if args.offset > 0:
-        matches = matches[args.offset:]
+        matches = matches[args.offset :]
     if args.limit > 0:
-        matches = matches[:args.limit]
+        matches = matches[: args.limit]
 
     for row in matches:
         start = row["start_line"]
@@ -500,6 +586,7 @@ def main():
         else:
             location = f"{row['file_path']}:{start}-{end}"
         print(location)
+
 
 if __name__ == "__main__":
     main()
