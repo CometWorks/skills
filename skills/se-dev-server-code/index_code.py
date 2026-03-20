@@ -381,6 +381,10 @@ class FileProcessor:
                 name = self._get_identifier_name(node)
                 if name:
                     context["declaring_type"] = name
+                # Process hierarchy/implementation in Pass 2 where
+                # declared_interfaces is populated from all files
+                if node.type != "enum_declaration":
+                    self._process_type_hierarchy(node, context, result)
             elif node.type in ("method_declaration", "constructor_declaration"):
                 name = self._get_identifier_name(node)
                 if name:
@@ -806,12 +810,32 @@ class FileProcessor:
         )
         result.interface_entries.append(entry)
 
-        # Process interface hierarchy (interfaces extending other interfaces)
+        # Note: interface hierarchy extraction is done in Pass 2
+        # (_process_type_hierarchy) where declared_interfaces is populated
+
+    def _process_type_hierarchy(
+        self, node: Node, context: Dict, result: FileProcessingResult
+    ):
+        """Process base types for class/struct/record/interface declarations.
+
+        Called during Pass 2 when self.declared_interfaces is populated
+        with all interface declarations from the entire codebase.
+        """
+        name = self._get_identifier_name(node)
+        if not name:
+            return
+
         base_list = self._find_base_list(node)
-        if base_list:
-            parent_types = self._get_base_list_types(base_list)
-            for parent_type in parent_types:
-                # All items in interface base list are parent interfaces
+        if not base_list:
+            return
+
+        base_types = self._get_base_list_types(base_list)
+        if not base_types:
+            return
+
+        if node.type == "interface_declaration":
+            # All items in interface base list are parent interfaces
+            for parent_type in base_types:
                 parent_fqn = self._resolve_type_namespace(
                     parent_type, context["namespace"]
                 )
@@ -827,6 +851,75 @@ class FileProcessor:
                     end_line=node.end_point[0] + 1,
                 )
                 result.interface_hierarchy_entries.append(hier_entry)
+
+        elif node.type == "struct_declaration":
+            # Structs can only implement interfaces (no struct inheritance)
+            interface_fqns = []
+            for iface in base_types:
+                iface_fqn = self._resolve_type_namespace(
+                    iface, context["namespace"]
+                )
+                interface_fqns.append(iface_fqn)
+
+            impl_entry = InterfaceImplementationEntry(
+                implementing_namespace=context["namespace"],
+                implementing_type=name,
+                interfaces=",".join(interface_fqns),
+                file_path=context["file_path"],
+                start_line=node.start_point[0] + 1,
+                end_line=node.end_point[0] + 1,
+            )
+            result.interface_implementation_entries.append(impl_entry)
+
+        else:
+            # class_declaration or record_declaration
+            # First item could be base class or interface
+            first_type = base_types[0]
+            first_fqn = self._resolve_type_namespace(
+                first_type, context["namespace"]
+            )
+            first_ns, first_name = self._split_namespace_and_type(first_fqn)
+
+            # Check if first type is an interface (declared_interfaces is
+            # populated from Pass 1, so this check is now reliable)
+            is_interface = first_name in self.declared_interfaces
+
+            interfaces = []
+            if is_interface:
+                # All items are interfaces
+                interfaces = base_types
+            else:
+                # First item is base class, rest are interfaces
+                hier_entry = ClassHierarchyEntry(
+                    child_namespace=context["namespace"],
+                    child_class=name,
+                    parent_namespace=first_ns,
+                    parent_class=first_name,
+                    file_path=context["file_path"],
+                    start_line=node.start_point[0] + 1,
+                    end_line=node.end_point[0] + 1,
+                )
+                result.class_hierarchy_entries.append(hier_entry)
+                interfaces = base_types[1:]
+
+            # Process interfaces
+            if interfaces:
+                interface_fqns = []
+                for iface in interfaces:
+                    iface_fqn = self._resolve_type_namespace(
+                        iface, context["namespace"]
+                    )
+                    interface_fqns.append(iface_fqn)
+
+                impl_entry = InterfaceImplementationEntry(
+                    implementing_namespace=context["namespace"],
+                    implementing_type=name,
+                    interfaces=",".join(interface_fqns),
+                    file_path=context["file_path"],
+                    start_line=node.start_point[0] + 1,
+                    end_line=node.end_point[0] + 1,
+                )
+                result.interface_implementation_entries.append(impl_entry)
 
     def _process_class(self, node: Node, context: Dict, result: FileProcessingResult):
         """Process class/record declaration"""
@@ -855,61 +948,8 @@ class FileProcessor:
         )
         result.class_entries.append(entry)
 
-        # Process class hierarchy (base class and interfaces)
-        base_list = self._find_base_list(node)
-        if base_list:
-            base_types = self._get_base_list_types(base_list)
-            if base_types:
-                # First item could be base class or interface
-                first_type = base_types[0]
-                first_fqn = self._resolve_type_namespace(
-                    first_type, context["namespace"]
-                )
-                first_ns, first_name = self._split_namespace_and_type(first_fqn)
-
-                # Check if first type is an interface (check declared_interfaces)
-                is_interface = first_name in self.declared_interfaces
-
-                interfaces = []
-                if is_interface:
-                    # All items are interfaces
-                    interfaces = base_types
-                else:
-                    # First item is base class, rest are interfaces
-                    parent_fqn = first_fqn
-                    parent_ns, parent_name = first_ns, first_name
-
-                    hier_entry = ClassHierarchyEntry(
-                        child_namespace=context["namespace"],
-                        child_class=name,
-                        parent_namespace=parent_ns,
-                        parent_class=parent_name,
-                        file_path=context["file_path"],
-                        start_line=node.start_point[0] + 1,
-                        end_line=node.end_point[0] + 1,
-                    )
-                    result.class_hierarchy_entries.append(hier_entry)
-
-                    interfaces = base_types[1:]
-
-                # Process interfaces
-                if interfaces:
-                    interface_fqns = []
-                    for iface in interfaces:
-                        iface_fqn = self._resolve_type_namespace(
-                            iface, context["namespace"]
-                        )
-                        interface_fqns.append(iface_fqn)
-
-                    impl_entry = InterfaceImplementationEntry(
-                        implementing_namespace=context["namespace"],
-                        implementing_type=name,
-                        interfaces=",".join(interface_fqns),
-                        file_path=context["file_path"],
-                        start_line=node.start_point[0] + 1,
-                        end_line=node.end_point[0] + 1,
-                    )
-                    result.interface_implementation_entries.append(impl_entry)
+        # Note: hierarchy/implementation extraction is done in Pass 2
+        # (_process_type_hierarchy) where declared_interfaces is populated
 
     def _process_struct(self, node: Node, context: Dict, result: FileProcessingResult):
         """Process struct declaration"""
@@ -938,27 +978,8 @@ class FileProcessor:
         )
         result.struct_entries.append(entry)
 
-        # Process interface implementations (structs can implement interfaces)
-        base_list = self._find_base_list(node)
-        if base_list:
-            interfaces = self._get_base_list_types(base_list)
-            if interfaces:
-                interface_fqns = []
-                for iface in interfaces:
-                    iface_fqn = self._resolve_type_namespace(
-                        iface, context["namespace"]
-                    )
-                    interface_fqns.append(iface_fqn)
-
-                impl_entry = InterfaceImplementationEntry(
-                    implementing_namespace=context["namespace"],
-                    implementing_type=name,
-                    interfaces=",".join(interface_fqns),
-                    file_path=context["file_path"],
-                    start_line=node.start_point[0] + 1,
-                    end_line=node.end_point[0] + 1,
-                )
-                result.interface_implementation_entries.append(impl_entry)
+        # Note: interface implementation extraction is done in Pass 2
+        # (_process_type_hierarchy) where declared_interfaces is populated
 
     def _process_enum(self, node: Node, context: Dict, result: FileProcessingResult):
         """Process enum declaration"""
