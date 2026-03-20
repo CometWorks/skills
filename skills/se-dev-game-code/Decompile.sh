@@ -17,6 +17,8 @@ run_decompile() {
 }
 
 # Execution List
+run_decompile "HavokWrapper" "Bin64/HavokWrapper.dll"
+run_decompile "RecastDetourWrapper" "Bin64/RecastDetourWrapper.dll"
 run_decompile "Sandbox.Common" "Bin64/Sandbox.Common.dll"
 run_decompile "Sandbox.Game" "Bin64/Sandbox.Game.dll"
 run_decompile "Sandbox.Game.XmlSerializers" "Bin64/Sandbox.Game.XmlSerializers.dll"
