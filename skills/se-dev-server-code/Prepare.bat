@@ -79,12 +79,18 @@ uv run python -u copy_content.py
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_content
 
-if exist CodeIndex\variables.csv goto skip_index
+if exist CodeIndex\game_version.txt goto skip_code_index
 echo Indexing decompiled code
 mkdir CodeIndex 2>NUL
 uv run python -OO -u index_code.py Decompiled CodeIndex
 if %ERRORLEVEL% NEQ 0 goto failed
-:skip_index
+:skip_code_index
+
+if exist CodeIndex\content_index.csv goto skip_content_index
+echo Indexing content files
+uv run python -u index_content.py Content Decompiled CodeIndex
+if %ERRORLEVEL% NEQ 0 goto failed
+:skip_content_index
 
 echo DONE
 del "\\?\%cd%\nul" 2>error.txt

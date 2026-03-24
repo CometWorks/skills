@@ -97,6 +97,15 @@ The textual part of the game's `Content` is copied into the `Content` folder for
 - Default blueprints and scenarios
 - See [ContentTypes.md](ContentTypes.md) for the full list of content types
 
+### Content Index
+
+`CodeIndex/content_index.csv` maps every textual content file to the decompiled C#
+source files that reference it. Columns: `rel_path` (path relative to `Content/`)
+and `usage` (path of a C# source file in `Decompiled/` that references it). Each
+content file appears once per usage, so you can filter and page by `rel_path` to see
+all C# code that loads or references a given content file. Files with no known usages
+have a single row with an empty `usage` column.
+
 ## General Rules
 
 - In the `Decompiled` folder search only inside the C# source files (*.cs) in general. If you work on transpiler or preloader patches, then also search in the IL code (*.il) files.
