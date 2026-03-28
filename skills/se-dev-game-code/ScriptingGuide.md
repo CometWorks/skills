@@ -39,7 +39,6 @@ busybox.exe sed -i 's/old/new/g' file.txt
 **Correct:**
 ```bash
 busybox.exe grep "pattern" C:/Users/name/folder
-busybox.exe find C:/Dev/SE1/Skills/se-dev-skills -name "*.cs"
 ```
 
 **Wrong:**
