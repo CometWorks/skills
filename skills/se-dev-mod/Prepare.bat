@@ -1,21 +1,26 @@
 @echo off
 
-:: 1. Get the Steam Install Path from the Registry
-for /f "tokens=2*" %%A in ('reg query "HKEY_CURRENT_USER\Software\Valve\Steam" /v "SteamPath" 2^>nul') do (
-    set "STEAM_ROOT=%%B"
+:: 1. Detect game install location (env var override takes precedence)
+if defined SE_GAME_ROOT goto have_game_root
+
+:: Try the game's registry key
+for /f "tokens=2*" %%A in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 244850" /v "InstallLocation" 2^>nul') do (
+    set "SE_GAME_ROOT=%%B"
 )
 
-:: 2. Clean up the path (Registry uses forward slashes, Batch prefers backslashes)
-set "STEAM_ROOT=%STEAM_ROOT:/=\%"
+if defined SE_GAME_ROOT goto have_game_root
+echo ERROR: Could not detect Space Engineers install location.
+echo Please set the SE_GAME_ROOT environment variable to the game's root folder
+echo (the folder containing Bin64, Content, etc.)
+goto failed
 
-:: 3. Define your target folders
-set "WORKSHOP_PATH=%STEAM_ROOT%\steamapps\workshop\content"
-set "COMMON_PATH=%STEAM_ROOT%\steamapps\common"
+:have_game_root
+echo Game Root: %SE_GAME_ROOT%
 
-:: Output results to verify
-echo Steam Root:    %STEAM_ROOT%
+:: 2. Derive workshop path from game install location
+for %%I in ("%SE_GAME_ROOT%\..\..") do set "STEAMAPPS_PATH=%%~fI"
+set "WORKSHOP_PATH=%STEAMAPPS_PATH%\workshop\content\244850"
 echo Workshop Path: %WORKSHOP_PATH%
-echo Common Path:   %COMMON_PATH%
 
 echo Verifying Python
 python --version
@@ -47,7 +52,7 @@ if %ERRORLEVEL% NEQ 0 goto failed
 
 if exist SteamMods goto skip_steam_mods
 echo Linking the Steam content folder as SteamMods
-mklink /J SteamMods "%WORKSHOP_PATH%\244850"
+mklink /J SteamMods "%WORKSHOP_PATH%"
 if %ERRORLEVEL% EQU 0 goto skip_steam_mods
 echo ERROR: Missing Steam content folder
 echo Please fix the folder path on the `mklink` line in the `Prepare.bat` script.

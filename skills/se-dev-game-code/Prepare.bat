@@ -1,21 +1,21 @@
 @echo off
 
-:: 1. Get the Steam Install Path from the Registry
-for /f "tokens=2*" %%A in ('reg query "HKEY_CURRENT_USER\Software\Valve\Steam" /v "SteamPath" 2^>nul') do (
-    set "STEAM_ROOT=%%B"
+:: 1. Detect game install location (env var override takes precedence)
+if defined SE_GAME_ROOT goto have_game_root
+
+:: Try the game's registry key
+for /f "tokens=2*" %%A in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 244850" /v "InstallLocation" 2^>nul') do (
+    set "SE_GAME_ROOT=%%B"
 )
 
-:: 2. Clean up the path (Registry uses forward slashes, Batch prefers backslashes)
-set "STEAM_ROOT=%STEAM_ROOT:/=\%"
+if defined SE_GAME_ROOT goto have_game_root
+echo ERROR: Could not detect Space Engineers install location.
+echo Please set the SE_GAME_ROOT environment variable to the game's root folder
+echo (the folder containing Bin64, Content, etc.)
+goto failed
 
-:: 3. Define your target folders
-set "WORKSHOP_PATH=%STEAM_ROOT%\steamapps\workshop\content"
-set "COMMON_PATH=%STEAM_ROOT%\steamapps\common"
-
-:: Output results to verify
-echo Steam Root:    %STEAM_ROOT%
-echo Workshop Path: %WORKSHOP_PATH%
-echo Common Path:   %COMMON_PATH%
+:have_game_root
+echo Game Root: %SE_GAME_ROOT%
 
 echo Verifying Python
 python --version
@@ -56,11 +56,12 @@ if %ERRORLEVEL% NEQ 0 goto failed
 if exist Bin64 goto skip_bin64
 echo Linking the game folder as Bin64
 REM It must be the folder where SpaceEngineers.exe is located:
-mklink /J Bin64 "%COMMON_PATH%\SpaceEngineers\Bin64"
+mklink /J Bin64 "%SE_GAME_ROOT%\Bin64"
 if %ERRORLEVEL% EQU 0 goto skip_bin64
 echo ERROR: Missing Bin64 folder.
 echo Please verify that Space Engineers (version 1) is installed.
-echo If Space Engineers is installed at custom location, then please update the absolute path to the `Bin64` folder in the `mklink` command inside `Prepare.bat` accordingly and try again.
+echo If Space Engineers is installed at a custom location, then set the SE_GAME_ROOT
+echo environment variable to the game's root folder and try again.
 goto failed
 :skip_bin64
 
@@ -73,7 +74,7 @@ rmdir /s /q Bin64
 
 if exist Content goto skip_content
 echo Copying indexable content
-uv run python -u copy_content.py "%COMMON_PATH%\SpaceEngineers\Content"
+uv run python -u copy_content.py "%SE_GAME_ROOT%\Content"
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_content
 

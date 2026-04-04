@@ -1,21 +1,21 @@
 @echo off
 
-:: 1. Get the Steam Install Path from the Registry
-for /f "tokens=2*" %%A in ('reg query "HKEY_CURRENT_USER\Software\Valve\Steam" /v "SteamPath" 2^>nul') do (
-    set "STEAM_ROOT=%%B"
+:: 1. Detect server install location (env var override takes precedence)
+if defined SE_SERVER_ROOT goto have_server_root
+
+:: Try the game's registry key, then append DedicatedServer to derive the server path
+for /f "tokens=2*" %%A in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 244850" /v "InstallLocation" 2^>nul') do (
+    set "SE_SERVER_ROOT=%%BDedicatedServer"
 )
 
-:: 2. Clean up the path (Registry uses forward slashes, Batch prefers backslashes)
-set "STEAM_ROOT=%STEAM_ROOT:/=\%"
+if defined SE_SERVER_ROOT goto have_server_root
+echo ERROR: Could not detect Space Engineers Dedicated Server install location.
+echo Please set the SE_SERVER_ROOT environment variable to the server's root folder
+echo (the folder containing DedicatedServer64, Content, etc.)
+goto failed
 
-:: 3. Define your target folders
-set "WORKSHOP_PATH=%STEAM_ROOT%\steamapps\workshop\content"
-set "COMMON_PATH=%STEAM_ROOT%\steamapps\common"
-
-:: Output results to verify
-echo Steam Root:    %STEAM_ROOT%
-echo Workshop Path: %WORKSHOP_PATH%
-echo Common Path:   %COMMON_PATH%
+:have_server_root
+echo Server Root: %SE_SERVER_ROOT%
 
 echo Verifying Python
 python --version
@@ -56,11 +56,12 @@ if %ERRORLEVEL% NEQ 0 goto failed
 if exist Bin64 goto skip_bin64
 echo Linking the server folder as Bin64
 REM It must be the folder where SpaceEngineersDedicated.exe is located:
-mklink /J Bin64 "%COMMON_PATH%\SpaceEngineersDedicatedServer\DedicatedServer64"
+mklink /J Bin64 "%SE_SERVER_ROOT%\DedicatedServer64"
 if %ERRORLEVEL% EQU 0 goto skip_bin64
 echo ERROR: Missing Bin64 folder.
 echo Please verify that Space Engineers Dedicated Server is installed.
-echo If the Dedicated Server is installed at a custom location, then please update the absolute path to the `DedicatedServer64` folder in the `mklink` command inside `Prepare.bat` accordingly and try again.
+echo If the Dedicated Server is installed at a custom location, then set the SE_SERVER_ROOT
+echo environment variable to the server's root folder and try again.
 goto failed
 :skip_bin64
 
@@ -71,11 +72,9 @@ if %ERRORLEVEL% NEQ 0 goto failed
 
 rmdir /s /q Bin64
 
-set "DEDICATED_SERVER_ROOT=%COMMON_PATH%\SpaceEngineersDedicatedServer"
-
 if exist Content goto skip_content
 echo Copying indexable content
-uv run python -u copy_content.py "%COMMON_PATH%\SpaceEngineersDedicatedServer\Content"
+uv run python -u copy_content.py "%SE_SERVER_ROOT%\Content"
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_content
 
