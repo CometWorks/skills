@@ -73,7 +73,7 @@ rmdir /s /q Bin64
 
 if exist Content goto skip_content
 echo Copying indexable content
-uv run python -u copy_content.py
+uv run python -u copy_content.py "%COMMON_PATH%\SpaceEngineers\Content"
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_content
 

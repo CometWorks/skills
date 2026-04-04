@@ -1,11 +1,12 @@
 import os
 import shutil
+import sys
 from pathlib import Path
 from typing import Set
 
-
-def copy_content(subdir: str, allowed_extensions: Set[str], exclude: Set[str] = ()):
-    src_dir = Path(os.environ['DEDICATED_SERVER_ROOT']) / 'Content' / subdir
+def copy_content(original_content_dir: Path, subdir: str, allowed_extensions: Set[str], exclude: Set[str] = ()):
+    src_dir = original_content_dir / subdir
+    assert src_dir.is_dir()
     dst_dir = Path('Content') / subdir
     dst_dir.mkdir(parents=True, exist_ok=True)
     for src_path in src_dir.glob('**/*'):
@@ -22,14 +23,16 @@ def copy_content(subdir: str, allowed_extensions: Set[str], exclude: Set[str] = 
 
 
 def main():
-    copy_content('CustomWorlds', {'scf'})
-    copy_content('Data', {'sbc', 'sbl', 'resx', 'vs', 'gsc', 'json'}, {'Prefabs'})
-    copy_content('DataPlatform', {'json'})
-    copy_content('Fonts', {'xml'})
-    copy_content('Particles', {'mwl'})
-    copy_content('Scenarios', {'scf', 'sbl', 'resx', 'vs'})
-    copy_content('Shaders', {'hlsl'})
-    copy_content('VisualScripts', {'vs', 'vsc', 'sbl', 'resx'})
+    oc = Path(sys.argv[1])
+    assert oc.is_dir()
+    copy_content(oc, 'CustomWorlds', {'scf'})
+    copy_content(oc, 'Data', {'sbc', 'sbl', 'resx', 'vs', 'gsc', 'json'}, {'Prefabs'})
+    copy_content(oc, 'DataPlatform', {'json'})
+    copy_content(oc, 'Fonts', {'xml'})
+    copy_content(oc, 'Particles', {'mwl'})
+    copy_content(oc, 'Scenarios', {'scf', 'sbl', 'resx', 'vs'})
+    copy_content(oc, 'Shaders', {'hlsl'})
+    copy_content(oc, 'VisualScripts', {'vs', 'vsc', 'sbl', 'resx'})
 
 
 if __name__ == '__main__':
