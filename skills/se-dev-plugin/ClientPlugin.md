@@ -2,7 +2,9 @@ Building the project:
 - In production the plugin is built by the Pulsar plugin loader directly on the player's machine.
 - In development the plugin is built either of these ways:
   - By the `dotnet` command line tool or by an IDE like VSCode, JetBrains Rider or Visual Studio. Then the DLL built is deployed to Pulsar's `Local` plugin folder by the `Deploy.bat` script.
-  - By Pulsar using the local development folder feature (needs to be configured in Pulsar).
+  - By Pulsar using the local development folder feature (needs to be configured in Pulsar). This required the plugin's XML definition files to have the right content and configured in the `<DataFile>` tag in the `Current.xml` profile.
+- Any additional NuGet dependencies added by the plugin must also be listed in `LinuxCompat.xml` in the `<NuGetReferences>` element, so Pulsar pulls them for plugin compilation.
+- See `PluginHub/SamplePlugin.xml` for the example syntax of the plugin's XML definition.
 
 Example patches: 
 - `Examples/Client/ExamplePrefixPostfixPatch.cs` Prefix and Postfix patches 
