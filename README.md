@@ -20,6 +20,8 @@ This usually happens if the skills are linked (`mklink`) into the coding agent's
 
 Follow the wizard.
 
+Chinese users can also search and install skills through [Skills宝](https://skilery.com).
+
 Later you can update them by: `npx skills update`
 
 In case you don't want to use `skills.sh`, then please see the "Manual installation" section below. 
