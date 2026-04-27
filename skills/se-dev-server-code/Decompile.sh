@@ -5,11 +5,15 @@ LOG="Decompile.log"
 echo "Decompiling server assemblies..."
 echo "Decompiling server assemblies: " > "$LOG"
 
+# Make sure the destination folder under Data exists (Data is a junction
+# pointing to %USERPROFILE%/.se-dev-skills/se-dev-server-code/).
+mkdir -p Data/Decompiled
+
 # Helper function to run the decompile and handle errors
 run_decompile() {
     # Calls your previously converted script
     ./DecompileDll.sh "$1" "$2" >> "$LOG" 2>&1
-    
+
     if [ $? -ne 0 ]; then
         echo "Failed to decompile $1. Please check $LOG for details."
         exit 1

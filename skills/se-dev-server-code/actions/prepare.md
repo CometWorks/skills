@@ -62,9 +62,15 @@ Prepare.bat
 ## What Preparation Does
 
 The preparation script:
+- Verifies that Python 3.13+ and the command line `git` client are available
 - Sets up the Python virtual environment
 - Downloads and installs required tools (busybox.exe, ILSpy)
+- Creates the `Data` junction pointing to `%USERPROFILE%\.se-dev-skills\se-dev-server-code\`
+- Initialises a local Git repository inside `Data/` on first run (with an initial commit of `.gitignore`)
+- Detects the current server version directly from the binaries
+- Wipes `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` whenever the version differs from the recorded one (older versions remain in the local Git history)
 - Decompiles the server DLLs to C# and optionally to IL code (needs uncommenting a line in `DecompileDll.sh` if this is required)
-- Builds the code search index
-- Copies server content data
+- Records the new server version in `Data/game_version.txt` and commits the decompiled sources with the version label as the commit message
+- Copies server content data into `Data/Content`
+- Builds the code search index in `Data/CodeIndex`
 - Verifies the environment is ready for use

@@ -27,7 +27,8 @@ In case you don't want to use `skills.sh`, then please see the "Manual installat
 ## Preparation
 
 The skills will automatically prepare themselves on **first use**. It means downloading some tools and indexing code.
-If you want to prepare them ahead of time, simply run `Prepare.bat` in their respective folders.
+If you want to prepare them ahead of time, simply run `Prepare.bat` in their respective folders. If any dependency
+is missing you will get a failure message, so run it in a `cmd` window, not directly, so you see its output.
 
 **Note:** Preparing the `se-dev-game-code` skill may take 5–15 minutes, as it fully decompiles the game and builds
 code indexes to allow for rapid code search later. The fully prepared repository takes about **1.5 GB** of disk space

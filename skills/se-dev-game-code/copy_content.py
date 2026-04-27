@@ -4,10 +4,13 @@ import sys
 from pathlib import Path
 from typing import Set
 
+CONTENT_DST = Path('Data') / 'Content'
+
+
 def copy_content(original_content_dir: Path, subdir: str, allowed_extensions: Set[str], exclude: Set[str] = ()):
     src_dir = original_content_dir / subdir
     assert src_dir.is_dir()
-    dst_dir = Path('Content') / subdir
+    dst_dir = CONTENT_DST / subdir
     dst_dir.mkdir(parents=True, exist_ok=True)
     for src_path in src_dir.glob('**/*'):
         src_path_ext = str(src_path).rsplit('.', 1)[-1].lower()

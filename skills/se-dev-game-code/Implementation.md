@@ -4,7 +4,7 @@ Technical documentation for contributors and those working on the skill itself.
 
 ## Index File Formats
 
-All CSV files are located in `CodeIndex/` after preparation.
+All CSV files are located in `Data/CodeIndex/` after preparation.
 
 ### Standard Index Files
 
@@ -21,7 +21,7 @@ namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,d
 - `method` - The method containing the symbol (empty for type-level declarations)
 - `symbol_name` - Field/property/event name (for member indices)
 - `type` - Either `declaration` or `usage`
-- `file_path` - Relative path from `Decompiled/` folder
+- `file_path` - Relative path from `Data/Decompiled/` folder
 - `start_line`, `end_line` - Line range in source file (1-indexed, inclusive)
 - `description` - XML doc comment summary (for declarations only)
 - `access` - Access modifier: `public`, `private`, `protected`, `internal`, etc. (member declarations only)
@@ -72,7 +72,7 @@ namespace,declaring_type,method_name,signature,file_path,start_line,end_line,des
 - `declaring_type` - Class name (for inner classes: `ParentClass.ChildClass`)
 - `method_name` - The method name
 - `signature` - Full method signature on a single line (whitespace normalized)
-- `file_path` - Relative path from `Decompiled/` folder
+- `file_path` - Relative path from `Data/Decompiled/` folder
 - `start_line`, `end_line` - Line range of signature only (not whole method body)
 - `description` - XML doc comment before the method
 

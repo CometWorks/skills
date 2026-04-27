@@ -171,11 +171,11 @@ Results are sorted by code depth, then alphabetically.
 
 ### Reading Source Files
 
-The `relative_path` is relative to the `Decompiled/` folder:
+The `relative_path` is relative to the `Data/Decompiled/` folder:
 
 ```bash
 # Search result: VRage.Math/VRageMath/Vector3D.cs:13-2293
-# Read file: Decompiled/VRage.Math/VRageMath/Vector3D.cs
+# Read file: Data/Decompiled/VRage.Math/VRageMath/Vector3D.cs
 ```
 
 The first folder indicates the assembly (DLL). From the second level, folders match namespace hierarchy.

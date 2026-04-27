@@ -72,7 +72,7 @@ Get-ChildItem -Recurse -Filter "*.cs" | Select-String "pattern"
 import csv
 from pathlib import Path
 
-INDEX_DIR = Path(__file__).parent / "CodeIndex"
+INDEX_DIR = Path(__file__).parent / "Data" / "CodeIndex"
 
 def find_methods_in_class(class_name):
     """Find all methods declared in a specific class"""
@@ -100,7 +100,7 @@ from pathlib import Path
 def grep_decompiled(pattern):
     """Search decompiled source using busybox grep"""
     # Use forward slashes for paths
-    decompiled = Path("Decompiled").resolve().as_posix()
+    decompiled = Path("Data/Decompiled").resolve().as_posix()
     
     result = subprocess.run(
         ["busybox.exe", "grep", "-r", "-n", pattern, decompiled],
@@ -122,12 +122,12 @@ if __name__ == "__main__":
 
 ### Working with CSV Indexes
 
-All index files are in `CodeIndex/` directory. Use Python's `csv` module:
+All index files are in `Data/CodeIndex/`. Use Python's `csv` module:
 
 ```python
 import csv
 
-with open("CodeIndex/class_declarations.csv", "r", encoding="utf-8") as f:
+with open("Data/CodeIndex/class_declarations.csv", "r", encoding="utf-8") as f:
     reader = csv.DictReader(f)
     for row in reader:
         # row is a dict with columns as keys
@@ -136,13 +136,13 @@ with open("CodeIndex/class_declarations.csv", "r", encoding="utf-8") as f:
 
 ### Reading Decompiled Source
 
-Files are in `Decompiled/` directory:
+Files are in `Data/Decompiled/`:
 
 ```python
 from pathlib import Path
 
 # From search result: VRage.Math/VRageMath/Vector3D.cs:13-2293
-file_path = Path("Decompiled/VRage.Math/VRageMath/Vector3D.cs")
+file_path = Path("Data/Decompiled/VRage.Math/VRageMath/Vector3D.cs")
 
 with open(file_path, "r", encoding="utf-8") as f:
     lines = f.readlines()
@@ -152,13 +152,13 @@ with open(file_path, "r", encoding="utf-8") as f:
 
 ### Searching Content Data
 
-Server content is in `Content/` directory. See `ContentTypes.md` for structure.
+Server content is in `Data/Content/`. See `ContentTypes.md` for structure.
 
 ```python
 from pathlib import Path
 
 # Search all SBC files
-for sbc_file in Path("Content/Data").rglob("*.sbc"):
+for sbc_file in Path("Data/Content/Data").rglob("*.sbc"):
     with open(sbc_file, "r", encoding="utf-8") as f:
         content = f.read()
         if "LargeBlockArmorBlock" in content:

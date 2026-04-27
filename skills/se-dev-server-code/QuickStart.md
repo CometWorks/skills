@@ -57,9 +57,9 @@ Output: `Sandbox.Game.MyGrid:VRage.Game.Entity.MyEntity`
 Results show: `relative_path:line` or `relative_path:start-end`
 
 To read the actual code:
-- Results are relative to the `Decompiled/` folder
+- Results are relative to the `Data/Decompiled/` folder
 - Example: `VRage.Math/VRageMath/Vector3D.cs:13-2293`
-- Read: `Decompiled/VRage.Math/VRageMath/Vector3D.cs`
+- Read: `Data/Decompiled/VRage.Math/VRageMath/Vector3D.cs`
 
 ## Next Steps
 

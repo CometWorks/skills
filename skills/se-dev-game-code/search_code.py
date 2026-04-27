@@ -7,7 +7,7 @@ from collections import defaultdict
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
-INDEX_DIR = SCRIPT_DIR / "CodeIndex"
+INDEX_DIR = SCRIPT_DIR / "Data" / "CodeIndex"
 
 CATEGORY_FILES = {
     "class": ("class_declarations.csv", "class_usages.csv"),

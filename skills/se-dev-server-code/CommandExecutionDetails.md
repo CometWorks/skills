@@ -205,7 +205,7 @@ uv run search_code.py class declaration MyCubeGrid (with workdir set to skill fo
 
 **Step 5:** For UNIX commands, use busybox with forward slashes:
 ```bash
-busybox.exe grep -r "MyCubeGrid" C:/path/to/Decompiled
+busybox.exe grep -r "MyCubeGrid" C:/path/to/Data/Decompiled
 ```
 
 ## Troubleshooting Checklist

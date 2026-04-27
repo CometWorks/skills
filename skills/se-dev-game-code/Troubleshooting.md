@@ -29,7 +29,7 @@ This guide helps you resolve common issues when searching game code.
    ```
 
 4. **Index not built yet**:
-   - Check if `CodeIndex/` directory exists in the skill folder
+   - Check if `Data/CodeIndex/` exists (the `Data` junction must be present in the skill folder)
    - If missing, preparation didn't complete successfully
    - Re-run `./Prepare.bat` from the skill directory
 
@@ -43,10 +43,10 @@ uv run search_code.py class usage Entity --count
 uv run search_code.py class usage "re:.*Entity.*" --count
 
 # Step 3: Check what files are available
-ls Decompiled/Sandbox.Game/Sandbox/Game/Entities/*.cs | head -10
+ls Data/Decompiled/Sandbox.Game/Sandbox/Game/Entities/*.cs | head -10
 
 # Step 4: Try direct file search as fallback
-grep -r "class.*Entity" Decompiled/Sandbox.Game/Sandbox/Game/Entities/ | head -5
+grep -r "class.*Entity" Data/Decompiled/Sandbox.Game/Sandbox/Game/Entities/ | head -5
 ```
 
 ## Too Many Results
@@ -103,24 +103,29 @@ uv run search_code.py class usage MyEntity --limit 10 --offset 20
 If searches return unexpected results or after game updates:
 
 ```bash
-# Delete old index
-rm -rf CodeIndex/
+# Delete the index (Data/Content can also be removed if needed)
+rm -rf Data/CodeIndex/
 
 # Re-run preparation (this will rebuild the index)
 ./Prepare.bat
 ```
 
+`Prepare.bat` also detects game updates automatically: if the binaries' version
+differs from `Data/game_version.txt`, the `Decompiled/`, `Content/` and
+`CodeIndex/` folders are wiped and rebuilt. Earlier decompiled versions remain
+available in the local Git history under `Data/.git/`.
+
 ### Checking Index Status
 
 ```bash
 # Check if index exists
-test -d CodeIndex && echo "Index exists" || echo "Index missing"
+test -d Data/CodeIndex && echo "Index exists" || echo "Index missing"
 
 # Count indexed entries
-wc -l CodeIndex/*.csv
+wc -l Data/CodeIndex/*.csv
 
 # See what's indexed
-ls -lh CodeIndex/
+ls -lh Data/CodeIndex/
 ```
 
 ## Wrong Skill Selection
@@ -198,12 +203,12 @@ If you're still getting NO-MATCHES or unexpected results:
 
 2. **Check decompiled code exists**:
    ```bash
-   ls Decompiled/ | head -5
+   ls Data/Decompiled/ | head -5
    ```
 
 3. **Manually search to verify**:
    ```bash
-   grep -r "MyCubeBlock" Decompiled/Sandbox.Game/ | head -3
+   grep -r "MyCubeBlock" Data/Decompiled/Sandbox.Game/ | head -3
    ```
 
 4. **Check the logs**:

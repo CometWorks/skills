@@ -4,23 +4,39 @@ This skill provides access to decompiled C# source code from the Space Engineers
 
 ## Overview
 
-The skill maintains:
-- **Decompiled/** - Full decompiled C# source organized by assembly
-- **Content/** - Server content files (definitions, translations, blueprints)
-- **CodeIndex/** - Pre-built CSV indexes for fast symbol lookup
+The skill maintains the following data under the `Data` junction (which points
+to `%USERPROFILE%\.se-dev-skills\se-dev-server-code\`):
+
+- **Data/Decompiled/** - Full decompiled C# source organized by assembly
+- **Data/Content/** - Server content files (definitions, translations, blueprints)
+- **Data/CodeIndex/** - Pre-built CSV indexes for fast symbol lookup
+- **Data/.git/** - Local Git repository tracking every decompilation; commit
+  message is the server version label (e.g. `1.208.015 b4`)
+- **Data/game_version.txt** - Recorded version constants; used to detect server updates
 
 ## Setup
 
-Run the preparation steps in `Prepare.md` if `Prepare.DONE` is missing. This will:
-1. Decompile the server assemblies
-2. Copy server content
-3. Build the code index
+Run the preparation steps in `Prepare.md` if `Prepare.DONE` is missing. This requires:
+
+- Python 3.13+
+- The command line `git` client on `PATH`
+- The .NET SDK (for `ilspycmd`)
+
+Preparation will:
+1. Create the `Data` junction and the local Git repository inside it (with an
+   initial commit of `.gitignore`)
+2. Detect the current server version by inspecting the binaries
+3. Wipe `Decompiled/`, `Content/` and `CodeIndex/` if the version differs from
+   the recorded one
+4. Decompile the server assemblies and commit them with the version label
+5. Copy server content
+6. Build the code index
 
 ## Code Index
 
 ### Index Files
 
-Located in `CodeIndex/` after preparation:
+Located in `Data/CodeIndex/` after preparation:
 
 | File | Contains |
 |------|----------|
@@ -61,7 +77,7 @@ namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,d
 | `method` | The method containing the symbol (empty for type-level items) |
 | `symbol_name` | Field/property/event name (for member indices) |
 | `type` | Either `declaration` or `usage` |
-| `file_path` | Relative path from `Decompiled/` folder |
+| `file_path` | Relative path from `Data/Decompiled/` folder |
 | `start_line` | Starting line number |
 | `end_line` | Ending line number |
 | `description` | XML doc comment (for declarations only) |
@@ -84,7 +100,7 @@ namespace,declaring_type,method_name,signature,file_path,start_line,end_line,des
 | `declaring_type` | Class name (for inner classes: `ParentClass.ChildClass`) |
 | `method_name` | The method name |
 | `signature` | Full method signature on a single line (whitespace normalized) |
-| `file_path` | Relative path from `Decompiled/` folder |
+| `file_path` | Relative path from `Data/Decompiled/` folder |
 | `start_line` | Starting line of the signature |
 | `end_line` | Ending line of the signature (not the whole method body) |
 | `description` | XML doc comment before the method |
@@ -205,17 +221,17 @@ uv run search_code.py method signature GetPosition
 For simple lookups, direct grep can be faster:
 
 ```
-busybox.exe grep ",MyToolbar," CodeIndex/class_declarations.csv
-busybox.exe grep ",GetPosition," CodeIndex/method_usages.csv
+busybox.exe grep ",MyToolbar," Data/CodeIndex/class_declarations.csv
+busybox.exe grep ",GetPosition," Data/CodeIndex/method_usages.csv
 ```
 
 ## Reading Source Files
 
-After finding a symbol location, read the source from `Decompiled/`:
+After finding a symbol location, read the source from `Data/Decompiled/`:
 
 ```
 # Search result: VRage.Math/VRageMath/Vector3D.cs:13-245
-# Read: Decompiled/VRage.Math/VRageMath/Vector3D.cs
+# Read: Data/Decompiled/VRage.Math/VRageMath/Vector3D.cs
 ```
 
 The first folder in the path indicates the assembly (DLL) containing the code.
@@ -240,7 +256,7 @@ The first folder in the path indicates the assembly (DLL) containing the code.
 All commands run on Windows. Use `busybox.exe` for UNIX-like commands with forward slashes in paths:
 
 ```
-busybox.exe grep "pattern" CodeIndex/class_declarations.csv
+busybox.exe grep "pattern" Data/CodeIndex/class_declarations.csv
 ```
 
 Use `uv run` to execute Python scripts with the virtual environment.

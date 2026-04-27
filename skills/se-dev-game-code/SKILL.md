@@ -35,13 +35,50 @@ Check these patterns **in order** - first match wins:
 | 4 | Search keywords | `se-dev-game-code search`, `se-dev-game-code find class`, `se-dev-game-code lookup` | search |
 | 5 | Test keywords | `se-dev-game-code test`, `se-dev-game-code verify`, `se-dev-game-code check` | test |
 
+## Requirements
+
+The host system must have the following on `PATH`:
+
+- **Python** 3.13 or newer
+- **git** command line client (used to version each decompiled game build)
+- **dotnet** SDK (for installing `ilspycmd`)
+
 ## Getting Started
 
 **⚠️ CRITICAL: Before running ANY commands, read [CommandExecution.md](CommandExecution.md) to avoid common mistakes that cause command failures.**
 
 If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time preparation steps first. See the [prepare action](./actions/prepare.md).
 
-During preparation the current game version is stored into `CodeIndex/game_version.txt`.
+## Folder Layout
+
+After preparation the skill folder contains a `Data` junction. The actual data lives outside the skill folder so that it is preserved across `Clean.bat` / `Prepare.bat` cycles.
+
+```
+skills/se-dev-game-code/
+├── Data/                 (junction → %USERPROFILE%\.se-dev-skills\se-dev-game-code)
+│   ├── .git/             local Git repository tracking decompiled sources
+│   ├── .gitignore        ignores CodeIndex/, Content/, __pycache__, *.py[cod], *.bak, *.log
+│   ├── game_version.txt  recorded SE_VERSION / CLIENT_BUILD_NUMBER / SERVER_BUILD_NUMBER
+│   ├── Decompiled/       decompiled C# sources, organised per assembly (committed)
+│   ├── Content/          textual game content (NOT committed - regenerated)
+│   └── CodeIndex/        CSV indexes (NOT committed - regenerated)
+├── Bin64/                (junction → game's Bin64, removed after preparation)
+└── ...                   skill scripts and documentation
+```
+
+The `Data` folder is a junction to `%USERPROFILE%\.se-dev-skills\se-dev-game-code\`. (`%USERPROFILE%` is used rather than `%LOCALAPPDATA%` so the data sits outside any per-app UWP filesystem virtualization.) Treat `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` exactly as before.
+
+## Local Versioning of Decompiled Sources
+
+The `Data` folder is a local Git repository. Every successful preparation creates a commit of the decompiled C# sources whose message is the game's version label, e.g. `1.208.015 b4`.
+
+This means:
+
+- **All previously decompiled game versions are preserved** in the local Git history. You can `git checkout` any past commit inside `Data/` to inspect or diff against an older build.
+- **Game updates are detected automatically** by comparing the binaries' embedded version constants with `Data/game_version.txt`. If they differ (or the file is missing), `Decompiled/`, `Content/` and `CodeIndex/` are wiped and a fresh decompilation runs.
+- This makes it easy to **update plugins, mods and scripts for compatibility with new game releases**: diff the relevant source between two commits inside `Data/` to see exactly what changed.
+
+The repository uses an internal author/email (`se-dev-skills@localhost`) so commits work even on machines without a configured global Git identity.
 
 ## Essential Documentation
 
@@ -91,7 +128,7 @@ For building your own utility scripts to work with the indexes and decompiled co
 
 ## Game Content Data
 
-The textual part of the game's `Content` is copied into the `Content` folder for free text search:
+The textual part of the game's `Content` is copied into the `Data/Content` folder for free text search:
 - Language translations, including the string IDs
 - Block and other entity definitions
 - Default blueprints and scenarios
@@ -99,19 +136,19 @@ The textual part of the game's `Content` is copied into the `Content` folder for
 
 ### Content Index
 
-`CodeIndex/content_index.csv` maps every textual content file to the decompiled C#
-source files that reference it. Columns: `rel_path` (path relative to `Content/`)
-and `usage` (path of a C# source file in `Decompiled/` that references it). Each
+`Data/CodeIndex/content_index.csv` maps every textual content file to the decompiled C#
+source files that reference it. Columns: `rel_path` (path relative to `Data/Content/`)
+and `usage` (path of a C# source file in `Data/Decompiled/` that references it). Each
 content file appears once per usage, so you can filter and page by `rel_path` to see
 all C# code that loads or references a given content file. Files with no known usages
 have a single row with an empty `usage` column.
 
 ## General Rules
 
-- In the `Decompiled` folder search only inside the C# source files (*.cs) in general. If you work on transpiler or preloader patches, then also search in the IL code (*.il) files.
-- In the `Content` folder search the files appropriate for the task. See [ContentTypes.md](ContentTypes.md) for the list of types.
-- Do not search for decompiled game code outside the `Decompiled` folder which is at the same level as this skill file. The decompiled game source tree must be there if the preparation succeeded.
-- Do not search for game content data outside the `Content` folder which is at the same level as this skill file. The copied game content must be there if the preparation succeeded.
+- In the `Data/Decompiled` folder search only inside the C# source files (*.cs) in general. If you work on transpiler or preloader patches, then also search in the IL code (*.il) files.
+- In the `Data/Content` folder search the files appropriate for the task. See [ContentTypes.md](ContentTypes.md) for the list of types.
+- Do not search for decompiled game code outside the `Data/Decompiled` folder. The decompiled game source tree must be there if the preparation succeeded.
+- Do not search for game content data outside the `Data/Content` folder. The copied game content must be there if the preparation succeeded.
 
 ## Action References
 

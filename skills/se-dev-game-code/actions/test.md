@@ -79,8 +79,8 @@ uv run search_code.py -c class usage MyPhysicsBody
 If tests fail:
 
 1. **Preparation not complete** - Run `.\Prepare.bat` first
-2. **Index not built** - Check that `CodeIndex/` folder exists and contains `.json` files
-3. **Decompiled folder missing** - Verify `Decompiled/` folder has `.cs` files
+2. **Index not built** - Check that `Data/CodeIndex/` exists and contains `.csv` files
+3. **Decompiled folder missing** - Verify `Data/Decompiled/` has `.cs` files
 4. **Python environment issues** - Try `uv sync` to reinstall dependencies
 
 As a last resort, you can force repeating the whole preparation process by running `.\Clean.bat`, then `.\Prepare.bat`.

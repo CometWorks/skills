@@ -15,8 +15,8 @@ The hierarchy system tracks:
 
 Quick visual overview of the complete hierarchies:
 
-- **`CodeIndex/class_hierarchy.txt`** - Full class inheritance tree (large, do not load at once)
-- **`CodeIndex/interface_hierarchy.txt`** - Full interface inheritance tree (very large, do not load at once)
+- **`Data/CodeIndex/class_hierarchy.txt`** - Full class inheritance tree (large, do not load at once)
+- **`Data/CodeIndex/interface_hierarchy.txt`** - Full interface inheritance tree (very large, do not load at once)
 
 These files use tree-style formatting similar to the `tree` command with fully-qualified type names.
 
