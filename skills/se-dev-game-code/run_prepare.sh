@@ -23,8 +23,8 @@ if cmd //c "$SCRIPT_DIR/Prepare.bat" >Prepare.log 2>&1; then
         echo "✓ Preparation completed successfully"
         echo ""
         echo "You can now use the skill features:"
-        echo "  - Run code searches: uv run search_code.py --help"
-        echo "  - Test the skill: ./test_search.bat"
+        echo "  - Run code searches: uv run search_game_code.py --help"
+        echo "  - Test the skill: ./test_search_game_code.bat"
         exit 0
     else
         echo "---"

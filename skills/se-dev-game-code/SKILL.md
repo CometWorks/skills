@@ -2,7 +2,7 @@
 name: se-dev-game-code
 description: Allows reading the decompiled C# code of Space Engineers version 1
 license: MIT
-allowed-tools: Read, Bash(*Prepare.bat*), Bash(*Clean.bat*), Bash(*run_prepare.sh*), Bash(*test_search.bat*), Bash(*uv run search_code.py *), Bash(*uv run index_code.py *), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*Clean.bat*), Bash(*run_prepare.sh*), Bash(*test_search_game_code.bat*), Bash(*uv run search_game_code.py *), Bash(*uv run index_code.py *), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
 # SE Dev Game Code Skill
@@ -20,8 +20,8 @@ Examples:
 
 - **prepare**: Run the one-time preparation (Prepare.bat)
 - **bash**: Run UNIX shell commands via busybox
-- **search**: Run code searches using `search_code.py`
-- **test**: Test this skill by running `test_search.bat`
+- **search**: Run code searches using `search_game_code.py`
+- **test**: Test this skill by running `test_search_game_code.bat`
 
 ## Routing Decision
 
@@ -55,7 +55,7 @@ After preparation the skill folder contains a `Data` junction. The actual data l
 
 ```
 skills/se-dev-game-code/
-├── Data/                 (junction → %USERPROFILE%\.se-dev-skills\se-dev-game-code)
+├── Data/                 (junction → %USERPROFILE%\.se-dev\game-code)
 │   ├── .git/             local Git repository tracking decompiled sources
 │   ├── .gitignore        ignores CodeIndex/, Content/, __pycache__, *.py[cod], *.bak, *.log
 │   ├── game_version.txt  recorded SE_VERSION / CLIENT_BUILD_NUMBER / SERVER_BUILD_NUMBER
@@ -66,7 +66,7 @@ skills/se-dev-game-code/
 └── ...                   skill scripts and documentation
 ```
 
-The `Data` folder is a junction to `%USERPROFILE%\.se-dev-skills\se-dev-game-code\`. (`%USERPROFILE%` is used rather than `%LOCALAPPDATA%` so the data sits outside any per-app UWP filesystem virtualization.) Treat `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` exactly as before.
+The `Data` folder is a junction to `%USERPROFILE%\.se-dev\game-code\`. (`%USERPROFILE%` is used rather than `%LOCALAPPDATA%` so the data sits outside any per-app UWP filesystem virtualization.) Treat `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` exactly as before.
 
 ## Local Versioning of Decompiled Sources
 
@@ -97,23 +97,23 @@ The repository uses an internal author/email (`se-dev-skills@localhost`) so comm
 
 ```bash
 # Find class declarations
-uv run search_code.py class declaration MyCubeBlock
+uv run search_game_code.py class declaration MyCubeBlock
 
 # Find method signatures
-uv run search_code.py method signature UpdateBeforeSimulation
+uv run search_game_code.py method signature UpdateBeforeSimulation
 
 # Find class hierarchy
-uv run search_code.py class children MyTerminalBlock
+uv run search_game_code.py class children MyTerminalBlock
 
 # Count results before viewing (useful for large result sets)
-uv run search_code.py class usage MyEntity --count
+uv run search_game_code.py class usage MyEntity --count
 
 # Limit number of results
-uv run search_code.py class usage MyEntity --limit 10
+uv run search_game_code.py class usage MyEntity --limit 10
 
 # Paginate through results
-uv run search_code.py class usage MyEntity --limit 10 --offset 0
-uv run search_code.py class usage MyEntity --limit 10 --offset 20
+uv run search_game_code.py class usage MyEntity --limit 10 --offset 0
+uv run search_game_code.py class usage MyEntity --limit 10 --offset 20
 ```
 
 Always check the game code when:

@@ -61,10 +61,15 @@ if %ERRORLEVEL% NEQ 0 goto failed
 :skip_busybox
 
 :: 7. Install ILSpy if missing
-echo Installing ILSpy (if not installed already)
-ilspycmd -v 2>NUL
-if %ERRORLEVEL% EQU 0 goto skip_ilspycmd
-dotnet tool install --global ilspycmd
+set ILSPY_VERSION=10.0.1.8346
+for /f "delims=" %%V in ('ilspycmd -v 2^>NUL') do set ILSPY_INSTALLED=%%V
+if defined ILSPY_INSTALLED (
+    echo ilspycmd version %ILSPY_INSTALLED% has already been installed
+    goto skip_ilspycmd
+)
+echo Installing ilspycmd %ILSPY_VERSION%
+dotnet tool install --global ilspycmd --version %ILSPY_VERSION%
+if %ERRORLEVEL% NEQ 0 goto failed
 ilspycmd -v
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_ilspycmd
@@ -74,7 +79,7 @@ if %ERRORLEVEL% NEQ 0 goto failed
 :: UWP filesystem virtualization layer (Claude Code is a packaged app whose
 :: writes under %LOCALAPPDATA% would be silently redirected into its
 :: per-package LocalCache, hiding the data from regular tools).
-set "DATA_ROOT=%USERPROFILE%\.se-dev-skills\se-dev-game-code"
+set "DATA_ROOT=%USERPROFILE%\.se-dev\game-code"
 echo Data Root: %DATA_ROOT%
 if not exist "%DATA_ROOT%" (
     echo Creating Data Root folder

@@ -5,7 +5,7 @@ This skill provides access to decompiled C# source code from the Space Engineers
 ## Overview
 
 The skill maintains the following data under the `Data` junction (which points
-to `%USERPROFILE%\.se-dev-skills\se-dev-server-code\`):
+to `%USERPROFILE%\.se-dev\server-code\`):
 
 - **Data/Decompiled/** - Full decompiled C# source organized by assembly
 - **Data/Content/** - Server content files (definitions, translations, blueprints)
@@ -121,12 +121,12 @@ uv run index_code.py <source_root_path> <output_directory>
 
 ## Code Search
 
-### search_code.py
+### search_server_code.py
 
 Search the code index for symbols by category and type.
 
 ```
-uv run search_code.py [options] <category> <symbol_type> <patterns...>
+uv run search_server_code.py [options] <category> <symbol_type> <patterns...>
 ```
 
 #### Positional Arguments
@@ -182,38 +182,38 @@ The signature includes any attributes on preceding lines, normalized to a single
 
 Find class declarations containing "Toolbar":
 ```
-uv run search_code.py class declaration Toolbar
+uv run search_server_code.py class declaration Toolbar
 ```
 
 Find all usages of methods matching "Get.*Position" regex:
 ```
-uv run search_code.py method usage "re:Get.*Position"
+uv run search_server_code.py method usage "re:Get.*Position"
 ```
 
 Find enum declarations in Sandbox.Game namespace:
 ```
-uv run search_code.py -n Sandbox.Game enum declaration ""
+uv run search_server_code.py -n Sandbox.Game enum declaration ""
 ```
 
 Count struct usages containing "Vector":
 ```
-uv run search_code.py -c struct usage Vector
+uv run search_server_code.py -c struct usage Vector
 ```
 
 Paginate through interface declarations (first 20, then next 20):
 ```
-uv run search_code.py -l 20 interface declaration ""
-uv run search_code.py -l 20 -o 20 interface declaration ""
+uv run search_server_code.py -l 20 interface declaration ""
+uv run search_server_code.py -l 20 -o 20 interface declaration ""
 ```
 
 Find variable declarations with "Entity" in name within VRage namespace:
 ```
-uv run search_code.py -n VRage field declaration Entity
+uv run search_server_code.py -n VRage field declaration Entity
 ```
 
 Find method signatures containing "GetPosition":
 ```
-uv run search_code.py method signature GetPosition
+uv run search_server_code.py method signature GetPosition
 ```
 
 ## Direct grep Search

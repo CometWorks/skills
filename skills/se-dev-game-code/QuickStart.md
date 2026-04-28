@@ -17,7 +17,7 @@ cd skills/se-dev-game-code
 ### Find a Class Definition
 
 ```bash
-uv run search_code.py class declaration MyToolbar
+uv run search_game_code.py class declaration MyToolbar
 ```
 
 Output: `Sandbox.Game/Sandbox/Game/Gui/MyToolbar.cs:42-1250`
@@ -25,7 +25,7 @@ Output: `Sandbox.Game/Sandbox/Game/Gui/MyToolbar.cs:42-1250`
 ### Find Where a Class is Used
 
 ```bash
-uv run search_code.py -l 10 class usage MyToolbar
+uv run search_game_code.py -l 10 class usage MyToolbar
 ```
 
 Shows first 10 usage locations.
@@ -33,13 +33,13 @@ Shows first 10 usage locations.
 ### Find a Method Definition
 
 ```bash
-uv run search_code.py method declaration GetPosition
+uv run search_game_code.py method declaration GetPosition
 ```
 
 ### Find Method Signatures
 
 ```bash
-uv run search_code.py method signature GetPosition
+uv run search_game_code.py method signature GetPosition
 ```
 
 Shows full method signatures including parameters and return types. See `CodeSearch.md` for more details.
@@ -47,7 +47,7 @@ Shows full method signatures including parameters and return types. See `CodeSea
 ### Find Class Hierarchy
 
 ```bash
-uv run search_code.py class parent MyGrid
+uv run search_game_code.py class parent MyGrid
 ```
 
 Output: `Sandbox.Game.MyGrid:VRage.Game.Entity.MyEntity`
