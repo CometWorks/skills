@@ -1,70 +1,52 @@
-import os
+"""
+Clone or update the PluginHub registry under the skill's Data folder.
+
+The PluginHub repository is cloned with git so it can be updated cheaply with
+git pull on subsequent runs. The clone lives in the skill profile folder
+(Data/PluginHub) rather than the skill folder itself.
+"""
+
+import subprocess
+import sys
 import time
-import requests
-import zipfile
-import shutil
 
-# Constants
-REPO_URL = "https://github.com/StarCpt/PluginHub"
-ZIP_URL = f"{REPO_URL}/archive/refs/heads/main.zip"
-SUBDIR_NAME = "PluginHub"
+from plugin_paths import DATA_DIR, PLUGINHUB_DIR
+
+REPO_URL = "https://github.com/StarCpt/PluginHub.git"
+REFRESH_INTERVAL_SECONDS = 2 * 3600
 
 
-def should_update(subdir_path):
-    if not os.path.exists(subdir_path):
-        return True
-    # Check if older than 2 hours
-    mod_time = os.path.getmtime(subdir_path)
-    current_time = time.time()
-    return (current_time - mod_time) > 2 * 3600
+def _run_git(args: list, cwd=None) -> int:
+    return subprocess.run(["git", *args], cwd=cwd).returncode
 
 
-def download_and_extract():
-    # Check if we need to update
-    subdir_path = os.path.join(os.getcwd(), SUBDIR_NAME)
-    if os.path.exists(subdir_path) and not should_update(subdir_path):
-        print(f"{SUBDIR_NAME} exists and is up to date.")
-        return
+def _is_recent(path) -> bool:
+    if not path.exists():
+        return False
+    return (time.time() - path.stat().st_mtime) < REFRESH_INTERVAL_SECONDS
 
-    # Delete old directory if exists
-    if os.path.exists(subdir_path):
-        shutil.rmtree(subdir_path)
-        print(f"Deleted old {SUBDIR_NAME} directory.")
 
-    # Download ZIP
-    print("Downloading ZIP...")
-    response = requests.get(ZIP_URL)
-    response.raise_for_status()
-    zip_path = "temp.zip"
-    with open(zip_path, "wb") as f:
-        f.write(response.content)
-    print("ZIP downloaded.")
+def main() -> int:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Extract ZIP
-    print("Extracting ZIP...")
-    with zipfile.ZipFile(zip_path, "r") as zip_ref:
-        zip_ref.extractall()
+    if (PLUGINHUB_DIR / ".git").exists():
+        if _is_recent(PLUGINHUB_DIR / ".git" / "FETCH_HEAD"):
+            print(f"PluginHub registry is up to date at {PLUGINHUB_DIR}.")
+            return 0
+        print(f"Updating PluginHub registry in {PLUGINHUB_DIR}...")
+        rc = _run_git(["pull", "--ff-only"], cwd=PLUGINHUB_DIR)
+        if rc != 0:
+            print("git pull failed", file=sys.stderr)
+            return rc
+        return 0
 
-    # The extracted directory name is PluginHub-main
-    extracted_dir = "PluginHub-main"
-    if os.path.exists(extracted_dir):
-        # Remove destination if it exists (handles Windows permission issues)
-        if os.path.exists(SUBDIR_NAME):
-            try:
-                shutil.rmtree(SUBDIR_NAME)
-            except Exception as e:
-                print(f"Warning: Could not remove existing {SUBDIR_NAME}: {e}")
-        # Try rename, fall back to move if rename fails
-        try:
-            os.rename(extracted_dir, SUBDIR_NAME)
-        except OSError:
-            shutil.move(extracted_dir, SUBDIR_NAME)
-    print(f"Extracted to {SUBDIR_NAME}.")
-
-    # Clean up
-    os.remove(zip_path)
-    print("Done.")
+    print(f"Cloning PluginHub registry into {PLUGINHUB_DIR}...")
+    rc = _run_git(["clone", "--depth", "1", REPO_URL, str(PLUGINHUB_DIR)])
+    if rc != 0:
+        print("git clone failed", file=sys.stderr)
+        return rc
+    return 0
 
 
 if __name__ == "__main__":
-    download_and_extract()
+    sys.exit(main())

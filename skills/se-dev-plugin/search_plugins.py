@@ -21,7 +21,7 @@ from collections import defaultdict
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
-INDEX_DIR = SCRIPT_DIR / "PluginCodeIndex"
+INDEX_DIR = SCRIPT_DIR / "Data" / "CodeIndex"
 
 CATEGORY_FILES = {
     "class": ("class_declarations.csv", "class_usages.csv"),
@@ -323,7 +323,7 @@ def main():
     args = parse_args()
 
     if not INDEX_DIR.exists():
-        print("ERROR: PluginCodeIndex not found. Run index_plugins.py first.", file=sys.stderr)
+        print("ERROR: plugin code index not found. Run index_plugins.py first.", file=sys.stderr)
         print("  List available plugins: uv run list_plugins.py", file=sys.stderr)
         print("  Download plugin source: uv run download_plugin_source.py <name>", file=sys.stderr)
         print("  Index plugins: uv run index_plugins.py", file=sys.stderr)

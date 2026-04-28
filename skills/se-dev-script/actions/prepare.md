@@ -62,7 +62,17 @@ Prepare.bat
 ## What Preparation Does
 
 The preparation script:
-- Sets up the Python virtual environment
-- Downloads and installs required tools (busybox.exe)
-- Creates symbolic links to game folders
-- Verifies the environment is ready for use
+- Verifies Python ≥ 3.13 and installs `uv` if needed.
+- Sets up the Python virtual environment via `uv sync`.
+- Downloads `busybox.exe` for UNIX-style shell commands.
+- Creates `Data/` as a junction to `%USERPROFILE%\.se-dev\script` so persistent
+  data (script inventory, hashes, code index) lives outside the skill folder.
+- Creates `LocalScripts/` as a junction to `%AppData%\SpaceEngineers\IngameScripts\local`.
+- Runs `list_scripts.py` to refresh `Data/scripts.json` (cheap; safe to rerun).
+- Runs `index_scripts.py` to (incrementally) rebuild `Data/CodeIndex/`.
+  Only scripts whose .cs content has changed since the last run are reparsed.
+
+The Steam Workshop content folder is **not** symlinked into the skill —
+it is read in-place via the path resolved from `SE_GAME_ROOT` or the
+Steam registry entry. PB scripts are detected by the presence of a
+top-level `Script.cs` file inside each numeric workshop folder.

@@ -2,7 +2,7 @@
 name: se-dev-script
 description: In-game (programmable block, aka PB) script development for Space Engineers version 1. Search script code for examples and patterns.
 license: MIT
-allowed-tools: Read, Bash(*Prepare.bat*), Bash(*Clean.bat*), Bash(*run_prepare.sh*), Bash(*uv run search_scripts.py *), Bash(*uv run index_scripts.py*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*Clean.bat*), Bash(*run_prepare.sh*), Bash(*uv run search_scripts.py *), Bash(*uv run list_scripts.py*), Bash(*uv run index_scripts.py*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
 # SE Dev Script Skill
@@ -64,8 +64,16 @@ searches corresponding to names on the PB API whitelist for efficiency.
 
 ## Folder Structure
 
-- `SteamScripts` - Game content (mods, scripts, blueprints) the player downloaded. Filter scripts by the existence of a `Script.cs` file directly in the numbered content folder.
-- `LocalScripts` - Mods the player is developing. Link to `%AppData%/SpaceEngineers/IngameScripts`.
+- `Data/` — junction to `%USERPROFILE%\.se-dev\script`. Persistent skill data lives here:
+  - `Data/scripts.json` — quick inventory of all installed PB scripts.
+  - `Data/script_hashes.json` — per-script aggregate sha1 used by the indexer for change detection.
+  - `Data/CodeIndex/` — full Tree-sitter C# index (one CSV per category, plus hierarchy trees).
+- `LocalScripts/` — junction to `%AppData%\SpaceEngineers\IngameScripts\local`, the
+  game's local-PB-script folder.
+- Steam Workshop content is read in-place from the Steam folder; **it is not copied or symlinked**
+  into the skill. PB scripts are detected by the presence of a top-level `Script.cs` file
+  inside each numeric workshop folder. The workshop folder is resolved from `SE_GAME_ROOT`
+  (env var) or the Steam registry entry for app id 244850.
 
 ## References
 
@@ -93,14 +101,16 @@ uv run search_scripts.py class usage Program --count
 uv run search_scripts.py class usage GridTerminalSystem --limit 30
 ```
 
-Before searching, ensure the index exists. If `ScriptCodeIndex/` is missing, run:
+Before searching, ensure the index exists. If `Data/CodeIndex/` is missing, run:
 ```bash
-uv run index_scripts.py
+uv run list_scripts.py     # quick inventory (always cheap)
+uv run index_scripts.py    # full code index (incremental: only changed scripts reparsed)
 ```
 
 **Re-indexing after new subscriptions:** When you subscribe to new scripts on Steam Workshop,
-load them in a world once (so the game downloads them), then re-run `uv run index_scripts.py`
-to make the new script code available for search.
+load them in a world once (so the game downloads them), then re-run the two commands above
+(or just `Prepare.bat`). The indexer hashes each script's .cs files and only reparses
+scripts whose hash changed since the previous run, so reruns are fast.
 
 See [search action](./actions/search.md) for complete documentation.
 

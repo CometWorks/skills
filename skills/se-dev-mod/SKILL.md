@@ -2,7 +2,7 @@
 name: se-dev-mod
 description: Mod development for Space Engineers version 1. Search mod code for examples and patterns.
 license: MIT
-allowed-tools: Read, Bash(*Prepare.bat*), Bash(*Clean.bat*), Bash(*run_prepare.sh*), Bash(*uv run search_mods.py *), Bash(*uv run index_mods.py*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*Clean.bat*), Bash(*run_prepare.sh*), Bash(*uv run search_mods.py *), Bash(*uv run list_mods.py*), Bash(*uv run index_mods.py*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
 # SE Dev Mod Skill
@@ -58,8 +58,14 @@ game code searches corresponding to names on the Mod API whitelist for efficienc
 
 ## Folder Structure
 
-- `SteamMods` - Game content (mods, scripts, blueprints) the player downloaded. Filter mods by the existence of a non-empty `Data/Scripts` folder inside the numbered content folder.
-- `LocalMods` - Mods the player is developing. Link to `%AppData%/SpaceEngineers/Mods`.
+- `Data/` — junction to `%USERPROFILE%\.se-dev\mod`. Persistent skill data lives here:
+  - `Data/mods.json` — quick inventory of all installed mods (workshop_id, path, has_scripts, ...).
+  - `Data/mod_hashes.json` — per-mod aggregate sha1 used by the indexer for change detection.
+  - `Data/CodeIndex/` — full Tree-sitter C# index (one CSV per category, plus hierarchy trees).
+- `LocalMods/` — junction to `%AppData%\SpaceEngineers\Mods`, the game's local-mod folder.
+- Steam Workshop content is read in-place from the Steam folder; **it is not copied or symlinked**
+  into the skill. The workshop folder is resolved from `SE_GAME_ROOT` (env var) or the Steam
+  registry entry for app id 244850.
 
 ## References
 
@@ -85,14 +91,16 @@ uv run search_mods.py class usage Init --count
 uv run search_mods.py class usage Init --limit 10
 ```
 
-Before searching, ensure the index exists. If `ModCodeIndex/` is missing, run:
+Before searching, ensure the index exists. If `Data/CodeIndex/` is missing, run:
 ```bash
-uv run index_mods.py
+uv run list_mods.py     # quick inventory (always cheap)
+uv run index_mods.py    # full code index (incremental: only changed mods reparsed)
 ```
 
 **Re-indexing after new subscriptions:** When you subscribe to new mods on Steam Workshop,
-load them in a world once (so the game downloads them), then re-run `uv run index_mods.py`
-to make the new mod code available for search.
+load them in a world once (so the game downloads them), then re-run the two commands above
+(or just `Prepare.bat`). The indexer hashes each mod's .cs files and only reparses mods
+whose hash changed since the previous run, so reruns are fast.
 
 See [search action](./actions/search.md) for complete documentation.
 

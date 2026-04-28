@@ -8,10 +8,9 @@ with declarations and usages of namespaces, interfaces, classes, methods, and me
 Usage:
     python index_plugins.py
 
-The script searches for plugins in the resolved plugin sources directory
-(see plugin_paths.py for resolution logic).
+The script searches for plugins in Data/Sources (see plugin_paths.py).
 
-Output is written to PluginCodeIndex/ directory.
+Output is written to Data/CodeIndex/.
 """
 
 import csv
@@ -28,12 +27,15 @@ from typing import Dict, List, Optional, Set, Tuple
 from tree_sitter import Language, Parser, Node
 from tree_sitter_c_sharp import language
 
-from plugin_paths import resolve_all_plugin_sources_dirs
+from plugin_paths import (
+    CODE_INDEX_DIR,
+    PLUGIN_SOURCES_DIR,
+    PLUGINHUB_DIR,
+    PLUGINS_DIR,
+    SCRIPT_DIR,
+)
 
-SCRIPT_DIR = Path(__file__).parent.resolve()
-PLUGINHUB_DIR = SCRIPT_DIR / "PluginHub"
-PLUGINS_DIR = PLUGINHUB_DIR / "Plugins"
-OUTPUT_DIR = SCRIPT_DIR / "PluginCodeIndex"
+OUTPUT_DIR = CODE_INDEX_DIR
 PLUGIN_LIST_FILE = OUTPUT_DIR / "plugins.json"
 
 
@@ -223,7 +225,10 @@ class FileProcessor:
     """Processes a single C# file"""
 
     def __init__(self, root_path: str):
-        self.root_path = Path(root_path).resolve()
+        # Avoid .resolve() so we don't follow the Data junction; otherwise
+        # file_path.relative_to(self.root_path) fails when files come in via
+        # the junction path.
+        self.root_path = Path(root_path)
         self.parser = Parser()
         self.parser.language = Language(language())
 
@@ -1452,33 +1457,20 @@ class PluginCodeIndexer:
 def main():
     sys.setrecursionlimit(10000)
 
-    source_dirs = resolve_all_plugin_sources_dirs()
-
     print("Plugin Code Indexer")
     print("=" * 50)
-
-    # Pick the best source directory: prefer one that has plugin subdirectories
-    plugin_sources_dir = None
-    for d in source_dirs:
-        if any(item.is_dir() and not item.name.startswith('.') for item in d.iterdir()):
-            plugin_sources_dir = d
-            break
-
-    if plugin_sources_dir is None and source_dirs:
-        plugin_sources_dir = source_dirs[0]
-
-    if plugin_sources_dir:
-        print(f"Plugin sources directory: {plugin_sources_dir}")
+    print(f"Plugin sources directory: {PLUGIN_SOURCES_DIR}")
     print(f"Output directory: {OUTPUT_DIR}")
     print()
 
-    if plugin_sources_dir is None:
-        print("Warning: No plugin source directories found.")
+    if not PLUGIN_SOURCES_DIR.exists() or not any(PLUGIN_SOURCES_DIR.iterdir()):
+        print("No plugin sources found.")
         print("Download plugin sources with: uv run download_plugin_source.py <plugin_name>")
         print("List available plugins with: uv run list_plugins.py")
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
         return
 
-    indexer = PluginCodeIndexer(plugin_sources_dir)
+    indexer = PluginCodeIndexer(PLUGIN_SOURCES_DIR)
     cs_files, plugins = indexer.collect_files()
 
     print(f"Found {len(plugins)} plugins with source code:")
