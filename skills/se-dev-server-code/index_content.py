@@ -15,8 +15,19 @@ Example:
 
 import csv
 import os
+import re
 import sys
 from pathlib import Path
+
+# Matches identifier-like tokens, optionally with dotted segments.
+# Examples: "CubeBlocks_Armor", "CubeBlocks_Armor.sbc", "Foo.Bar.Baz".
+# Quotes, slashes, backslashes, and whitespace all break tokens, so a string
+# literal like "Data/CubeBlocks_Armor.sbc" yields "Data" and "CubeBlocks_Armor.sbc".
+TOKEN_RE = re.compile(r"[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)*")
+
+# Characters allowed inside a token. Patterns containing anything else (spaces,
+# parens, etc.) cannot match token-substring scanning and need a raw-text fallback.
+TOKEN_CHARS = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.")
 
 # Text file extensions to index (skip binary assets like .dds, .mwm, .wav, etc.)
 TEXT_EXTENSIONS = {
@@ -54,20 +65,52 @@ def build_source_text_cache(decompiled_dir):
     return cache
 
 
-def find_usages(filename_stem, filename_full, source_cache):
-    """Find C# source files that reference this content filename."""
-    matches = set()
-    # Search for the full filename (e.g., "CubeBlocks_Armor.sbc")
-    # and for the stem if it's specific enough (>= 6 chars to avoid false positives)
+def build_token_index(source_cache):
+    """Build inverted index: token -> set of source rel_paths containing it.
+
+    Each source file is tokenized once into identifier-like tokens (with optional
+    dotted segments). The set of unique tokens is dramatically smaller than the
+    raw 100+ MB corpus, so the per-pattern substring scan in find_usages becomes
+    cheap.
+    """
+    index = {}
+    for rel_path, text in source_cache.items():
+        for token in set(TOKEN_RE.findall(text)):
+            index.setdefault(token, set()).add(rel_path)
+    return index
+
+
+def find_usages(filename_stem, filename_full, token_index, tokens, source_cache):
+    """Find C# source files that reference this content filename.
+
+    Substring semantics match the original `pat in text` behavior: a pattern
+    matches if it appears anywhere inside any token (so stem "AlienSystem"
+    still matches inside identifier "CustomWorld_AlienSystem"). Patterns that
+    contain non-token characters (e.g. spaces in "Learning to Survive") fall
+    back to scanning raw source text, since they can never sit inside a single
+    token.
+    """
     patterns = [filename_full]
+    # Stem-only match is permissive, so require >= 6 chars to limit collisions.
     if len(filename_stem) >= 6:
         patterns.append(filename_stem)
 
-    for rel_path, text in source_cache.items():
-        for pat in patterns:
-            if pat in text:
-                matches.add(rel_path)
-                break
+    fast_pats = [p for p in patterns if all(c in TOKEN_CHARS for c in p)]
+    slow_pats = [p for p in patterns if p not in fast_pats]
+
+    matches = set()
+    if fast_pats:
+        for tok in tokens:
+            for pat in fast_pats:
+                if pat in tok:
+                    matches.update(token_index[tok])
+                    break
+    if slow_pats:
+        for rel_path, text in source_cache.items():
+            for pat in slow_pats:
+                if pat in text:
+                    matches.add(rel_path)
+                    break
     return sorted(matches)
 
 
@@ -89,13 +132,18 @@ def main():
     source_cache = build_source_text_cache(decompiled_dir)
     print(f"  Loaded {len(source_cache)} source files")
 
+    print("Building token index...")
+    token_index = build_token_index(source_cache)
+    tokens = list(token_index.keys())
+    print(f"  Indexed {len(tokens)} unique tokens")
+
     print("Searching for usages...")
     rows = []
     usage_count = 0
     for rel_path in files:
         fname = Path(rel_path).name
         stem = Path(rel_path).stem
-        usages = find_usages(stem, fname, source_cache)
+        usages = find_usages(stem, fname, token_index, tokens, source_cache)
         usage_count += len(usages)
         if usages:
             for usage in usages:
