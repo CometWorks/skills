@@ -6,7 +6,7 @@ echo "Decompiling server assemblies..."
 echo "Decompiling server assemblies: " > "$LOG"
 
 # Make sure the destination folder under Data exists (Data is a junction
-# pointing to %USERPROFILE%/.se-dev-skills/se-dev-server-code/).
+# pointing to %USERPROFILE%/.se-dev-server-code/).
 mkdir -p Data/Decompiled
 
 # Helper function to run the decompile and handle errors

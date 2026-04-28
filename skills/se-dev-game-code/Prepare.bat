@@ -79,7 +79,7 @@ if %ERRORLEVEL% NEQ 0 goto failed
 :: UWP filesystem virtualization layer (Claude Code is a packaged app whose
 :: writes under %LOCALAPPDATA% would be silently redirected into its
 :: per-package LocalCache, hiding the data from regular tools).
-set "DATA_ROOT=%USERPROFILE%\.se-dev-skills\se-dev-game-code"
+set "DATA_ROOT=%USERPROFILE%\.se-dev-game-code"
 echo Data Root: %DATA_ROOT%
 if not exist "%DATA_ROOT%" (
     echo Creating Data Root folder

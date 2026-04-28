@@ -5,7 +5,7 @@ This skill provides access to decompiled C# source code from Space Engineers ver
 ## Overview
 
 The skill maintains the following data under the `Data` junction (which points
-to `%USERPROFILE%\.se-dev-skills\se-dev-game-code\`):
+to `%USERPROFILE%\.se-dev-game-code\`):
 
 - **Data/Decompiled/** - Full decompiled C# source organized by assembly
 - **Data/Content/** - Game content files (definitions, translations, blueprints)
