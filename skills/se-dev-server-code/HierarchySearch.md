@@ -26,7 +26,7 @@ These files use tree-style formatting similar to the `tree` command with fully-q
 
 ```bash
 cd skills/se-dev-server-code
-uv run search_code.py <class|interface> <subcommand> <pattern>
+uv run search_server_code.py <class|interface> <subcommand> <pattern>
 ```
 
 ### Class Hierarchy
@@ -34,7 +34,7 @@ uv run search_code.py <class|interface> <subcommand> <pattern>
 #### Find Parent Class
 
 ```bash
-uv run search_code.py class parent MyGrid
+uv run search_server_code.py class parent MyGrid
 ```
 
 Output: `Sandbox.Game.MyGrid:VRage.Game.Entity.MyEntity`
@@ -44,7 +44,7 @@ Shows the direct base class. Classes with no explicit parent (inherit from `Syst
 #### Find Child Classes
 
 ```bash
-uv run search_code.py class children MyEntity
+uv run search_server_code.py class children MyEntity
 ```
 
 Output: `VRage.Game.Entity.MyEntity|Sandbox.Game.(Entities.(MyGrid,MyCharacter),MyProjectile)`
@@ -54,7 +54,7 @@ Shows all direct children in compressed namespace format.
 #### Find Implemented Interfaces
 
 ```bash
-uv run search_code.py class implements MyGrid
+uv run search_server_code.py class implements MyGrid
 ```
 
 Output: `Sandbox.Game.MyGrid:VRage.ModAPI.IMyEntity,Sandbox.ModAPI.IMyGrid`
@@ -66,7 +66,7 @@ Shows all interfaces implemented by the class.
 #### Find Parent Interface
 
 ```bash
-uv run search_code.py interface parent IMyTerminalBlock
+uv run search_server_code.py interface parent IMyTerminalBlock
 ```
 
 Output: `VRage.Game.ModAPI.IMyTerminalBlock:VRage.Game.ModAPI.IMyCubeBlock`
@@ -76,7 +76,7 @@ Shows which interface this one extends.
 #### Find Child Interfaces
 
 ```bash
-uv run search_code.py interface children IMyEntity
+uv run search_server_code.py interface children IMyEntity
 ```
 
 Output: `VRage.ModAPI.IMyEntity|VRage.Game.ModAPI.(IMyTerminalBlock,IMyCubeGrid)`
@@ -86,7 +86,7 @@ Shows all interfaces that extend this one.
 #### Find Implementors
 
 ```bash
-uv run search_code.py interface implementors IMyTerminalBlock
+uv run search_server_code.py interface implementors IMyTerminalBlock
 ```
 
 Output: `VRage.Game.ModAPI.IMyTerminalBlock|Sandbox.Game.(MyTerminalBlock,MyDoor,MyBatteryBlock)`
@@ -126,7 +126,7 @@ All hierarchy commands support standard options:
 ### Count Matches
 
 ```bash
-uv run search_code.py -c interface implementors IMyTerminalBlock
+uv run search_server_code.py -c interface implementors IMyTerminalBlock
 # Output: 47
 ```
 
@@ -136,15 +136,15 @@ For `children` and `implementors`: counts matching parent types (not total child
 ### Paginate Results
 
 ```bash
-uv run search_code.py -l 10 interface implementors IMyTerminalBlock
-uv run search_code.py -l 10 -o 10 interface implementors IMyTerminalBlock
+uv run search_server_code.py -l 10 interface implementors IMyTerminalBlock
+uv run search_server_code.py -l 10 -o 10 interface implementors IMyTerminalBlock
 ```
 
 ### Filter by Namespace
 
 ```bash
-uv run search_code.py -n Sandbox.Game class parent ""
-uv run search_code.py -n VRage interface children IMyEntity
+uv run search_server_code.py -n Sandbox.Game class parent ""
+uv run search_server_code.py -n VRage interface children IMyEntity
 ```
 
 ## Pattern Syntax
@@ -162,13 +162,13 @@ Multiple patterns use AND logic.
 
 ```bash
 # Find parent of any class matching pattern
-uv run search_code.py class parent "re:^My.*Block$"
+uv run search_server_code.py class parent "re:^My.*Block$"
 
 # Find children of classes starting with "My"
-uv run search_code.py class children "re:^My"
+uv run search_server_code.py class children "re:^My"
 
 # Find implementors of interfaces matching pattern
-uv run search_code.py interface implementors "re:^IMy.*Block$"
+uv run search_server_code.py interface implementors "re:^IMy.*Block$"
 ```
 
 ## Walking Hierarchies
@@ -179,15 +179,15 @@ To traverse deep hierarchies, chain multiple queries:
 
 ```bash
 # Start with a class
-uv run search_code.py class parent MyGrid
+uv run search_server_code.py class parent MyGrid
 # Output: Sandbox.Game.MyGrid:VRage.Game.Entity.MyEntity
 
 # Find its parent
-uv run search_code.py class parent MyEntity
+uv run search_server_code.py class parent MyEntity
 # Output: VRage.Game.Entity.MyEntity:VRage.Game.Entity.MyEntityBase
 
 # Continue upward
-uv run search_code.py class parent MyEntityBase
+uv run search_server_code.py class parent MyEntityBase
 # Output: VRage.Game.Entity.MyEntityBase:System.Object
 ```
 
@@ -195,11 +195,11 @@ uv run search_code.py class parent MyEntityBase
 
 ```bash
 # Find direct children
-uv run search_code.py class children MyEntity
+uv run search_server_code.py class children MyEntity
 # Output: VRage.Game.Entity.MyEntity|Sandbox.Game.MyGrid,Sandbox.Game.MyCharacter
 
 # Then query each child for their children
-uv run search_code.py class children MyGrid
+uv run search_server_code.py class children MyGrid
 # (if MyGrid has children)
 ```
 
@@ -207,12 +207,12 @@ uv run search_code.py class children MyGrid
 
 ```bash
 # Walk up interface hierarchy
-uv run search_code.py interface parent IMyTerminalBlock
-uv run search_code.py interface parent IMyCubeBlock
+uv run search_server_code.py interface parent IMyTerminalBlock
+uv run search_server_code.py interface parent IMyCubeBlock
 
 # Walk down interface hierarchy
-uv run search_code.py interface children IMyEntity
-uv run search_code.py interface children IMyCubeBlock
+uv run search_server_code.py interface children IMyEntity
+uv run search_server_code.py interface children IMyCubeBlock
 ```
 
 ## Best Practices

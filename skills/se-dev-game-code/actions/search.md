@@ -2,12 +2,12 @@
 
 > **Part of the se-dev-game-code skill.** Invoked when searching the game's decompiled code.
 
-Run searches using `uv run search_code.py` from this skill folder.
+Run searches using `uv run search_game_code.py` from this skill folder.
 
 ## Quick Reference
 
 ```cmd
-uv run search_code.py --help
+uv run search_game_code.py --help
 ```
 
 ## Documentation

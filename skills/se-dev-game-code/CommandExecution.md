@@ -16,9 +16,9 @@ This guide explains how to correctly execute commands on Windows when using this
 3. **Search game code:**
    ```bash
    # Correct syntax: <category> <type> <pattern>
-   uv run search_code.py class declaration MyCubeGrid
-   uv run search_code.py method usage GetPosition
-   uv run search_code.py interface declaration IMyTerminalBlock
+   uv run search_game_code.py class declaration MyCubeGrid
+   uv run search_game_code.py method usage GetPosition
+   uv run search_game_code.py interface declaration IMyTerminalBlock
    ```
    (Always use workdir parameter set to the skill folder)
 

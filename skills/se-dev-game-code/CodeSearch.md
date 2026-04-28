@@ -10,7 +10,7 @@ Always change to this skill folder first:
 
 ```bash
 cd skills/se-dev-game-code
-uv run search_code.py class declaration MyToolbar
+uv run search_game_code.py class declaration MyToolbar
 ```
 
 ## Search Categories
@@ -31,29 +31,29 @@ uv run search_code.py class declaration MyToolbar
 ## Basic Usage
 
 ```bash
-uv run search_code.py <category> <declaration|usage> <pattern>
+uv run search_game_code.py <category> <declaration|usage> <pattern>
 ```
 
 ### Find Declarations
 
 ```bash
-uv run search_code.py class declaration MyToolbar
-uv run search_code.py struct declaration Vector3D
-uv run search_code.py interface declaration IMyTerminalBlock
-uv run search_code.py enum declaration MyRelationsBetweenPlayerAndBlock
-uv run search_code.py method declaration GetPosition
-uv run search_code.py field declaration AngularDamping
-uv run search_code.py property declaration IsWorking
-uv run search_code.py event declaration IsWorkingChanged
-uv run search_code.py constructor declaration MyCubeBlock
+uv run search_game_code.py class declaration MyToolbar
+uv run search_game_code.py struct declaration Vector3D
+uv run search_game_code.py interface declaration IMyTerminalBlock
+uv run search_game_code.py enum declaration MyRelationsBetweenPlayerAndBlock
+uv run search_game_code.py method declaration GetPosition
+uv run search_game_code.py field declaration AngularDamping
+uv run search_game_code.py property declaration IsWorking
+uv run search_game_code.py event declaration IsWorkingChanged
+uv run search_game_code.py constructor declaration MyCubeBlock
 ```
 
 ### Find Usages
 
 ```bash
-uv run search_code.py -l 10 class usage MyToolbar
-uv run search_code.py -l 10 method usage GetPosition
-uv run search_code.py -l 10 struct usage Vector3D
+uv run search_game_code.py -l 10 class usage MyToolbar
+uv run search_game_code.py -l 10 method usage GetPosition
+uv run search_game_code.py -l 10 struct usage Vector3D
 ```
 
 ### Search Method Signatures
@@ -62,16 +62,16 @@ Method signatures show the complete method declaration including modifiers, retu
 
 ```bash
 # Find signatures by method name
-uv run search_code.py method signature GetPosition
+uv run search_game_code.py method signature GetPosition
 
 # Regex for exact match
-uv run search_code.py method signature "re:^Build$"
+uv run search_game_code.py method signature "re:^Build$"
 
 # Limit results
-uv run search_code.py -l 10 method signature GetPosition
+uv run search_game_code.py -l 10 method signature GetPosition
 
 # Filter by namespace
-uv run search_code.py -n VRageMath method signature Normalize
+uv run search_game_code.py -n VRageMath method signature Normalize
 ```
 
 **Output Format:** Signature searches show the full method signature after a pipe separator:
@@ -94,25 +94,25 @@ Sandbox.Game/MyClass.cs:100-102|public static void MyMethod(int param)
 ### Count Before Fetching
 
 ```bash
-uv run search_code.py -c class usage MyEntity
+uv run search_game_code.py -c class usage MyEntity
 # Output: 1247
 
-uv run search_code.py -l 20 class usage MyEntity
+uv run search_game_code.py -l 20 class usage MyEntity
 ```
 
 ### Paginate Large Results
 
 ```bash
-uv run search_code.py -l 20 class usage MyEntity
-uv run search_code.py -l 20 -o 20 class usage MyEntity
-uv run search_code.py -l 20 -o 40 class usage MyEntity
+uv run search_game_code.py -l 20 class usage MyEntity
+uv run search_game_code.py -l 20 -o 20 class usage MyEntity
+uv run search_game_code.py -l 20 -o 40 class usage MyEntity
 ```
 
 ### Filter by Namespace
 
 ```bash
-uv run search_code.py -n Sandbox.Game class declaration ""
-uv run search_code.py -n VRageMath method declaration Add
+uv run search_game_code.py -n Sandbox.Game class declaration ""
+uv run search_game_code.py -n VRageMath method declaration Add
 ```
 
 ## Pattern Syntax
@@ -130,24 +130,24 @@ Multiple patterns use AND logic (all must match).
 
 ```bash
 # Substring match (default)
-uv run search_code.py class declaration Toolbar
+uv run search_game_code.py class declaration Toolbar
 
 # Explicit text match
-uv run search_code.py class declaration "text:Toolbar"
+uv run search_game_code.py class declaration "text:Toolbar"
 
 # Regex for exact match
-uv run search_code.py class declaration "re:^MyToolbar$"
+uv run search_game_code.py class declaration "re:^MyToolbar$"
 
 # Regex patterns
-uv run search_code.py class declaration "re:^My.*Block$"
-uv run search_code.py method declaration "re:^Get.*Position$"
-uv run search_code.py struct declaration "re:^Vector[23]D$"
+uv run search_game_code.py class declaration "re:^My.*Block$"
+uv run search_game_code.py method declaration "re:^Get.*Position$"
+uv run search_game_code.py struct declaration "re:^Vector[23]D$"
 ```
 
 ### Multiple Patterns
 
 ```bash
-uv run search_code.py method declaration Get Position
+uv run search_game_code.py method declaration Get Position
 ```
 
 Both "Get" AND "Position" must appear in the name.

@@ -2,12 +2,12 @@
 
 > **Part of the se-dev-server-code skill.** Invoked when searching the server's decompiled code.
 
-Run searches using `uv run search_code.py` from this skill folder.
+Run searches using `uv run search_server_code.py` from this skill folder.
 
 ## Quick Reference
 
 ```cmd
-uv run search_code.py --help
+uv run search_server_code.py --help
 ```
 
 ## Documentation

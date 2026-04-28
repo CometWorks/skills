@@ -323,7 +323,7 @@ After building CSV files:
    - `interface_hierarchy.txt`
    - Sort children alphabetically at each level
 
-## Search Tool Implementation (`search_code.py`)
+## Search Tool Implementation (`search_game_code.py`)
 
 ### Argument Parsing
 
@@ -391,8 +391,8 @@ print(f"{parent_namespace}.{parent_name}|{compressed}")
 
 Standard search commands remain unchanged:
 ```bash
-uv run search_code.py class declaration MyGrid
-uv run search_code.py method usage GetPosition
+uv run search_game_code.py class declaration MyGrid
+uv run search_game_code.py method usage GetPosition
 ```
 
 Hierarchy subcommands are additions that don't affect existing functionality.
