@@ -1,36 +1,17 @@
 @echo off
+setlocal EnableDelayedExpansion
 
-:: 1. Detect game install location (env var override takes precedence)
-if defined SE_GAME_ROOT goto have_game_root
-
-:: Try the game's registry key
-for /f "tokens=2*" %%A in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 244850" /v "InstallLocation" 2^>nul') do (
-    set "SE_GAME_ROOT=%%B"
-)
-
-if defined SE_GAME_ROOT goto have_game_root
-echo ERROR: Could not detect Space Engineers install location.
-echo Please set the SE_GAME_ROOT environment variable to the game's root folder
-echo (the folder containing Bin64, Content, etc.)
-goto failed
-
-:have_game_root
-echo Game Root: %SE_GAME_ROOT%
-
-:: 2. Derive workshop path from game install location
-for %%I in ("%SE_GAME_ROOT%\..\..") do set "STEAMAPPS_PATH=%%~fI"
-set "WORKSHOP_PATH=%STEAMAPPS_PATH%\workshop\content\244850"
-echo Workshop Path: %WORKSHOP_PATH%
-
+:: 1. Verify Python is available
 echo Verifying Python
 python --version
 if %ERRORLEVEL% EQU 0 goto has_python
 echo ERROR: Missing Python
-echo Please install Python 3.13 or newer. 
+echo Please install Python 3.13 or newer.
 echo Make sure python.exe is on PATH.
 goto failed
 :has_python
 
+:: 2. Install uv if missing
 uv -V 2>NUL
 if %ERRORLEVEL% EQU 0 goto skip_uv
 echo Installing uv
@@ -39,26 +20,39 @@ uv -V
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_uv
 
+:: 3. Set up Python venv
 if exist .venv goto skip_venv
 echo Setting up Python .venv (uv sync)
 uv sync
 :skip_venv
 
+:: 4. Download busybox if missing
 if exist busybox.exe goto skip_busybox
 echo Downloading busybox
 powershell -Command "$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri https://frippery.org/files/busybox/busybox64u.exe -OutFile busybox.exe"
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_busybox
 
-if exist SteamMods goto skip_steam_mods
-echo Linking the Steam content folder as SteamMods
-mklink /J SteamMods "%WORKSHOP_PATH%"
-if %ERRORLEVEL% EQU 0 goto skip_steam_mods
-echo ERROR: Missing Steam content folder
-echo Please fix the folder path on the `mklink` line in the `Prepare.bat` script.
-goto failed
-:skip_steam_mods
+:: 5. Set up the Data folder under %USERPROFILE% and create a Data junction.
+:: See se-dev-game-code/Prepare.bat for why %USERPROFILE% is used over %LOCALAPPDATA%.
+set "DATA_ROOT=%USERPROFILE%\.se-dev\mod"
+echo Data Root: %DATA_ROOT%
+if not exist "%DATA_ROOT%" (
+    echo Creating Data Root folder
+    mkdir "%DATA_ROOT%"
+    if !ERRORLEVEL! NEQ 0 goto failed
+)
 
+if exist Data goto skip_data_junction
+echo Linking the Data folder
+mklink /J Data "%DATA_ROOT%"
+if %ERRORLEVEL% NEQ 0 (
+    echo ERROR: Could not create Data junction.
+    goto failed
+)
+:skip_data_junction
+
+:: 6. Link the game's local Mods folder as LocalMods (user development mods)
 if exist LocalMods goto skip_local_mods
 echo Linking the game's local Mods folder as LocalMods
 mklink /J LocalMods "%AppData%\SpaceEngineers\Mods"
@@ -67,8 +61,14 @@ echo ERROR: Missing local Mods folder, this should not happen
 goto failed
 :skip_local_mods
 
-echo Indexing mod code (this may take a while)
-uv run index_mods.py
+:: 7. Build the quick mod inventory (cheap; safe to rerun before tasks)
+echo Building mod inventory
+uv run python -u list_mods.py
+if %ERRORLEVEL% NEQ 0 goto failed
+
+:: 8. Build (or incrementally update) the full code index
+echo Indexing mod code (incremental: only changed mods are reparsed)
+uv run python -u index_mods.py
 if %ERRORLEVEL% NEQ 0 goto failed
 
 echo DONE

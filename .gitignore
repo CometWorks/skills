@@ -219,12 +219,8 @@ version_check.txt
 /skills/se-dev-game-code/Data/
 /skills/se-dev-server-code/Bin64/
 /skills/se-dev-server-code/Data/
+/skills/se-dev-mod/Data/
 /skills/se-dev-mod/LocalMods/
-/skills/se-dev-mod/ModCodeIndex/
-/skills/se-dev-mod/SteamMods/
-/skills/se-dev-plugin/PluginCodeIndex/
-/skills/se-dev-plugin/PluginHub/
-/skills/se-dev-plugin/PluginSources/
+/skills/se-dev-plugin/Data/
+/skills/se-dev-script/Data/
 /skills/se-dev-script/LocalScripts/
-/skills/se-dev-script/ScriptCodeIndex/
-/skills/se-dev-script/SteamScripts/

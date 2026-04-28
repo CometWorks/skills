@@ -1,10 +1,14 @@
 @echo off
-rmdir /s /q __pycache__
-rmdir /s /q PluginSources
-rmdir /s /q PluginCodeIndex
-rmdir /s /q PluginHub
-rmdir /s /q .venv
-del busybox.exe
-del Prepare.log
-del Prepare.DONE
+:: Clean.bat - removes everything that Prepare.bat creates inside the skill
+:: folder. The Data folder (a junction to %USERPROFILE%\.se-dev\plugin) is
+:: preserved: only the junction itself is removed so the actual contents
+:: (Sources, PluginHub, CodeIndex) survive across runs.
+
+if exist Data rmdir Data
+
+if exist __pycache__ rmdir /s /q __pycache__
+if exist .venv       rmdir /s /q .venv
+if exist busybox.exe del busybox.exe
+if exist Prepare.log del Prepare.log
+if exist Prepare.DONE del Prepare.DONE
 exit /b 0

@@ -21,7 +21,7 @@ from collections import defaultdict
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
-INDEX_DIR = SCRIPT_DIR / "ScriptCodeIndex"
+INDEX_DIR = SCRIPT_DIR / "Data" / "CodeIndex"
 
 CATEGORY_FILES = {
     "class": ("class_declarations.csv", "class_usages.csv"),
@@ -323,7 +323,8 @@ def main():
     args = parse_args()
 
     if not INDEX_DIR.exists():
-        print("ERROR: ScriptCodeIndex not found. Run index_scripts.py first.", file=sys.stderr)
+        print(f"ERROR: Code index not found at {INDEX_DIR}. "
+              f"Run Prepare.bat (or index_scripts.py) first.", file=sys.stderr)
         sys.exit(1)
 
     if args.category == "method" and args.symbol_type in METHOD_SUBCOMMANDS:

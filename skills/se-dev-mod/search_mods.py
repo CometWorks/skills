@@ -21,7 +21,7 @@ from collections import defaultdict
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
-INDEX_DIR = SCRIPT_DIR / "ModCodeIndex"
+INDEX_DIR = SCRIPT_DIR / "Data" / "CodeIndex"
 
 CATEGORY_FILES = {
     "class": ("class_declarations.csv", "class_usages.csv"),
@@ -332,7 +332,8 @@ def main():
 
     # Check if index exists
     if not INDEX_DIR.exists():
-        print("ERROR: ModCodeIndex not found. Run index_mods.py first.", file=sys.stderr)
+        print(f"ERROR: Code index not found at {INDEX_DIR}. "
+              f"Run Prepare.bat (or index_mods.py) first.", file=sys.stderr)
         sys.exit(1)
 
     # Check if this is a method signature query
