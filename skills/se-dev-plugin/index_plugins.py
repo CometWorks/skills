@@ -29,6 +29,7 @@ from tree_sitter_c_sharp import language
 
 from plugin_paths import (
     CODE_INDEX_DIR,
+    PLUGIN_LIST_FILE,
     PLUGIN_SOURCES_DIR,
     PLUGINHUB_DIR,
     PLUGINS_DIR,
@@ -36,7 +37,6 @@ from plugin_paths import (
 )
 
 OUTPUT_DIR = CODE_INDEX_DIR
-PLUGIN_LIST_FILE = OUTPUT_DIR / "plugins.json"
 
 
 @dataclass
@@ -1319,6 +1319,7 @@ class PluginCodeIndexer:
         # Also get available plugins from PluginHub
         available = get_available_plugins()
 
+        PLUGIN_LIST_FILE.parent.mkdir(parents=True, exist_ok=True)
         with open(PLUGIN_LIST_FILE, 'w', encoding='utf-8') as f:
             json.dump({
                 "indexed_plugins": plugins,

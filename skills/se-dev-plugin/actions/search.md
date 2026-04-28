@@ -114,7 +114,7 @@ uv run search_plugins.py -i class declaration config
 
 ## Plugin List
 
-After indexing, `PluginCodeIndex/plugins.json` contains:
+After indexing, `Data/plugins.json` contains:
 - `indexed_plugins` - Plugins with downloaded source code
 - `available_plugins` - All plugins from PluginHub (for downloading)
 
