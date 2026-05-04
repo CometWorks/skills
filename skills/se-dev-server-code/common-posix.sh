@@ -158,17 +158,31 @@ EOF
     return 1
 }
 
+normalize_server_root() {
+    local server_root="$1"
+    [ -d "$server_root" ] || fail "SE_SERVER_ROOT does not exist: $server_root"
+    server_root="$(cd -P -- "$server_root" && pwd)"
+
+    if [ "$(basename "$server_root")" = "DedicatedServer64" ]; then
+        printf '%s\n' "$(cd -P -- "$server_root/.." && pwd)"
+        return 0
+    fi
+
+    [ -d "$server_root/DedicatedServer64" ] || fail \
+        "SE_SERVER_ROOT must point to the dedicated server root or its DedicatedServer64 directory: $server_root"
+    printf '%s\n' "$server_root"
+}
+
 detect_server_root() {
     if [ -n "${SE_SERVER_ROOT:-}" ]; then
-        [ -d "$SE_SERVER_ROOT" ] || fail "SE_SERVER_ROOT does not exist: $SE_SERVER_ROOT"
-        printf '%s\n' "$SE_SERVER_ROOT"
+        normalize_server_root "$SE_SERVER_ROOT"
         return 0
     fi
 
     local game_root
     game_root="$(detect_game_root 2>/dev/null || true)"
     if [ -n "$game_root" ] && [ -d "$game_root/DedicatedServer" ]; then
-        printf '%s\n' "$game_root/DedicatedServer"
+        normalize_server_root "$game_root/DedicatedServer"
         return 0
     fi
 

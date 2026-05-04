@@ -34,6 +34,8 @@ If `Prepare.DONE` is missing:
 ./Prepare.sh (Linux/macOS) or ./run_prepare.sh (cross-platform wrapper)
 ```
 
+If auto-detection fails, set `SE_SERVER_ROOT` first. It may point either to the dedicated server root or directly to the `DedicatedServer64` directory.
+
 **Alternative approaches:**
 
 Using PowerShell:

@@ -216,9 +216,9 @@ Prepare.DONE
 busybox.exe
 version_check.txt
 /skills/se-dev-game-code/Bin64/
-/skills/se-dev-game-code/Data/
+/skills/se-dev-game-code/Data
 /skills/se-dev-server-code/Bin64/
-/skills/se-dev-server-code/Data/
+/skills/se-dev-server-code/Data
 /skills/se-dev-mod/Data/
 /skills/se-dev-mod/LocalMods/
 /skills/se-dev-plugin/Data/

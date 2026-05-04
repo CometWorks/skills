@@ -49,6 +49,8 @@ The host system must have the following on `PATH`:
 
 If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time preparation steps first. See the [prepare action](./actions/prepare.md).
 
+If server auto-detection fails, set `SE_SERVER_ROOT` before running the preparation script. It may point to either the dedicated server root or directly to the `DedicatedServer64` directory.
+
 ## Folder Layout
 
 After preparation the skill folder contains a `Data` junction/symlink. The actual data lives outside the skill folder so that it is preserved across `Clean.bat` / `Prepare.bat` / `Prepare.sh` cycles.
