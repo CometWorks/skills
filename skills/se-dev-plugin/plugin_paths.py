@@ -1,8 +1,9 @@
 """
 Shared path resolution for the plugin skill.
 
-All plugin data lives under the Data junction inside the skill folder. The
-junction is created by Prepare.bat and points at %USERPROFILE%\\.se-dev\\plugin.
+All plugin data lives under the Data symlink/junction inside the skill folder.
+The link is created by Prepare.bat / Prepare.sh and points at the per-user
+persistent skill data directory.
 """
 
 from pathlib import Path

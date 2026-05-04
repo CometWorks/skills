@@ -1,4 +1,6 @@
-#!/bin/sh
+#!/usr/bin/env bash
+
+set -euo pipefail
 
 # $1 is the first argument (directory name)
 # $2 is the second argument (path to DLL)
@@ -12,8 +14,14 @@ export DOTNET_Thread_DefaultStackSize=1000000
 export COMPlus_Thread_DefaultStackSize=1000000
 
 OUT="Data/Decompiled/$1"
+ILSPY_CMD="${ILSPYCMD:-$(command -v ilspycmd 2>/dev/null || true)}"
 
 echo "Decompiling: $1"
+
+if [ -z "$ILSPY_CMD" ]; then
+    echo "ERROR: ilspycmd is not available. Run Prepare.sh first." >&2
+    exit 1
+fi
 
 # A successful previous run leaves the marker file. The marker is what makes
 # subsequent runs skip the assembly cleanly even if the source set was wiped
@@ -30,9 +38,11 @@ if [ -d "$OUT" ]; then
     rm -rf "$OUT"
 fi
 
-ilspycmd --project --nested-directories --referencepath Bin64 --languageversion CSharp11_0 --disable-updatecheck -o "$OUT" "$2"
+set +e
+"$ILSPY_CMD" --project --nested-directories --referencepath Bin64 --languageversion CSharp11_0 --disable-updatecheck -o "$OUT" "$2"
 RC=$?
-if [ $RC -ne 0 ]; then
+set -e
+if [ "$RC" -ne 0 ]; then
     echo "Failed during project decompilation (ilspycmd exit $RC)."
     rm -rf "$OUT"
     exit 1

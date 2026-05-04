@@ -27,17 +27,25 @@ In case you don't want to use `skills.sh`, then please see the "Manual installat
 ## Preparation
 
 The skills will automatically prepare themselves on **first use**. It means downloading some tools and indexing code.
-If you want to prepare them ahead of time, simply run `Prepare.bat` in their respective folders. If any dependency
-is missing you will get a failure message, so run it in a `cmd` window, not directly, so you see its output.
+If you want to prepare them ahead of time, run `Prepare.bat` on Windows or `Prepare.sh`
+on Linux/macOS in the respective skill folder. `run_prepare.sh` is a wrapper that picks
+the right preparation script for the current platform. If any dependency is missing you
+will get a failure message, so run the preparation script from a terminal where you can
+see its output.
 
 **Note:** Preparing the `se-dev-game-code` skill may take 5–15 minutes, as it fully decompiles the game and builds
 code indexes to allow for rapid code search later. The fully prepared repository takes about **1.5 GB** of disk space
 due to the code index. If you need to save space, you can delete all `*.il` files (approx. **660 MB**), which are
 only required for working on transpiler or preloader patches.
 
-All skills install BusyBox (`busybox.exe`) into their folder for use by agentic coding tools for UNIX like commands,
-because AI models are bad at Windows commands and often fall back to the UNIX CLI tools even if told otherwise. It
-has improved efficiency a lot, therefore this is currently a requirement. 
+On Windows the skills install BusyBox (`busybox.exe`) into their folder for use by
+agentic coding tools for UNIX like commands, because AI models are bad at Windows
+commands and often fall back to the UNIX CLI tools even if told otherwise. It has
+improved efficiency a lot, therefore this is currently a requirement there.
+
+On Linux/macOS the skills use the native shell tools instead. The decompiler skills
+(`se-dev-game-code`, `se-dev-server-code`) install `ilspycmd` with the official ILSpy
+dotnet tool frontend, so PowerShell is not required just to prepare and run the skills.
 
 If you want to use BusyBox in your other projects, then this is also available as a separate skill:
 `npx skills add https://github.com/viktor-ferenczi/skills --skill busybox-on-windows`
@@ -66,15 +74,15 @@ You can also install the skills manually:
 1. Clone this repository
 2. Run one of the installation scripts from the `install` folder:
 
-| Target Environment | Script                              |
-|--------------------|-------------------------------------|
-| Claude Code        | `claude.bat`                        |
-| Kilo Code          | `kilocode.bat`                      |
-| Cline              | `cline.bat`                         |
-| OpenCode           | `opencode.bat`                      |
-| Custom location    | `install.bat <target_skills_folder>` |
+| Target Environment | Windows Script                      | Linux/macOS Script                  |
+|--------------------|-------------------------------------|-------------------------------------|
+| Claude Code        | `claude.bat`                        | `claude.sh`                         |
+| Kilo Code          | `kilocode.bat`                      | `kilocode.sh`                       |
+| Cline              | `cline.bat`                         | `cline.sh`                          |
+| OpenCode           | `opencode.bat`                      | `opencode.sh`                       |
+| Custom location    | `install.bat <target_skills_folder>` | `install.sh <target_skills_folder>` |
 
-The scripts create junction points (symlinks) from the target skill folders to the skill folders in this repository.
+The scripts create junction points / symlinks from the target skill folders to the skill folders in this repository.
 
 ## FAQ
 

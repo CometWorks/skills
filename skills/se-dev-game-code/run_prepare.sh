@@ -1,9 +1,8 @@
-#!/bin/bash
-# run_prepare.sh - Wrapper to run Prepare.bat correctly from any shell
+#!/usr/bin/env bash
 
-set -e  # Exit on error
+set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR" || exit 1
 
 echo "Running preparation from: $SCRIPT_DIR"
@@ -16,8 +15,16 @@ fi
 echo "Starting preparation... This may take 5-15 minutes."
 echo "---"
 
-# Run Prepare.bat using full path (works from any shell on Windows)
-if cmd //c "$SCRIPT_DIR/Prepare.bat" >Prepare.log 2>&1; then
+case "$(uname -s)" in
+    MINGW*|MSYS*|CYGWIN*)
+        PREP_CMD=(cmd //c "$SCRIPT_DIR/Prepare.bat")
+        ;;
+    *)
+        PREP_CMD=(bash "$SCRIPT_DIR/Prepare.sh")
+        ;;
+esac
+
+if "${PREP_CMD[@]}" >Prepare.log 2>&1; then
     if [ -f "Prepare.DONE" ]; then
         echo "---"
         echo "✓ Preparation completed successfully"
@@ -36,7 +43,7 @@ if cmd //c "$SCRIPT_DIR/Prepare.bat" >Prepare.log 2>&1; then
     fi
 else
     echo "---"
-    echo "✗ Prepare.bat execution failed"
+    echo "✗ Preparation failed"
     echo ""
     echo "Check Prepare.log for details:"
     tail -20 Prepare.log

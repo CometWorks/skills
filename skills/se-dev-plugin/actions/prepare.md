@@ -4,7 +4,7 @@
 
 **⚠️ IMPORTANT: Read [CommandExecution.md](../CommandExecution.md) for complete guidance on running commands correctly.**
 
-Run `Prepare.bat` to set up the skill environment. This is required before using the skill.
+Run `Prepare.bat` on Windows or `Prepare.sh` on Linux/macOS to set up the skill environment. `run_prepare.sh` is also acceptable as a cross-platform wrapper. This is required before using the skill.
 
 ## Quick Check Status
 
@@ -31,7 +31,7 @@ If `Prepare.DONE` is missing:
 
 **Recommended approach (using workdir parameter):**
 ```bash
-./Prepare.bat (with workdir set to skill folder)
+./Prepare.sh (Linux/macOS) or ./run_prepare.sh (cross-platform wrapper)
 ```
 
 **Alternative approaches:**
@@ -56,13 +56,13 @@ Prepare.bat
 ## Critical Rules
 
 - **DO NOT** create the `Prepare.DONE` file yourself.
-- It is automatically created by `Prepare.bat` only upon a successful run.
+- It is automatically created by the preparation script only upon a successful run.
 - Creating it manually is "faking" success and will lead to errors.
 
 ## What Preparation Does
 
 The preparation script:
 - Sets up the Python virtual environment
-- Downloads and installs required tools (busybox.exe)
+- On Windows downloads `busybox.exe`. On Linux/macOS uses the native shell tools.
 - Downloads plugin sources for examples (to OS temp folder or configured location)
 - Verifies the environment is ready for use

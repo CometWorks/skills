@@ -333,7 +333,7 @@ def main():
     # Check if index exists
     if not INDEX_DIR.exists():
         print(f"ERROR: Code index not found at {INDEX_DIR}. "
-              f"Run Prepare.bat (or index_mods.py) first.", file=sys.stderr)
+              f"Run Prepare.bat / Prepare.sh (or index_mods.py) first.", file=sys.stderr)
         sys.exit(1)
 
     # Check if this is a method signature query

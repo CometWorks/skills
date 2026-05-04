@@ -37,6 +37,24 @@ GAME_DLL = "SpaceEngineers.Game.dll"
 GAME_TYPE = "SpaceEngineers.Game.SpaceEngineersGame"
 
 
+def _resolve_ilspycmd() -> str:
+    env_override = os.environ.get("ILSPYCMD", "").strip()
+    if env_override:
+        return env_override
+
+    from_path = shutil.which("ilspycmd")
+    if from_path:
+        return from_path
+
+    local_tool = Path.home() / ".se-dev" / "tools" / "ilspycmd" / "ilspycmd"
+    if local_tool.is_file():
+        return str(local_tool)
+
+    raise FileNotFoundError(
+        "ilspycmd not found. Run Prepare.bat/Prepare.sh first or set ILSPYCMD."
+    )
+
+
 def _format_label(se_version: int, client_build: int) -> str:
     major = se_version // 1000000
     minor = (se_version // 1000) % 1000
@@ -53,7 +71,7 @@ def _decompile_type(bin64: Path) -> str:
     try:
         # ilspycmd writes the decompiled type into the output directory
         cmd = [
-            "ilspycmd",
+            _resolve_ilspycmd(),
             "-t", GAME_TYPE,
             "--disable-updatecheck",
             "-o", str(tmp_dir),
