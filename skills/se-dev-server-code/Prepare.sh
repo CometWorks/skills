@@ -3,8 +3,12 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=../../scripts/common-posix.sh
-source "$SCRIPT_DIR/../../scripts/common-posix.sh"
+COMMON_POSIX_SH="$SCRIPT_DIR/common-posix.sh"
+if [ ! -f "$COMMON_POSIX_SH" ]; then
+    COMMON_POSIX_SH="$SCRIPT_DIR/../../scripts/common-posix.sh"
+fi
+# shellcheck source=./common-posix.sh
+source "$COMMON_POSIX_SH"
 
 cd "$SCRIPT_DIR"
 
