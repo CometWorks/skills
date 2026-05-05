@@ -64,7 +64,7 @@ Prepare.bat
 ## What Preparation Does
 
 The preparation script:
-- Verifies that Python 3.13+ and the command line `git` client are available
+- Verifies that Python 3.11+ and the command line `git` client are available
 - Sets up the Python virtual environment
 - On Windows downloads `busybox.exe`. On Linux/macOS uses the native shell tools.
 - Installs `ilspycmd` for decompilation.

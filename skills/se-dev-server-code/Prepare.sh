@@ -28,7 +28,7 @@ fi
 log "Server Root: $SERVER_ROOT"
 
 log "Verifying Python"
-require_python_3_13
+require_python_3_11
 log "Verifying git"
 require_cmd git
 ensure_uv

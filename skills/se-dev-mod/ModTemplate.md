@@ -11,7 +11,7 @@ This is a template repository to build new Space Engineers mods.
 
 \* Install the Mod SDK via Steam. It is listed under Tools in your Library. You may need to enable listing the Tools in the drop-down at the top of the left side list.
 
-\** Python is required only for the project setup. Tested with Python 3.12.
+\** Python is required only for the project setup. Tested with Python 3.11.
 
 ## Create your project
 

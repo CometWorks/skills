@@ -6,7 +6,7 @@ echo Verifying Python
 python --version
 if %ERRORLEVEL% EQU 0 goto has_python
 echo ERROR: Missing Python
-echo Please install Python 3.13 or newer.
+echo Please install Python 3.11 or newer.
 echo Make sure python.exe is on PATH.
 goto failed
 :has_python

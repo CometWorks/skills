@@ -1,4 +1,4 @@
-1. Run `python --version`, if it fails or not at least 3.13 then inform the user and stop here.
+1. Run `python --version`, if it fails or not at least 3.11 then inform the user and stop here.
 2. Run `git --version`, if it fails inform the user that the command line `git` client must be available on `PATH` and stop here.
 3. Inform the user that this is a one time preparation which will take about 5-15 minutes. Highlight this message.
 4. On Windows run `.\Prepare.bat >Prepare.log 2>&1`. On Linux/macOS run `./Prepare.sh >Prepare.log 2>&1`. `run_prepare.sh` is also acceptable as a cross-platform wrapper. Use this same folder as CWD, this is where `Prepare.md` is situated.

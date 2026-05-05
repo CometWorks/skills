@@ -54,13 +54,13 @@ find_python() {
     return 1
 }
 
-require_python_3_13() {
+require_python_3_11() {
     prepend_user_paths
     PYTHON_BIN="${PYTHON_BIN:-$(find_python 2>/dev/null || true)}"
-    [ -n "${PYTHON_BIN:-}" ] || fail "Missing Python. Install Python 3.13 or newer."
-    "$PYTHON_BIN" - <<'PY' || fail "Python 3.13 or newer required."
+    [ -n "${PYTHON_BIN:-}" ] || fail "Missing Python. Install Python 3.11 or newer."
+    "$PYTHON_BIN" - <<'PY' || fail "Python 3.11 or newer required."
 import sys
-raise SystemExit(0 if sys.version_info >= (3, 13) else 1)
+raise SystemExit(0 if sys.version_info >= (3, 11) else 1)
 PY
     export PYTHON_BIN
 }

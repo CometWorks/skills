@@ -39,7 +39,7 @@ Check these patterns **in order** - first match wins:
 
 The host system must have the following on `PATH`:
 
-- **Python** 3.13 or newer
+- **Python** 3.11 or newer
 - **git** command line client (used to version each decompiled server build)
 - **dotnet** SDK (for installing `ilspycmd`)
 

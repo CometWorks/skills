@@ -62,7 +62,7 @@ Prepare.bat
 ## What Preparation Does
 
 The preparation script:
-- Verifies Python ≥ 3.13 and installs `uv` if needed.
+- Verifies Python ≥ 3.11 and installs `uv` if needed.
 - Sets up the Python virtual environment via `uv sync`.
 - On Windows downloads `busybox.exe` for UNIX-style shell commands. On Linux/macOS uses the native shell tools.
 - Creates `Data/` as a junction to `%USERPROFILE%\.se-dev\mod` so persistent
