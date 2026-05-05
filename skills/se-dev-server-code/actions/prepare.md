@@ -4,7 +4,7 @@
 
 **⚠️ IMPORTANT: Read [CommandExecution.md](../CommandExecution.md) for complete guidance on running commands correctly.**
 
-Run `Prepare.bat` to set up the skill environment. This is required before using the skill.
+Run `Prepare.bat` on Windows or `Prepare.sh` on Linux/macOS to set up the skill environment. `run_prepare.sh` is also acceptable as a cross-platform wrapper. This is required before using the skill.
 
 ## Quick Check Status
 
@@ -31,8 +31,10 @@ If `Prepare.DONE` is missing:
 
 **Recommended approach (using workdir parameter):**
 ```bash
-./Prepare.bat (with workdir set to skill folder)
+./Prepare.sh (Linux/macOS) or ./run_prepare.sh (cross-platform wrapper)
 ```
+
+If auto-detection fails, set `SE_SERVER_ROOT` first. It may point either to the dedicated server root or directly to the `DedicatedServer64` directory.
 
 **Alternative approaches:**
 
@@ -56,7 +58,7 @@ Prepare.bat
 ## Critical Rules
 
 - **DO NOT** create the `Prepare.DONE` file yourself.
-- It is automatically created by `Prepare.bat` only upon a successful run.
+- It is automatically created by the preparation script only upon a successful run.
 - Creating it manually is "faking" success and will lead to errors.
 
 ## What Preparation Does
@@ -64,7 +66,8 @@ Prepare.bat
 The preparation script:
 - Verifies that Python 3.13+ and the command line `git` client are available
 - Sets up the Python virtual environment
-- Downloads and installs required tools (busybox.exe, ILSpy)
+- On Windows downloads `busybox.exe`. On Linux/macOS uses the native shell tools.
+- Installs `ilspycmd` for decompilation.
 - Creates the `Data` junction pointing to `%USERPROFILE%\.se-dev\server-code\`
 - Initialises a local Git repository inside `Data/` on first run (with an initial commit of `.gitignore`)
 - Detects the current server version directly from the binaries

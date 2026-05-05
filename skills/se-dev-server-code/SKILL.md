@@ -2,14 +2,14 @@
 name: se-dev-server-code
 description: Allows reading the decompiled C# code of the Space Engineers Dedicated Server
 license: MIT
-allowed-tools: Read, Bash(*Prepare.bat*), Bash(*Clean.bat*), Bash(*run_prepare.sh*), Bash(*test_search_server_code.bat*), Bash(*uv run search_server_code.py *), Bash(*uv run index_code.py *), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*Prepare.sh*), Bash(*Clean.bat*), Bash(*run_prepare.sh*), Bash(*test_search_server_code.bat*), Bash(*uv run search_server_code.py *), Bash(*uv run index_code.py *), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
 # SE Dev Server Code Skill
 
 Allows reading the decompiled C# code of the Space Engineers Dedicated Server. The "game logic" of the server is largely the same as the game (client) is running. The entry point (main executable), some aspects of logging and configuration differ. Also, some of the libraries are not used by the server, but they may still present to provide the necessary data structures and some backend functionality.
 
-**⚠️ CRITICAL: Commands run in a UNIX shell (busybox), NOT Windows CMD. Use bash syntax!**
+**⚠️ CRITICAL: Commands run in a UNIX shell. Use bash syntax. On Windows this is BusyBox; on Linux/macOS use the native shell.**
 
 Examples:
 - ✅ `test -f file.txt && echo exists`
@@ -18,7 +18,7 @@ Examples:
 
 **Actions:**
 
-- **prepare**: Run the one-time preparation (Prepare.bat)
+- **prepare**: Run the one-time preparation (`Prepare.bat` on Windows, `Prepare.sh` on Linux/macOS, or `run_prepare.sh` as wrapper)
 - **bash**: Run UNIX shell commands via busybox
 - **search**: Run code searches using `search_server_code.py`
 - **test**: Test this skill by running `test_search_server_code.bat`
@@ -49,24 +49,26 @@ The host system must have the following on `PATH`:
 
 If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time preparation steps first. See the [prepare action](./actions/prepare.md).
 
+If server auto-detection fails, set `SE_SERVER_ROOT` before running the preparation script. It may point to either the dedicated server root or directly to the `DedicatedServer64` directory.
+
 ## Folder Layout
 
-After preparation the skill folder contains a `Data` junction. The actual data lives outside the skill folder so that it is preserved across `Clean.bat` / `Prepare.bat` cycles.
+After preparation the skill folder contains a `Data` junction/symlink. The actual data lives outside the skill folder so that it is preserved across `Clean.bat` / `Prepare.bat` / `Prepare.sh` cycles.
 
 ```
 skills/se-dev-server-code/
-├── Data/                 (junction → %USERPROFILE%\.se-dev\server-code)
+├── Data/                 (junction/symlink → per-user persistent server-code data)
 │   ├── .git/             local Git repository tracking decompiled sources
 │   ├── .gitignore        ignores CodeIndex/, Content/, __pycache__, *.py[cod], *.bak, *.log
 │   ├── game_version.txt  recorded SE_VERSION / CLIENT_BUILD_NUMBER / SERVER_BUILD_NUMBER
 │   ├── Decompiled/       decompiled C# sources, organised per assembly (committed)
 │   ├── Content/          textual server content (NOT committed - regenerated)
 │   └── CodeIndex/        CSV indexes (NOT committed - regenerated)
-├── Bin64/                (junction → server's DedicatedServer64, removed after preparation)
+├── Bin64/                (junction/symlink → server's DedicatedServer64, removed after preparation)
 └── ...                   skill scripts and documentation
 ```
 
-The `Data` folder is a junction to `%USERPROFILE%\.se-dev\server-code\`. (`%USERPROFILE%` is used rather than `%LOCALAPPDATA%` so the data sits outside any per-app UWP filesystem virtualization.) Treat `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` exactly as before.
+The `Data` folder is a junction/symlink to the per-user persistent server-code data directory (`%USERPROFILE%\.se-dev\server-code` on Windows, `~/.se-dev/server-code` on Linux/macOS). Treat `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` exactly as before.
 
 ## Local Versioning of Decompiled Sources
 
@@ -82,7 +84,7 @@ The repository uses an internal author/email (`se-dev-skills@localhost`) so comm
 
 ## Essential Documentation
 
-- **[CommandExecution.md](CommandExecution.md)** - ⚠️ **READ THIS FIRST** - How to run commands correctly on Windows
+- **[CommandExecution.md](CommandExecution.md)** - ⚠️ **READ THIS FIRST** - Windows command execution details; on Linux/macOS keep bash syntax and use `Prepare.sh`
 
 ## Code Search Documentation
 
