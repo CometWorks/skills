@@ -4,7 +4,7 @@
 
 **⚠️ IMPORTANT: Read [CommandExecution.md](../CommandExecution.md) for complete guidance on running commands correctly.**
 
-Run `Prepare.bat` on Windows or `prepare.sh` on Linux/macOS to set up the skill environment. This is required before using the skill.
+Run `Prepare.bat` on Windows or `prepare.sh` on Linux to set up the skill environment. This is required before using the skill.
 
 ## Quick Check Status
 
@@ -31,7 +31,7 @@ If `Prepare.DONE` is missing:
 
 **Recommended approach (using workdir parameter):**
 ```bash
-./prepare.sh (Linux/macOS)
+./prepare.sh (Linux)
 ```
 
 **Alternative approaches:**
@@ -64,7 +64,7 @@ Prepare.bat
 The preparation script:
 - Verifies that Python 3.11+ and the command line `git` client are available
 - Sets up the Python virtual environment
-- On Windows downloads `busybox.exe`. On Linux/macOS uses the native shell tools.
+- On Windows downloads `busybox.exe`. On Linux uses the native shell tools.
 - Installs `ilspycmd` for decompilation.
 - Creates the `Data` junction pointing to `%USERPROFILE%\.se-dev\game-code\`
 - Initialises a local Git repository inside `Data/` on first run (with an initial commit of `.gitignore`)

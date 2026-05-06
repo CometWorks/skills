@@ -9,7 +9,7 @@ allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*),
 
 Plugin development for Space Engineers version 1.
 
-**⚠️ CRITICAL: Commands run in a UNIX shell. Use bash syntax. On Windows this is BusyBox; on Linux/macOS use the native shell.**
+**⚠️ CRITICAL: Commands run in a UNIX shell. Use bash syntax. On Windows this is BusyBox; on Linux use the native shell.**
 
 Examples:
 - ✅ `test -f file.txt && echo exists`
@@ -18,7 +18,7 @@ Examples:
 
 **Actions:**
 
-- **prepare**: Run the one-time preparation (`Prepare.bat` on Windows, `prepare.sh` on Linux/macOS)
+- **prepare**: Run the one-time preparation (`Prepare.bat` on Windows, `prepare.sh` on Linux)
 - **bash**: Run UNIX shell commands via busybox
 - **search**: Search plugin code using `search_plugins.py`
 
@@ -41,7 +41,7 @@ If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time 
 
 ## Essential Documentation
 
-- **[CommandExecution.md](CommandExecution.md)** - ⚠️ **READ THIS FIRST** - Windows command execution details; on Linux/macOS keep bash syntax and use `prepare.sh`
+- **[CommandExecution.md](CommandExecution.md)** - ⚠️ **READ THIS FIRST** - Windows command execution details; on Linux keep bash syntax and use `prepare.sh`
 
 ## Plugin Development Documentation
 

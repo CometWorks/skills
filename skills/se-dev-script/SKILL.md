@@ -9,7 +9,7 @@ allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*),
 
 In-game (programmable block, aka PB) script development for Space Engineers version 1.
 
-**⚠️ CRITICAL: Commands run in a UNIX shell. Use bash syntax. On Windows this is BusyBox; on Linux/macOS use the native shell.**
+**⚠️ CRITICAL: Commands run in a UNIX shell. Use bash syntax. On Windows this is BusyBox; on Linux use the native shell.**
 
 Examples:
 - ✅ `test -f file.txt && echo exists`
@@ -18,7 +18,7 @@ Examples:
 
 **Actions:**
 
-- **prepare**: Run the one-time preparation (`Prepare.bat` on Windows, `prepare.sh` on Linux/macOS)
+- **prepare**: Run the one-time preparation (`Prepare.bat` on Windows, `prepare.sh` on Linux)
 - **bash**: Run UNIX shell commands via busybox
 - **search**: Search script code using `search_scripts.py`
 
@@ -41,7 +41,7 @@ If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time 
 
 ## Essential Documentation
 
-- **[CommandExecution.md](CommandExecution.md)** - ⚠️ **READ THIS FIRST** - Windows command execution details; on Linux/macOS keep bash syntax and use `prepare.sh`
+- **[CommandExecution.md](CommandExecution.md)** - ⚠️ **READ THIS FIRST** - Windows command execution details; on Linux keep bash syntax and use `prepare.sh`
 
 ## Script Development
 
@@ -64,11 +64,11 @@ searches corresponding to names on the PB API whitelist for efficiency.
 
 ## Folder Structure
 
-- `Data/` — junction/symlink to the per-user persistent script data folder (`%USERPROFILE%\.se-dev\script` on Windows, `~/.se-dev/script` on Linux/macOS). Persistent skill data lives here:
+- `Data/` — junction/symlink to the per-user persistent script data folder (`%USERPROFILE%\.se-dev\script` on Windows, `~/.se-dev/script` on Linux). Persistent skill data lives here:
   - `Data/scripts.json` — quick inventory of all installed PB scripts.
   - `Data/script_hashes.json` — per-script aggregate sha1 used by the indexer for change detection.
   - `Data/CodeIndex/` — full Tree-sitter C# index (one CSV per category, plus hierarchy trees).
-- `LocalScripts/` — junction/symlink to the game's local-script folder (`%AppData%\SpaceEngineers\IngameScripts\local` on Windows, the Proton appdata equivalent on Linux/macOS), the
+- `LocalScripts/` — junction/symlink to the game's local-script folder (`%AppData%\SpaceEngineers\IngameScripts\local` on Windows, the Proton appdata equivalent on Linux), the
   game's local-PB-script folder.
 - Steam Workshop content is read in-place from the Steam folder; **it is not copied or symlinked**
   into the skill. PB scripts are detected by the presence of a top-level `Script.cs` file

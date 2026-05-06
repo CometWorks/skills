@@ -9,7 +9,7 @@ allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*),
 
 Mod development for Space Engineers version 1.
 
-**⚠️ CRITICAL: Commands run in a UNIX shell. Use bash syntax. On Windows this is BusyBox; on Linux/macOS use the native shell.**
+**⚠️ CRITICAL: Commands run in a UNIX shell. Use bash syntax. On Windows this is BusyBox; on Linux use the native shell.**
 
 Examples:
 - ✅ `test -f file.txt && echo exists`
@@ -18,7 +18,7 @@ Examples:
 
 **Actions:**
 
-- **prepare**: Run the one-time preparation (`Prepare.bat` on Windows, `prepare.sh` on Linux/macOS)
+- **prepare**: Run the one-time preparation (`Prepare.bat` on Windows, `prepare.sh` on Linux)
 - **bash**: Run UNIX shell commands via busybox
 - **search**: Search mod code using `search_mods.py`
 
@@ -41,7 +41,7 @@ If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time 
 
 ## Essential Documentation
 
-- **[CommandExecution.md](CommandExecution.md)** - ⚠️ **READ THIS FIRST** - Windows command execution details; on Linux/macOS keep bash syntax and use `prepare.sh`
+- **[CommandExecution.md](CommandExecution.md)** - ⚠️ **READ THIS FIRST** - Windows command execution details; on Linux keep bash syntax and use `prepare.sh`
 
 ## Mod Development
 
@@ -58,11 +58,11 @@ game code searches corresponding to names on the Mod API whitelist for efficienc
 
 ## Folder Structure
 
-- `Data/` — junction/symlink to the per-user persistent mod data folder (`%USERPROFILE%\.se-dev\mod` on Windows, `~/.se-dev/mod` on Linux/macOS). Persistent skill data lives here:
+- `Data/` — junction/symlink to the per-user persistent mod data folder (`%USERPROFILE%\.se-dev\mod` on Windows, `~/.se-dev/mod` on Linux). Persistent skill data lives here:
   - `Data/mods.json` — quick inventory of all installed mods (workshop_id, path, has_scripts, ...).
   - `Data/mod_hashes.json` — per-mod aggregate sha1 used by the indexer for change detection.
   - `Data/CodeIndex/` — full Tree-sitter C# index (one CSV per category, plus hierarchy trees).
-- `LocalMods/` — junction/symlink to the game's local-mod folder (`%AppData%\SpaceEngineers\Mods` on Windows, the Proton appdata equivalent on Linux/macOS).
+- `LocalMods/` — junction/symlink to the game's local-mod folder (`%AppData%\SpaceEngineers\Mods` on Windows, the Proton appdata equivalent on Linux).
 - Steam Workshop content is read in-place from the Steam folder; **it is not copied or symlinked**
   into the skill. The workshop folder is resolved from `SE_GAME_ROOT` (env var) or the Steam
   registry entry for app id 244850.

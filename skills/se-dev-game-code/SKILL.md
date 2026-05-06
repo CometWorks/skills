@@ -9,7 +9,7 @@ allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*),
 
 Allows reading the decompiled C# code of Space Engineers version 1.
 
-**⚠️ CRITICAL: Commands run in a UNIX shell. Use bash syntax. On Windows this is BusyBox; on Linux/macOS use the native shell.**
+**⚠️ CRITICAL: Commands run in a UNIX shell. Use bash syntax. On Windows this is BusyBox; on Linux use the native shell.**
 
 Examples:
 - ✅ `test -f file.txt && echo exists`
@@ -18,7 +18,7 @@ Examples:
 
 **Actions:**
 
-- **prepare**: Run the one-time preparation (`Prepare.bat` on Windows, `prepare.sh` on Linux/macOS)
+- **prepare**: Run the one-time preparation (`Prepare.bat` on Windows, `prepare.sh` on Linux)
 - **bash**: Run UNIX shell commands via busybox
 - **search**: Run code searches using `search_game_code.py`
 - **test**: Test this skill by running `test_search_game_code.bat`
@@ -66,7 +66,7 @@ skills/se-dev-game-code/
 └── ...                   skill scripts and documentation
 ```
 
-The `Data` folder is a junction/symlink to the per-user persistent game-code data directory (`%USERPROFILE%\.se-dev\game-code` on Windows, `~/.se-dev/game-code` on Linux/macOS). Treat `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` exactly as before.
+The `Data` folder is a junction/symlink to the per-user persistent game-code data directory (`%USERPROFILE%\.se-dev\game-code` on Windows, `~/.se-dev/game-code` on Linux). Treat `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` exactly as before.
 
 ## Local Versioning of Decompiled Sources
 
@@ -82,7 +82,7 @@ The repository uses an internal author/email (`se-dev-skills@localhost`) so comm
 
 ## Essential Documentation
 
-- **[CommandExecution.md](CommandExecution.md)** - ⚠️ **READ THIS FIRST** - Windows command execution details; on Linux/macOS keep bash syntax and use `prepare.sh`
+- **[CommandExecution.md](CommandExecution.md)** - ⚠️ **READ THIS FIRST** - Windows command execution details; on Linux keep bash syntax and use `prepare.sh`
 
 ## Code Search Documentation
 

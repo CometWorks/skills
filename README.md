@@ -28,7 +28,7 @@ In case you don't want to use `skills.sh`, then please see the "Manual installat
 
 The skills will automatically prepare themselves on **first use**. It means downloading some tools and indexing code.
 If you want to prepare them ahead of time, run `Prepare.bat` on Windows or `prepare.sh`
-on Linux/macOS in the respective skill folder. If any dependency is missing you
+on Linux in the respective skill folder. If any dependency is missing you
 will get a failure message, so run the preparation script from a terminal where you can
 see its output.
 
@@ -42,7 +42,7 @@ agentic coding tools for UNIX like commands, because AI models are bad at Window
 commands and often fall back to the UNIX CLI tools even if told otherwise. It has
 improved efficiency a lot, therefore this is currently a requirement there.
 
-On Linux/macOS the skills use the native shell tools instead. The decompiler skills
+On Linux the skills use the native shell tools instead. The decompiler skills
 (`se-dev-game-code`, `se-dev-server-code`) install `ilspycmd` with the official ILSpy
 dotnet tool frontend, so PowerShell is not required just to prepare and run the skills.
 
@@ -73,7 +73,7 @@ You can also install the skills manually:
 1. Clone this repository
 2. Run one of the installation scripts from the `install` folder:
 
-| Target Environment | Windows Script                      | Linux/macOS Script                  |
+| Target Environment | Windows Script                      | Linux Script                  |
 |--------------------|-------------------------------------|-------------------------------------|
 | Claude Code        | `claude.bat`                        | `claude.sh`                         |
 | Kilo Code          | `kilocode.bat`                      | `kilocode.sh`                       |

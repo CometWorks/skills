@@ -4,7 +4,7 @@
 
 **⚠️ IMPORTANT: Read [CommandExecution.md](../CommandExecution.md) for complete guidance on running commands correctly.**
 
-Run `Prepare.bat` on Windows or `prepare.sh` on Linux/macOS to set up the skill environment. This is required before using the skill.
+Run `Prepare.bat` on Windows or `prepare.sh` on Linux to set up the skill environment. This is required before using the skill.
 
 ## Quick Check Status
 
@@ -31,7 +31,7 @@ If `Prepare.DONE` is missing:
 
 **Recommended approach (using workdir parameter):**
 ```bash
-./prepare.sh (Linux/macOS)
+./prepare.sh (Linux)
 ```
 
 **Alternative approaches:**
@@ -64,7 +64,7 @@ Prepare.bat
 The preparation script:
 - Verifies Python ≥ 3.11 and installs `uv` if needed.
 - Sets up the Python virtual environment via `uv sync`.
-- On Windows downloads `busybox.exe` for UNIX-style shell commands. On Linux/macOS uses the native shell tools.
+- On Windows downloads `busybox.exe` for UNIX-style shell commands. On Linux uses the native shell tools.
 - Creates `Data/` as a junction to `%USERPROFILE%\.se-dev\script` so persistent
   data (script inventory, hashes, code index) lives outside the skill folder.
 - Creates `LocalScripts/` as a junction to `%AppData%\SpaceEngineers\IngameScripts\local`.
