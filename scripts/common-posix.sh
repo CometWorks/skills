@@ -165,12 +165,17 @@ detect_server_root() {
         return 0
     fi
 
-    local game_root
-    game_root="$(detect_game_root 2>/dev/null || true)"
-    if [ -n "$game_root" ] && [ -d "$game_root/DedicatedServer" ]; then
-        printf '%s\n' "$game_root/DedicatedServer"
-        return 0
-    fi
+    local steamapps
+    while IFS= read -r steamapps; do
+        [ -d "$steamapps" ] || continue
+        local candidate="$steamapps/common/SpaceEngineersDedicatedServer"
+        if [ -d "$candidate/DedicatedServer64" ]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done <<EOF
+$(steamapps_candidates)
+EOF
 
     return 1
 }
