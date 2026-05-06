@@ -3,12 +3,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-COMMON_POSIX_SH="$SCRIPT_DIR/common-posix.sh"
-if [ ! -f "$COMMON_POSIX_SH" ]; then
-    COMMON_POSIX_SH="$SCRIPT_DIR/../../scripts/common-posix.sh"
-fi
 # shellcheck source=./common-posix.sh
-source "$COMMON_POSIX_SH"
+source "$SCRIPT_DIR/common-posix.sh"
 
 cd "$SCRIPT_DIR"
 
@@ -20,27 +16,27 @@ cleanup() {
 }
 trap cleanup EXIT
 
-SERVER_ROOT="$(detect_server_root 2>/dev/null || true)"
-if [ -z "$SERVER_ROOT" ]; then
-    fail "Could not detect Space Engineers Dedicated Server install location. Set SE_SERVER_ROOT."
+GAME_ROOT="$(detect_game_root 2>/dev/null || true)"
+if [ -z "$GAME_ROOT" ]; then
+    fail "Could not detect Space Engineers install location. Set SE_GAME_ROOT."
 fi
-[ -d "$SERVER_ROOT/DedicatedServer64" ] || fail "Missing DedicatedServer64 folder under $SERVER_ROOT."
-log "Server Root: $SERVER_ROOT"
+[ -d "$GAME_ROOT/Bin64" ] || fail "Missing Bin64 folder under $GAME_ROOT."
+log "Game Root: $GAME_ROOT"
 
 log "Verifying Python"
-require_python_3_13
+require_python_3_11
 log "Verifying git"
 require_cmd git
 ensure_uv
 ensure_uv_sync
 ensure_ilspycmd
 
-DATA_ROOT="$(default_data_home)/server-code"
+DATA_ROOT="$(default_data_home)/game-code"
 log "Data Root: $DATA_ROOT"
 ensure_directory_link "Data" "$DATA_ROOT"
 ensure_git_repo "Data"
 
-ensure_temp_link "Bin64" "$SERVER_ROOT/DedicatedServer64"
+ensure_temp_link "Bin64" "$GAME_ROOT/Bin64"
 
 log "Checking current game version"
 set +e
@@ -63,7 +59,7 @@ case "$RC" in
 esac
 
 if [ ! -d Data/Decompiled/VRage.XmlSerializers ]; then
-    log "Decompiling the server assemblies"
+    log "Decompiling the game assemblies"
     ILSPYCMD="$ILSPYCMD" ./Decompile.sh
 
     log "Recording game version and committing decompiled sources"
@@ -81,7 +77,7 @@ fi
 
 if [ ! -d Data/Content ]; then
     log "Copying indexable content"
-    uv run python -u copy_content.py "$SERVER_ROOT/Content"
+    uv run python -u copy_content.py "$GAME_ROOT/Content"
 fi
 
 if [ ! -f Data/CodeIndex/class_declarations.csv ]; then

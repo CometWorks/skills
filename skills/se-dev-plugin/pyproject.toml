@@ -3,7 +3,7 @@ name = "se-dev-plugin"
 version = "0.1.0"
 description = "Plugin development for Space Engineers version 1"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
     "requests>=2.32.5",
     "lxml>=6.0.2",

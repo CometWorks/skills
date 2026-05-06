@@ -3,7 +3,7 @@ name = "se-dev-server-code"
 version = "0.1.0"
 description = "Decompiled C# code of the Space Engineers Dedicated Server"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
     "lxml",
     "requests>=2.32.5",

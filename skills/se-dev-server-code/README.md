@@ -18,7 +18,7 @@ to `%USERPROFILE%\.se-dev\server-code\`):
 
 Run the preparation steps in `Prepare.md` if `Prepare.DONE` is missing. This requires:
 
-- Python 3.13+
+- Python 3.11+
 - The command line `git` client on `PATH`
 - The .NET SDK (for `ilspycmd`)
 

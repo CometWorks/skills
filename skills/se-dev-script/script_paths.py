@@ -2,7 +2,7 @@
 Shared path helpers for the script (PB) skill.
 
 All persistent script data lives under the Data symlink/junction inside the skill
-folder. The link is created by Prepare.bat / Prepare.sh and points at the
+folder. The link is created by Prepare.bat / prepare.sh and points at the
 per-user persistent skill data directory.
 
 Steam workshop content is read directly from its Steam folder rather than

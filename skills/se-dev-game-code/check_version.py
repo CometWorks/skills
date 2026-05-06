@@ -50,7 +50,7 @@ def _resolve_ilspycmd() -> str:
         return str(local_tool)
 
     raise FileNotFoundError(
-        "ilspycmd not found. Run Prepare.bat/Prepare.sh first or set ILSPYCMD."
+        "ilspycmd not found. Run Prepare.bat/prepare.sh first or set ILSPYCMD."
     )
 
 

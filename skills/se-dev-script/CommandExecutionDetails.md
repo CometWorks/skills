@@ -251,7 +251,6 @@ uv run search_code.py --help (workdir: skill_folder)
 cd C:\path\to\skill; .\Prepare.bat; uv run search_code.py --help
 ```
 
-**Option C:** Use a bash script wrapper (see `run_prepare.sh` if available)
 
 ## Summary
 
