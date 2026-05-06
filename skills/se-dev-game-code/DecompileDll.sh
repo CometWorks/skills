@@ -19,7 +19,7 @@ ILSPY_CMD="${ILSPYCMD:-$(command -v ilspycmd 2>/dev/null || true)}"
 echo "Decompiling: $1"
 
 if [ -z "$ILSPY_CMD" ]; then
-    echo "ERROR: ilspycmd is not available. Run Prepare.sh first." >&2
+    echo "ERROR: ilspycmd is not available. Run prepare.sh first." >&2
     exit 1
 fi
 

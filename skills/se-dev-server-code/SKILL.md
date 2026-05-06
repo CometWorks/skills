@@ -2,7 +2,7 @@
 name: se-dev-server-code
 description: Allows reading the decompiled C# code of the Space Engineers Dedicated Server
 license: MIT
-allowed-tools: Read, Bash(*Prepare.bat*), Bash(*Prepare.sh*), Bash(*Clean.bat*), Bash(*run_prepare.sh*), Bash(*test_search_server_code.bat*), Bash(*uv run search_server_code.py *), Bash(*uv run index_code.py *), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*test_search_server_code.bat*), Bash(*uv run search_server_code.py *), Bash(*uv run index_code.py *), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
 # SE Dev Server Code Skill
@@ -18,7 +18,7 @@ Examples:
 
 **Actions:**
 
-- **prepare**: Run the one-time preparation (`Prepare.bat` on Windows, `Prepare.sh` on Linux/macOS, or `run_prepare.sh` as wrapper)
+- **prepare**: Run the one-time preparation (`Prepare.bat` on Windows, `prepare.sh` on Linux/macOS)
 - **bash**: Run UNIX shell commands via busybox
 - **search**: Run code searches using `search_server_code.py`
 - **test**: Test this skill by running `test_search_server_code.bat`
@@ -53,7 +53,7 @@ If server auto-detection fails, set `SE_SERVER_ROOT` before running the preparat
 
 ## Folder Layout
 
-After preparation the skill folder contains a `Data` junction/symlink. The actual data lives outside the skill folder so that it is preserved across `Clean.bat` / `Prepare.bat` / `Prepare.sh` cycles.
+After preparation the skill folder contains a `Data` junction/symlink. The actual data lives outside the skill folder so that it is preserved across `Clean.bat` / `Prepare.bat` / `prepare.sh` cycles.
 
 ```
 skills/se-dev-server-code/
@@ -84,7 +84,7 @@ The repository uses an internal author/email (`se-dev-skills@localhost`) so comm
 
 ## Essential Documentation
 
-- **[CommandExecution.md](CommandExecution.md)** - ⚠️ **READ THIS FIRST** - Windows command execution details; on Linux/macOS keep bash syntax and use `Prepare.sh`
+- **[CommandExecution.md](CommandExecution.md)** - ⚠️ **READ THIS FIRST** - Windows command execution details; on Linux/macOS keep bash syntax and use `prepare.sh`
 
 ## Code Search Documentation
 

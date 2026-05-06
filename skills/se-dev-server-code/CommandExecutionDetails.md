@@ -251,7 +251,6 @@ uv run search_server_code.py class declaration MyCubeGrid (workdir: skill_folder
 cd C:\path\to\skill; .\Prepare.bat; uv run search_server_code.py class declaration MyCubeGrid
 ```
 
-**Option C:** Use a bash script wrapper (see `run_prepare.sh` if available)
 
 ## Summary
 

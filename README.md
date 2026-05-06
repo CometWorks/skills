@@ -27,9 +27,8 @@ In case you don't want to use `skills.sh`, then please see the "Manual installat
 ## Preparation
 
 The skills will automatically prepare themselves on **first use**. It means downloading some tools and indexing code.
-If you want to prepare them ahead of time, run `Prepare.bat` on Windows or `Prepare.sh`
-on Linux/macOS in the respective skill folder. `run_prepare.sh` is a wrapper that picks
-the right preparation script for the current platform. If any dependency is missing you
+If you want to prepare them ahead of time, run `Prepare.bat` on Windows or `prepare.sh`
+on Linux/macOS in the respective skill folder. If any dependency is missing you
 will get a failure message, so run the preparation script from a terminal where you can
 see its output.
 

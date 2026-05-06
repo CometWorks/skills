@@ -324,7 +324,7 @@ def main():
 
     if not INDEX_DIR.exists():
         print(f"ERROR: Code index not found at {INDEX_DIR}. "
-              f"Run Prepare.bat / Prepare.sh (or index_scripts.py) first.", file=sys.stderr)
+              f"Run Prepare.bat / prepare.sh (or index_scripts.py) first.", file=sys.stderr)
         sys.exit(1)
 
     if args.category == "method" and args.symbol_type in METHOD_SUBCOMMANDS:
