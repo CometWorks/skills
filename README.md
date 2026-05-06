@@ -138,8 +138,6 @@ Once they are prepared, conduct some smoke testing on their features to make sur
 If something is missing or not working properly, then list those in a final summary.
 ```
 
-_If you need the `se-dev-server-code` skill, then add that as well to the list._
-
 In case of permission issues you have to grant access to the folder where the skills are stored. 
 This usually happens if the skills are linked (`mklink`) into the coding agent's skills folder.
 
