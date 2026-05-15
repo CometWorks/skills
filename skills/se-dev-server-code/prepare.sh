@@ -62,6 +62,9 @@ if [ ! -d Data/Decompiled/VRage.XmlSerializers ]; then
     log "Decompiling the server assemblies"
     ILSPYCMD="$ILSPYCMD" ./Decompile.sh
 
+    log "Fixing case-collision folders (Gui vs GUI, Filesystem vs FileSystem)"
+    uv run python -u fix_case_collisions.py Data/Decompiled
+
     log "Recording game version and committing decompiled sources"
     uv run python -u check_version.py --write Bin64 Data
     GAME_VERSION_LABEL="$(uv run python -u check_version.py --print Bin64)"

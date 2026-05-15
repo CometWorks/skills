@@ -173,6 +173,11 @@ if exist Data\Decompiled\VRage.XmlSerializers goto skip_decompile
 .\busybox sh Decompile.sh
 if %ERRORLEVEL% NEQ 0 goto failed
 
+:: 12b. Fix case-collision folders (Gui vs GUI, Filesystem vs FileSystem)
+echo Fixing case-collision folders
+uv run python -u fix_case_collisions.py Data\Decompiled
+if %ERRORLEVEL% NEQ 0 goto failed
+
 :: 12a. Record the current game version and commit decompiled code
 echo Recording game version and committing decompiled sources
 uv run python -u check_version.py --write Bin64 Data
