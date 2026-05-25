@@ -84,6 +84,8 @@ You can also install the skills manually:
 
 The scripts create junction points / symlinks from the target skill folders to the skill folders in this repository.
 
+They install all skills listed in the [Skills](#skills) section above.
+
 ## FAQ
 
 ### How well does this work for plugin development?

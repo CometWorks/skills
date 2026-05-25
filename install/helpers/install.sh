@@ -18,6 +18,7 @@ skills=(
     se-dev-game-code
     se-dev-mod
     se-dev-plugin
+    se-dev-torch
     se-dev-script
     se-dev-server-code
 )
