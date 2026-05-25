@@ -1,4 +1,4 @@
-1. Run `python --version`, and stop if it is missing or older than 3.13.
+1. Run `python --version`, and stop if it is missing or older than 3.11.
 2. Run `git --version`, and stop if the command line `git` client is missing.
 3. Inform the user that this is a one-time preparation which usually takes about 1 minute.
 4. If the user already has a Torch checkout, set `TORCH_ROOT` to that repository root before preparation. It must contain `Torch.sln`.

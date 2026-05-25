@@ -13,7 +13,7 @@ source "$COMMON_POSIX_SH"
 cd "$SCRIPT_DIR"
 
 log "Verifying Python"
-require_python_3_13
+require_python_3_11
 log "Verifying git"
 require_cmd git
 ensure_uv

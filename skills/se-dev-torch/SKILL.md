@@ -39,7 +39,7 @@ Check these patterns in order:
 
 The host system must have the following on `PATH`:
 
-- **Python** 3.13 or newer
+- **Python** 3.11 or newer
 - **git** command line client
 
 If the user already has a local Torch checkout, set `TORCH_ROOT` to that repository root before preparation. Otherwise the skill clones `https://github.com/TorchAPI/Torch` into its persistent data folder.

@@ -4,7 +4,7 @@
 
 Check these first:
 
-1. `python --version` is at least 3.13
+1. `python --version` is at least 3.11
 2. `git --version` works
 3. If using `TORCH_ROOT`, it points at the Torch repository root and contains `Torch.sln`
 4. `Prepare.log` ends with `DONE`
