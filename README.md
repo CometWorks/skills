@@ -54,6 +54,7 @@ If you want to use BusyBox in your other projects, then this is also available a
 * [se-dev-script](skills/se-dev-script/SKILL.md) – In-game script development
 * [se-dev-mod](skills/se-dev-mod/SKILL.md) – Mod development
 * [se-dev-plugin](skills/se-dev-plugin/SKILL.md) – Plugin development
+* [se-dev-torch](skills/se-dev-torch/SKILL.md) – Torch plugin development and Torch source search
 * [se-dev-game-code](skills/se-dev-game-code/SKILL.md) – Searchable decompiled C# game code (recommended companion for all the other skills)
 * [se-dev-server-code](skills/se-dev-server-code/SKILL.md) – Searchable decompiled C# Dedicated Server code (for server side mod and plugin development)
 
@@ -82,6 +83,8 @@ You can also install the skills manually:
 | Custom location    | `install.bat <target_skills_folder>` | `install.sh <target_skills_folder>` |
 
 The scripts create junction points / symlinks from the target skill folders to the skill folders in this repository.
+
+They install all skills listed in the [Skills](#skills) section above.
 
 ## FAQ
 
@@ -128,6 +131,7 @@ Check whether you can see these skills:
 - `se-dev-script`
 - `se-dev-mod`
 - `se-dev-plugin`
+- `se-dev-torch`
 - `se-dev-game-code`
 - `se-dev-server-code`
 

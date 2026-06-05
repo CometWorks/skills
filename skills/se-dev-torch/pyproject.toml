@@ -1,0 +1,9 @@
+[project]
+name = "se-dev-torch"
+version = "0.1.0"
+description = "Torch plugin development for Space Engineers version 1"
+requires-python = ">=3.11"
+dependencies = [
+    "tree-sitter>=0.25.2",
+    "tree-sitter-c-sharp>=0.23.1",
+]
