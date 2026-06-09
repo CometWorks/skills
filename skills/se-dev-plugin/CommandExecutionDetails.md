@@ -1,29 +1,29 @@
 # Command Execution - Detailed Guide
 
-This document provides comprehensive details about command execution on Windows for the se-dev-plugin skill. For most use cases, refer to the Quick Start section in [CommandExecution.md](CommandExecution.md).
+This document provides full details about command execution on Windows for the se-dev-plugin skill. For most use cases, refer to the Quick Start section in [CommandExecution.md](CommandExecution.md).
 
 ## Recommended Approach
 
 **Use the skill folder's `workdir` parameter when running bash commands:**
 
 ```bash
-# RECOMMENDED: Use workdir parameter to run commands in the skill folder
+# RECOMMENDED: Use workdir parameter to run commands in skill folder
 bash -c "./Prepare.bat" (with workdir set to the skill folder)
 uv run search_code.py --help (with workdir set to the skill folder)
 ```
 
-This is the most reliable approach because:
-- No need to manually `cd` to the folder
+Most reliable approach because:
+- No need to manually `cd` to folder
 - Works consistently across all shells
 - Avoids path and command chaining issues
 
 ## Shell Options on Windows
 
-You have three shell options on Windows, each with different syntax rules:
+Three shell options on Windows, each with different syntax rules:
 
 ### Option 1: BusyBox Bash (Recommended for UNIX commands)
 
-BusyBox provides UNIX-like commands on Windows. Use it for individual commands:
+BusyBox provides UNIX-like commands on Windows. Use for individual commands:
 
 ```bash
 # Run UNIX commands via busybox.exe
@@ -36,7 +36,7 @@ busybox.exe cat file.txt
 - ✅ Correct: `busybox.exe grep "pattern" C:/Users/name/folder`
 - ❌ Wrong: `busybox.exe grep "pattern" C:\Users\name\folder` (backslashes are escape characters!)
 
-**DO NOT** open an interactive bash shell with `busybox bash` unless specifically needed for a sequence of commands.
+**DO NOT** open interactive bash shell with `busybox bash` unless specifically needed for a sequence of commands.
 
 ### Option 2: PowerShell (Native Windows)
 
@@ -56,7 +56,7 @@ cd C:\path\to\skill\folder; .\Prepare.bat
 
 ### Option 3: CMD (Windows Command Prompt) - Not Recommended
 
-CMD is the legacy Windows shell with limited features:
+CMD is the legacy Windows shell, limited features:
 
 ```cmd
 REM CMD does NOT support && for command chaining
@@ -69,7 +69,7 @@ REM Or chain with &
 cd /d C:\path\to\skill\folder & Prepare.bat
 ```
 
-**Note:** `&&` does NOT work in CMD. This is a common source of errors.
+**Note:** `&&` does NOT work in CMD. Common source of errors.
 
 ## Command Execution Rules - Critical Guidelines
 
@@ -87,11 +87,11 @@ cd /d C:\path\to\skill\folder & Prepare.bat
 Methods to ensure correct CWD:
 1. **Best:** Use the `workdir` parameter in your bash tool
 2. **Alternative:** Change directory first, then run commands separately
-3. **Avoid:** Don't try to chain `cd` with `&&` in CMD
+3. **Avoid:** Don't chain `cd` with `&&` in CMD
 
 ### Rule 3: Verify Preparation Status Before Running Commands
 
-Before using any skill features, check if preparation is complete:
+Before using any skill features, check if preparation complete:
 
 **Using bash syntax:**
 ```bash
@@ -110,14 +110,14 @@ if (Test-Path "Prepare.DONE") { "READY" } else { "NOT_READY" }
 
 ### Rule 4: Python Commands Must Use `uv run`
 
-All Python scripts in this skill must be run via `uv run`:
+All Python scripts in this skill must run via `uv run`:
 
 ```bash
 uv run search_code.py --class-decl "MyCubeGrid"
 uv run index_code.py
 ```
 
-This ensures the correct Python virtual environment is used.
+Ensures correct Python virtual environment is used.
 
 ## Common Mistakes and Solutions
 
@@ -126,7 +126,7 @@ This ensures the correct Python virtual environment is used.
 ```cmd
 cd C:\skills\se-dev-game-code && Prepare.bat
 ```
-**Error:** `&&` is not recognized in CMD
+**Error:** `&&` not recognized in CMD
 
 ✅ **Solution 1:** Use `&` instead:
 ```cmd
@@ -146,7 +146,7 @@ Prepare.bat
 ```bash
 busybox.exe grep "pattern" C:\Users\name\folder
 ```
-**Error:** Backslashes are interpreted as escape characters, path becomes `C:Usersnamefolder`
+**Error:** Backslashes interpreted as escape characters, path becomes `C:Usersnamefolder`
 
 ✅ **Solution:** Use forward slashes:
 ```bash
@@ -189,7 +189,7 @@ test -f "Prepare.DONE" && echo "READY" || echo "NOT_READY"
 
 ## Recommended Workflow for Agents
 
-**Step 1:** Verify the skill folder exists and is accessible
+**Step 1:** Verify skill folder exists and is accessible
 
 **Step 2:** Check preparation status by looking for `Prepare.DONE` file
 
@@ -198,7 +198,7 @@ test -f "Prepare.DONE" && echo "READY" || echo "NOT_READY"
 ./Prepare.bat (with workdir set to skill folder)
 ```
 
-**Step 4:** Once prepared, run commands using the workdir parameter:
+**Step 4:** Once prepared, run commands using workdir parameter:
 ```bash
 uv run search_code.py --help (with workdir set to skill folder)
 ```
@@ -214,7 +214,7 @@ busybox.exe grep -r "MyCubeGrid" C:/path/to/Decompiled
 
 1. ✓ **Correct working directory?**
    - Run `pwd` (bash) or `cd` (CMD/PowerShell) to check
-   - Skill commands must run from the skill folder
+   - Skill commands must run from skill folder
 
 2. ✓ **Correct shell syntax?**
    - CMD doesn't support `&&` → use `&` or PowerShell
@@ -236,7 +236,7 @@ busybox.exe grep -r "MyCubeGrid" C:/path/to/Decompiled
 
 ## Advanced: Running Multiple Commands
 
-**If you need to run a sequence of commands:**
+**To run a sequence of commands:**
 
 **Option A:** Use workdir parameter for each command (recommended):
 ```bash
@@ -255,11 +255,11 @@ cd C:\path\to\skill; .\Prepare.bat; uv run search_code.py --help
 ## Summary
 
 **Key takeaways:**
-1. Use the workdir parameter when running commands - it's the most reliable
+1. Use the workdir parameter when running commands - most reliable
 2. If using BusyBox, always use forward slashes in paths
 3. Don't use `&&` in CMD - use `&` or PowerShell instead
-4. Always run from the skill folder as CWD
+4. Always run from skill folder as CWD
 5. Check for `Prepare.DONE` before using skill features
 6. Use `uv run` for all Python scripts
 
-Following these rules will eliminate command execution errors and make your agent interactions smooth and reliable.
+Following these rules eliminates command execution errors and makes agent interactions smooth and reliable.

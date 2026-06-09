@@ -1,26 +1,26 @@
 # Class and Interface Hierarchy Search
 
-Search for inheritance relationships, interface implementations, and explore type hierarchies.
+Search inheritance relationships, interface implementations, explore type hierarchies.
 
 **IMPORTANT:** All hierarchy queries return only **direct** relationships (immediate parent/children). To traverse deep hierarchies, use multiple queries.
 
 ## Overview
 
-The hierarchy system tracks:
+Hierarchy system tracks:
 - **Class inheritance** - Which classes inherit from which base classes
 - **Interface inheritance** - Which interfaces extend other interfaces
 - **Interface implementation** - Which classes/structs implement which interfaces
 
 ## Hierarchy Tree Files
 
-Quick visual overview of the complete hierarchies:
+Visual overview of complete hierarchies:
 
 - **`Data/CodeIndex/class_hierarchy.txt`** - Full class inheritance tree (large, do not load at once)
 - **`Data/CodeIndex/interface_hierarchy.txt`** - Full interface inheritance tree (very large, do not load at once)
 
-These files use tree-style formatting similar to the `tree` command with fully-qualified type names.
+These files use tree-style formatting like `tree` command with fully-qualified type names.
 
-**Note:** Interface implementations are not shown in tree files. Use search commands for that.
+**Note:** Interface implementations not shown in tree files. Use search commands for that.
 
 ## Search Commands
 
@@ -39,7 +39,7 @@ uv run search_game_code.py class parent MyGrid
 
 Output: `Sandbox.Game.MyGrid:VRage.Game.Entity.MyEntity`
 
-Shows the direct base class. Classes with no explicit parent (inherit from `System.Object`) won't appear.
+Shows direct base class. Classes with no explicit parent (inherit from `System.Object`) won't appear.
 
 #### Find Child Classes
 
@@ -59,7 +59,7 @@ uv run search_game_code.py class implements MyGrid
 
 Output: `Sandbox.Game.MyGrid:VRage.ModAPI.IMyEntity,Sandbox.ModAPI.IMyGrid`
 
-Shows all interfaces implemented by the class.
+Shows all interfaces implemented by class.
 
 ### Interface Hierarchy
 
@@ -95,7 +95,7 @@ Shows all classes/structs implementing the interface.
 
 ## Compressed Output Format
 
-For queries that return multiple children/implementors, output uses hierarchical namespace compression:
+For queries returning multiple children/implementors, output uses hierarchical namespace compression:
 
 - Groups by shared namespace prefixes
 - Uses nested parentheses: `Namespace.(Child1,Child2)`
@@ -173,7 +173,7 @@ uv run search_game_code.py interface implementors "re:^IMy.*Block$"
 
 ## Walking Hierarchies
 
-To traverse deep hierarchies, chain multiple queries:
+To traverse deep hierarchies, chain multiple queries.
 
 ### Walk Up the Inheritance Chain
 
@@ -217,12 +217,12 @@ uv run search_game_code.py interface children IMyCubeBlock
 
 ## Best Practices
 
-1. **Start searching for what you already know** - Start by searching for what you already know from the task description
+1. **Start searching for what you already know** - Start by searching for what you know from task description
 2. **Then drill down** - Use search commands for specific relationships
 3. **Iterate for depth** - Each query returns only direct relationships
 4. **Filter smartly** - Use `-n` to focus on specific namespaces
 5. **Count first** - Check `-c` before fetching if you expect large result sets
-6. **Combine searches** - After finding a class, use standard search to explore its members
+6. **Combine searches** - After finding class, use standard search to explore its members
 
 ## Next Steps
 

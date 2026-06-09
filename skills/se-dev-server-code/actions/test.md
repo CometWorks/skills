@@ -2,7 +2,7 @@
 
 > **Part of the se-dev-server-code skill.** Invoked to run server code search tests and verify results.
 
-Run `test_search_server_code.bat` to verify the server code search functionality is working correctly.
+Run `test_search_server_code.bat` to verify server code search works correctly.
 
 ## Running Tests
 
@@ -12,7 +12,7 @@ From this skill folder, run:
 .\test_search_server_code.bat
 ```
 
-Or redirect output to a file for review:
+Or redirect output to file for review:
 
 ```cmd
 .\test_search_server_code.bat > test_results.txt 2>&1
@@ -20,7 +20,7 @@ Or redirect output to a file for review:
 
 ## What the Tests Cover
 
-The test suite exercises all server code search capabilities:
+Test suite exercises all server code search capabilities:
 
 | Category | Tests |
 |----------|-------|
@@ -39,7 +39,7 @@ The test suite exercises all server code search capabilities:
 | Enum usage | MyPhysicsOption |
 | Namespace filtering | Sandbox.Engine.Physics, VRageMath |
 | Pagination | limit and offset options |
-| Count mode | counting results instead of listing |
+| Count mode | count results instead of listing |
 | Regex patterns | ^MyPhysics, Position$, Vector[23]D |
 | Multiple patterns | AND logic with multiple terms |
 | Hierarchy - class parent | MyGrid, MyProjectorBase |
@@ -52,19 +52,19 @@ The test suite exercises all server code search capabilities:
 
 ## Verifying Results
 
-A successful test run should:
+Successful test run should:
 
 1. **Complete without errors** - No Python exceptions or crashes
-2. **Return results for known items** - Each search (except non-matching examples) should return at least one result
-3. **Show "No results found"** for the non-matching examples section
+2. **Return results for known items** - Each search (except non-matching examples) returns at least one result
+3. **Show "No results found"** for non-matching examples section
 4. **End with "ALL TESTS COMPLETED"** message
 
 ## Example Verification
 
-Check that key searches return expected results:
+Check key searches return expected results:
 
 ```cmd
-REM Should find the MyPhysicsBody class
+REM Should find MyPhysicsBody class
 uv run search_server_code.py class declaration MyPhysicsBody
 
 REM Should find Vector3D struct
@@ -79,9 +79,9 @@ uv run search_server_code.py -c class usage MyPhysicsBody
 If tests fail:
 
 1. **Preparation not complete** - Run `.\Prepare.bat` first
-2. **Index not built** - Check that `Data/CodeIndex/` exists and contains `.csv` files
+2. **Index not built** - Check `Data/CodeIndex/` exists and contains `.csv` files
 3. **Decompiled folder missing** - Verify `Data/Decompiled/` has `.cs` files
 4. **Python environment issues** - Try `uv sync` to reinstall dependencies
 
-As a last resort, you can force repeating the whole preparation process by running `.\Clean.bat`, then `.\Prepare.bat`.
-Notify the user if you do this, because the preparation may take 5-15 minutes to complete depending on the hardware.
+As last resort, force repeating whole preparation process by running `.\Clean.bat`, then `.\Prepare.bat`.
+Notify user if you do this, because preparation may take 5-15 minutes depending on hardware.

@@ -4,7 +4,7 @@
 
 **⚠️ IMPORTANT: Read [CommandExecution.md](../CommandExecution.md) for complete guidance on running commands correctly.**
 
-Run `Prepare.bat` on Windows or `prepare.sh` on Linux to set up the skill environment. This is required before using the skill.
+Run `Prepare.bat` on Windows or `prepare.sh` on Linux to set up skill environment. Required before using skill.
 
 ## Quick Check Status
 
@@ -15,7 +15,7 @@ Run `Prepare.bat` on Windows or `prepare.sh` on Linux to set up the skill enviro
 test -f "Prepare.DONE" && echo "READY" || echo "NOT_READY"
 ```
 
-**Alternative**: Use the Glob tool to check for file existence instead of bash commands.
+**Alternative**: Use Glob tool to check for file existence instead of bash commands.
 
 ```bash
 # ❌ WRONG - Don't use Windows CMD syntax (will NOT work)
@@ -26,15 +26,15 @@ test -f "Prepare.DONE" && echo "READY" || echo "NOT_READY"
 
 If `Prepare.DONE` is missing:
 
-1. Review the requirements and instructions in [Prepare.md](../Prepare.md).
-2. Execute preparation using the skill folder as working directory:
+1. Review requirements and instructions in [Prepare.md](../Prepare.md).
+2. Execute preparation using skill folder as working directory:
 
-**Recommended approach (using workdir parameter):**
+**Recommended (using workdir parameter):**
 ```bash
 ./prepare.sh (Linux)
 ```
 
-If auto-detection fails, set `SE_SERVER_ROOT` first. It may point either to the dedicated server root or directly to the `DedicatedServer64` directory.
+If auto-detection fails, set `SE_SERVER_ROOT` first. May point either to dedicated server root or directly to `DedicatedServer64` directory.
 
 **Alternative approaches:**
 
@@ -58,22 +58,22 @@ Prepare.bat
 ## Critical Rules
 
 - **DO NOT** create the `Prepare.DONE` file yourself.
-- It is automatically created by the preparation script only upon a successful run.
-- Creating it manually is "faking" success and will lead to errors.
+- Preparation script creates it automatically only upon successful run.
+- Creating it manually is "faking" success and leads to errors.
 
 ## What Preparation Does
 
-The preparation script:
-- Verifies that Python 3.11+ and the command line `git` client are available
-- Sets up the Python virtual environment
-- On Windows downloads `busybox.exe`. On Linux uses the native shell tools.
+Preparation script:
+- Verifies Python 3.11+ and command line `git` client are available
+- Sets up Python virtual environment
+- On Windows downloads `busybox.exe`. On Linux uses native shell tools.
 - Installs `ilspycmd` for decompilation.
-- Creates the `Data` junction pointing to `%USERPROFILE%\.se-dev\server-code\`
-- Initialises a local Git repository inside `Data/` on first run (with an initial commit of `.gitignore`)
-- Detects the current server version directly from the binaries
-- Wipes `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` whenever the version differs from the recorded one (older versions remain in the local Git history)
-- Decompiles the server DLLs to C# and optionally to IL code (needs uncommenting a line in `DecompileDll.sh` if this is required)
-- Records the new server version in `Data/game_version.txt` and commits the decompiled sources with the version label as the commit message
+- Creates `Data` junction pointing to `%USERPROFILE%\.se-dev\server-code\`
+- Initialises local Git repository inside `Data/` on first run (with initial commit of `.gitignore`)
+- Detects current server version directly from binaries
+- Wipes `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` whenever version differs from recorded one (older versions remain in local Git history)
+- Decompiles server DLLs to C# and optionally to IL code (needs uncommenting a line in `DecompileDll.sh` if required)
+- Records new server version in `Data/game_version.txt` and commits decompiled sources with version label as commit message
 - Copies server content data into `Data/Content`
-- Builds the code search index in `Data/CodeIndex`
-- Verifies the environment is ready for use
+- Builds code search index in `Data/CodeIndex`
+- Verifies environment is ready for use

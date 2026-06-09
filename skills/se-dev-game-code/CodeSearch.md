@@ -2,7 +2,7 @@
 
 Search the decompiled Space Engineers C# codebase efficiently.
 
-**IMPORTANT:** All commands run on Windows. This skill folder must be the current working directory.
+**IMPORTANT:** All commands run on Windows. This skill folder must be current working directory.
 
 ## Running Commands
 
@@ -58,7 +58,7 @@ uv run search_game_code.py -l 10 struct usage Vector3D
 
 ### Search Method Signatures
 
-Method signatures show the complete method declaration including modifiers, return type, parameters, and attributes:
+Method signatures show full method declaration including modifiers, return type, parameters, and attributes:
 
 ```bash
 # Find signatures by method name
@@ -74,12 +74,12 @@ uv run search_game_code.py -l 10 method signature GetPosition
 uv run search_game_code.py -n VRageMath method signature Normalize
 ```
 
-**Output Format:** Signature searches show the full method signature after a pipe separator:
+**Output Format:** Signature searches show full method signature after a pipe separator:
 ```
 Sandbox.Game/MyClass.cs:100-102|public static void MyMethod(int param)
 ```
 
-**Note:** Signatures are always declarations. There is no `method signature usage` - use `method usage` instead to find method call sites.
+**Note:** Signatures always declarations. No `method signature usage` - use `method usage` instead to find method call sites.
 
 ## Search Options
 
@@ -117,7 +117,7 @@ uv run search_game_code.py -n VRageMath method declaration Add
 
 ## Pattern Syntax
 
-Patterns match against the symbol name (not namespace):
+Patterns match against symbol name (not namespace):
 
 | Prefix | Behavior |
 |--------|----------|
@@ -150,7 +150,7 @@ uv run search_game_code.py struct declaration "re:^Vector[23]D$"
 uv run search_game_code.py method declaration Get Position
 ```
 
-Both "Get" AND "Position" must appear in the name.
+Both "Get" AND "Position" must appear in name.
 
 ## Reading Output
 
@@ -165,20 +165,20 @@ relative_path:line
 relative_path:start-end
 ```
 
-Lines are inclusive (both start and end are part of the match).
+Lines inclusive (both start and end part of match).
 
-Results are sorted by code depth, then alphabetically.
+Results sorted by code depth, then alphabetically.
 
 ### Reading Source Files
 
-The `relative_path` is relative to the `Data/Decompiled/` folder:
+`relative_path` is relative to `Data/Decompiled/` folder:
 
 ```bash
 # Search result: VRage.Math/VRageMath/Vector3D.cs:13-2293
 # Read file: Data/Decompiled/VRage.Math/VRageMath/Vector3D.cs
 ```
 
-The first folder indicates the assembly (DLL). From the second level, folders match namespace hierarchy.
+First folder indicates assembly (DLL). From second level, folders match namespace hierarchy.
 
 ## Assembly Reference
 

@@ -1,6 +1,6 @@
 # Troubleshooting Guide
 
-This guide helps you resolve common issues when searching mod code.
+Resolve common issues when searching mod code.
 
 ## NO-MATCHES Results
 
@@ -31,25 +31,25 @@ This guide helps you resolve common issues when searching mod code.
 4. **Searching for base game classes**: 
    - Mods don't typically *declare* game classes like `MyGameLogicComponent`
    - They *use* them instead
-   - Try searching for usages, not declarations:
+   - Search for usages, not declarations:
    ```bash
-   # This likely won't find anything (mods don't declare it)
+   # Likely won't find anything (mods don't declare it)
    uv run search_mods.py class declaration MyGameLogicComponent
    
-   # This will find how mods use it
+   # Finds how mods use it
    uv run search_mods.py class usage MyGameLogicComponent
    ```
 
 ### Debugging Strategy
 
 ```bash
-# Step 1: Check if any mods are indexed
+# Step 1: Check if any mods indexed
 cat ModCodeIndex/plugins.json 2>/dev/null || echo "No index"
 
 # Step 2: Count files indexed
 wc -l ModCodeIndex/*.csv 2>/dev/null
 
-# Step 3: Try a very common search
+# Step 3: Try a common search
 uv run search_mods.py class usage Init --count
 
 # Step 4: If still nothing, verify mods exist
@@ -90,12 +90,12 @@ uv run search_mods.py class usage Init --limit 10 --offset 20
 
 ### Re-indexing After Subscribing to New Mods
 
-**IMPORTANT**: The game must download mods before they can be indexed.
+**IMPORTANT**: Game must download mods before they can be indexed.
 
 ```bash
 # 1. Subscribe to mods on Steam Workshop
-# 2. Start the game and load a world (this downloads the mods)
-# 3. Exit the game
+# 2. Start game and load a world (downloads mods)
+# 3. Exit game
 # 4. Re-index
 uv run index_mods.py
 ```
@@ -126,11 +126,11 @@ uv run index_mods.py
 
 ## Finding the Right Mods
 
-If you're looking for specific functionality:
+If looking for specific functionality:
 
 ### 1. Search Mod Files Directly
 ```bash
-# Find mods that mention "thruster"
+# Find mods mentioning "thruster"
 grep -r "thruster" SteamMods/*/Data/Scripts/ | cut -d: -f1 | sort -u | head -10
 ```
 
@@ -166,10 +166,10 @@ uv run search_mods.py method usage UpdateAfterSimulation
 
 ### 2. Remember the Mod API Whitelist
 
-Mods can only use names from `ModApiWhitelist.txt`. If searching for something not on the whitelist, you won't find it in mods.
+Mods can only use names from `ModApiWhitelist.txt`. If searching for something not on whitelist, you won't find it in mods.
 
 ```bash
-# Check if name is whitelisted
+# Check if name whitelisted
 grep "MyCubeBlock" ModApiWhitelist.txt
 ```
 
@@ -180,7 +180,7 @@ To understand what you can inherit from or how classes work:
 # Wrong skill - won't find definition
 uv run search_mods.py class declaration MyGameLogicComponent
 
-# Right skill - find the actual definition
+# Right skill - finds actual definition
 # (switch to se-dev-game-code skill)
 uv run search_code.py class declaration MyGameLogicComponent
 ```

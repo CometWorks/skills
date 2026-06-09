@@ -2,7 +2,7 @@
 
 > **CRITICAL: Read this before running any commands in this skill.**
 
-This guide explains how to execute commands correctly for the Torch skill.
+This guide explains how to execute commands correctly for Torch skill.
 
 ## Quick Start
 
@@ -13,7 +13,7 @@ For most use cases, follow these steps:
    ```bash
    TORCH_ROOT=/path/to/Torch ./Prepare.sh
    ```
-   If `TORCH_ROOT` is not set, preparation clones `TorchAPI/Torch` automatically.
+   If `TORCH_ROOT` not set, preparation clones `TorchAPI/Torch` automatically.
 3. **Inspect plugin entry points:**
    ```bash
    uv run search_torch.py class declaration TorchPluginBase
@@ -24,6 +24,6 @@ For most use cases, follow these steps:
    uv run search_torch.py class declaration PluginManager -n Torch.Managers
    uv run search_torch.py method signature RegisterPluginCommands
    ```
-   (Always use workdir parameter set to the skill folder)
+   (Always use workdir parameter set to skill folder)
 
-If you need more detail, read [CommandExecutionDetails.md](CommandExecutionDetails.md).
+Need more detail? Read [CommandExecutionDetails.md](CommandExecutionDetails.md).

@@ -7,7 +7,7 @@
 - Harmony allows changing IL code at runtime after game assemblies are loaded
 - Patches are applied when loading the game
 
-Before writing a plugin with patches, consider whether the implementation is possible as a Programmable Block script (PB API) or a mod (Mod API). Usually it is not, if writing a plugin comes up as a solution.
+Before writing a plugin with patches, consider whether the implementation is possible as a Programmable Block script (PB API) or a mod (Mod API). Usually not, if writing a plugin comes up as a solution.
 
 ## Patch Types
 
@@ -199,7 +199,7 @@ static class ConstructorPatch
 {
     static void Postfix(MyClass __instance)
     {
-        // Initialize additional state after construction
+        // Initialize extra state after construction
     }
 }
 ```
@@ -214,7 +214,7 @@ static class ConditionalPatch
 {
     static bool Prepare()
     {
-        // Only patch if the feature is enabled
+        // Only patch if feature is enabled
         return Settings.FeatureEnabled;
     }
 

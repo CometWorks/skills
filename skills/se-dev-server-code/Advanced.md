@@ -56,7 +56,7 @@ Always count before fetching large result sets:
 uv run search_server_code.py -c class usage MyEntity
 # Output: 1247
 
-# Step 2: Decide on pagination
+# Step 2: Decide pagination
 # At 10-20 results per query: 1247 / 20 = ~62 queries needed
 
 # Step 3: Sample strategically
@@ -67,7 +67,7 @@ uv run search_server_code.py -l 10 -o 1200 class usage MyEntity   # End sample
 
 ### Progressive Refinement
 
-Narrow down searches incrementally:
+Narrow searches incrementally:
 
 ```bash
 # Start broad
@@ -108,7 +108,7 @@ uv run search_server_code.py -n VRageMath method signature Normalize
 ```bash
 # 1. Find class declaration
 uv run search_server_code.py class declaration MyTerminalBlock
-# Read the file to understand structure
+# Read file to understand structure
 
 # 2. Find what implements it (if interface)
 uv run search_server_code.py interface implementors IMyTerminalBlock
@@ -150,7 +150,7 @@ uv run search_server_code.py class implements "re:^My.*Block$"
 
 ## Signature Search Strategies
 
-Signature searches are useful for understanding method overloads and parameter types. For basic usage, see `CodeSearch.md`.
+Signature searches useful for understanding method overloads and parameter types. For basic usage, see `CodeSearch.md`.
 
 ### Advanced Signature Patterns
 
@@ -174,7 +174,7 @@ uv run search_server_code.py method signature Get Position
 
 ### Analyzing Method Overloads
 
-When exploring overloaded methods, use signature search to understand the variations:
+When exploring overloaded methods, use signature search to understand variations:
 
 ```bash
 # Get count of overloads
@@ -260,12 +260,12 @@ uv run search_server_code.py -n SpaceEngineers class usage MyEntity
 
 ## Context Management Tips
 
-Keep your queries focused to avoid overwhelming context:
+Keep queries focused to avoid overwhelming context:
 
-1. **Query 10-20 results max per command** - More is rarely useful
+1. **Query 10-20 results max per command** - More rarely useful
 2. **Read selectively** - Don't read every matched file
 3. **Use count to estimate scope** - Helps decide if you need to narrow
-4. **Prefer declarations over usages** - Definitions are more informative
+4. **Prefer declarations over usages** - Definitions more informative
 5. **Sample strategically** - Beginning, middle, end of large result sets
 6. **Clear context between major searches** - Don't carry everything forward
 
@@ -273,7 +273,7 @@ Keep your queries focused to avoid overwhelming context:
 
 1. **Signature searches are fastest** - Smaller index, single file
 2. **Namespace filtering is cheap** - Apply liberally
-3. **Limit aggressively** - `-l 10` is usually enough
+3. **Limit aggressively** - `-l 10` usually enough
 4. **Count is instant** - Use it to validate patterns
 5. **Regex is fine** - Doesn't impact performance significantly
 

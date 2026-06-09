@@ -1,61 +1,61 @@
 # Space Engineers Developer Skills
 
-A [skill](https://agentskills.io) library for Space Engineers plugin, mod, and in-game script development.
+[skill](https://agentskills.io) library for Space Engineers plugin, mod, in-game script development.
 
 **This library applies only to version 1 of the game.**
 
 ## How to use
 
-You must have a "skills" compatible agentic coding environment. 
+Need "skills" compatible agentic coding environment. 
 See [agentskills.io](https://agentskills.io) or [skills.sh](https://skills.sh) for details.
 
-**After installing the skills make sure they work and the agent can actually access the files.**
+**After installing skills, verify they work and agent can access files.**
 
-In case of permission issues you have to grant access to the folder where the skills are stored. 
-This usually happens if the skills are linked (`mklink`) into the coding agent's skills folder.
+Permission issues: grant access to folder where skills stored. 
+Happens if skills linked (`mklink`) into coding agent's skills folder.
 
 ## Installation
 
 `npx skills add viktor-ferenczi/se-dev-skills`
 
-Follow the wizard.
+Follow wizard.
 
-Later you can update them by: `npx skills update`
+Later update them by: `npx skills update`
 
-In case you don't want to use `skills.sh`, then please see the "Manual installation" section below. 
+Don't want to use `skills.sh`? See "Manual installation" section below. 
 
 ## Preparation
 
-The skills will automatically prepare themselves on **first use**. It means downloading some tools and indexing code.
-If you want to prepare them ahead of time, run `Prepare.bat` on Windows or `prepare.sh`
-on Linux in the respective skill folder. If any dependency is missing you
-will get a failure message, so run the preparation script from a terminal where you can
+Skills auto-prepare on **first use**. Means downloading some tools and indexing code.
+To prepare ahead of time, run `Prepare.bat` on Windows or `prepare.sh`
+on Linux in respective skill folder. If any dependency missing, you
+get failure message, so run preparation script from terminal where you can
 see its output.
 
-**Note:** Preparing the `se-dev-game-code` skill may take 5–15 minutes, as it fully decompiles the game and builds
-code indexes to allow for rapid code search later. The fully prepared repository takes about **1.5 GB** of disk space
-due to the code index. If you need to save space, you can delete all `*.il` files (approx. **660 MB**), which are
-only required for working on transpiler or preloader patches.
+**Note:** Preparing `se-dev-game-code` skill may take 5–15 minutes, as it fully decompiles game and builds
+code indexes for rapid code search later. Fully prepared repository takes about **1.5 GB** disk space
+due to code index. To save space, delete all `*.il` files (approx. **660 MB**), only
+required for working on transpiler or preloader patches.
 
-On Windows the skills install BusyBox (`busybox.exe`) into their folder for use by
+On Windows skills install BusyBox (`busybox.exe`) into their folder for use by
 agentic coding tools for UNIX like commands, because AI models are bad at Windows
-commands and often fall back to the UNIX CLI tools even if told otherwise. It has
-improved efficiency a lot, therefore this is currently a requirement there.
+commands and often fall back to UNIX CLI tools even if told otherwise. Improved
+efficiency a lot, so currently a requirement there.
 
-On Linux the skills use the native shell tools instead. The decompiler skills
-(`se-dev-game-code`, `se-dev-server-code`) install `ilspycmd` with the official ILSpy
-dotnet tool frontend, so PowerShell is not required just to prepare and run the skills.
+On Linux skills use native shell tools instead. Decompiler skills
+(`se-dev-game-code`, `se-dev-server-code`) install `ilspycmd` with official ILSpy
+dotnet tool frontend, so PowerShell not required to prepare and run skills.
 
-If you want to use BusyBox in your other projects, then this is also available as a separate skill:
+To use BusyBox in your other projects, also available as separate skill:
 `npx skills add https://github.com/viktor-ferenczi/skills --skill busybox-on-windows`
 
 ## Skills
 
-* [se-dev](skills/se-dev/SKILL.md) – Big-picture overview and table of contents for all the skills below (start here)
+* [se-dev](skills/se-dev/SKILL.md) – Big-picture overview and table of contents for all skills below (start here)
 * [se-dev-script](skills/se-dev-script/SKILL.md) – In-game script development
 * [se-dev-mod](skills/se-dev-mod/SKILL.md) – Mod development
 * [se-dev-plugin](skills/se-dev-plugin/SKILL.md) – Plugin development (client via Pulsar, server via Magnetar)
-* [se-dev-game-code](skills/se-dev-game-code/SKILL.md) – Searchable decompiled C# game code (recommended companion for all the other skills)
+* [se-dev-game-code](skills/se-dev-game-code/SKILL.md) – Searchable decompiled C# game code (recommended companion for all other skills)
 * [se-dev-server-code](skills/se-dev-server-code/SKILL.md) – Searchable decompiled C# Dedicated Server code (for server side mod and plugin development)
 * [se-dev-torch](skills/se-dev-torch/SKILL.md) – Torch plugin development and Torch source search (legacy; Torch-only)
 
@@ -70,10 +70,10 @@ _Enjoy!_
 
 ## Manual installation
 
-You can also install the skills manually:
+Install skills manually:
 
 1. Clone this repository
-2. Run one of the installation scripts from the `install` folder:
+2. Run one of installation scripts from `install` folder:
 
 | Target Environment | Windows Script                      | Linux Script                  |
 |--------------------|-------------------------------------|-------------------------------------|
@@ -83,49 +83,49 @@ You can also install the skills manually:
 | OpenCode           | `opencode.bat`                      | `opencode.sh`                       |
 | Custom location    | `install.bat <target_skills_folder>` | `install.sh <target_skills_folder>` |
 
-The scripts create junction points / symlinks from the target skill folders to the skill folders in this repository.
+Scripts create junction points / symlinks from target skill folders to skill folders in this repository.
 
-They install all skills listed in the [Skills](#skills) section above.
+They install all skills listed in [Skills](#skills) section above.
 
 ## FAQ
 
 ### How well does this work for plugin development?
 
-I am currently testing it myself. It looks promising, but there may be rough edges. Please try it out and report back or
+Currently testing it myself. Looks promising, but may have rough edges. Try it out and report back or
 submit a PR!
 
 ### Why do the mod development skills lack details about non-scripting parts?
 
-I haven't developed many mods involving custom art or definitions, so I lack the personal experience to add those yet.
-Contributions via PR are very welcome.
+Haven't developed many mods involving custom art or definitions, so lack personal experience to add those yet.
+Contributions via PR welcome.
 
 ### Does Claude Code know about the mod and script API whitelists?
 
-I have exported the current whitelists (as of game version 1.208.015) using [MDK2](https://github.com/malforge/mdk2).
-This may need future updates or automation during the preparation phase.
+Exported current whitelists (as of game version 1.208.015) using [MDK2](https://github.com/malforge/mdk2).
+May need future updates or automation during preparation phase.
 
-If you use the suggested mod or script template projects and the **ScriptMerge** tool, there is no formal whitelist
-validation during build time. It may fail when loading into the game, but if you provide the relevant game logs to
+If you use suggested mod or script template projects and **ScriptMerge** tool, no formal whitelist
+validation during build time. May fail when loading into game, but if you provide relevant game logs to
 Claude Code, it can usually identify and fix the issue.
 
 ### How does Claude Code load this much information into the context?
 
-It doesn't! Skills work on the principle of **progressive disclosure**. Claude Code initially sees only the top-level
-skill names and descriptions. It then gradually "discovers" more information as needed for the task. It has been given
-specific instructions on how to search the SE codebase efficiently so it doesn't get overwhelmed.
+It doesn't! Skills work on principle of **progressive disclosure**. Claude Code initially sees only top-level
+skill names and descriptions. Then gradually "discovers" more information as needed for the task. Given
+specific instructions on how to search SE codebase efficiently so it doesn't get overwhelmed.
 
-Ideally, it performs research using sub-agents and clears irrelevant data before passing the results back to the parent
-agent. Agent hierarchies are a fascinating and fast-evolving topic, definitely worth looking into!
+Ideally, performs research using sub-agents and clears irrelevant data before passing results back to parent
+agent. Agent hierarchies are fascinating and fast-evolving topic, worth looking into!
 
 ### How much of this was "vibe-coded"?
 
-The code indexing and search scripts were written entirely by Claude Code with zero human intervention, other than 
-repeated prompting and some extra testing and review. The indexing logic is based on my previous work using 
-Tree-sitter's C# parser, originally developed for the (now defunct) *Ask Your Code* ChatGPT plugin and GPT.
+Code indexing and search scripts written entirely by Claude Code with zero human intervention, other than 
+repeated prompting and some extra testing and review. Indexing logic based on my previous work using 
+Tree-sitter's C# parser, originally developed for (now defunct) *Ask Your Code* ChatGPT plugin and GPT.
 
 ## Troubleshooting
 
-If you suspect something is not working in these skills, then issue the following test prompt in an empty project:
+If you suspect something not working in these skills, issue the following test prompt in empty project:
 
 _Add `se-dev-server-code` to the list if you plan to develop server side plugins._
 
@@ -143,8 +143,8 @@ Once they are prepared, conduct some smoke testing on their features to make sur
 If something is missing or not working properly, then list those in a final summary.
 ```
 
-In case of permission issues you have to grant access to the folder where the skills are stored. 
-This usually happens if the skills are linked (`mklink`) into the coding agent's skills folder.
+Permission issues: grant access to folder where skills stored. 
+Happens if skills linked (`mklink`) into coding agent's skills folder.
 
 ## Credits
 

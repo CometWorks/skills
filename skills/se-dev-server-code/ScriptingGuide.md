@@ -1,10 +1,10 @@
 # Custom Scripting Guide
 
-How to build custom utility scripts to work with the decompiled code and indexes.
+How to build custom utility scripts to work with decompiled code and indexes.
 
 ## Python Environment
 
-A Python virtual environment in this folder was made available by the preparation process.
+Preparation process made a Python virtual environment in this folder available.
 
 - Use this environment to write short, targeted, reusable utility scripts
 - Build a catalog of scripts in `UtilityScripts.md` next to this file
@@ -59,8 +59,8 @@ Get-ChildItem -Recurse -Filter "*.cs" | Select-String "pattern"
 
 1. **Keep scripts focused** - One task per script
 2. **Document in UtilityScripts.md** - Add entries as you create scripts
-3. **Use the indexes** - Leverage existing CSV files instead of parsing source
-4. **Handle paths correctly** - Follow the guidelines above
+3. **Use the indexes** - Use existing CSV files instead of parsing source
+4. **Handle paths correctly** - Follow guidelines above
 5. **Test on Windows** - Always verify scripts work on Windows
 
 ## Example Scripts

@@ -4,7 +4,7 @@ This skill provides access to decompiled C# source code from Space Engineers ver
 
 ## Overview
 
-The skill maintains the following data under the `Data` junction (which points
+Skill maintains the following data under the `Data` junction (which points
 to `%USERPROFILE%\.se-dev\game-code\`):
 
 - **Data/Decompiled/** - Full decompiled C# source organized by assembly
@@ -16,21 +16,21 @@ to `%USERPROFILE%\.se-dev\game-code\`):
 
 ## Setup
 
-Run the preparation steps in `Prepare.md` if `Prepare.DONE` is missing. This requires:
+Run preparation steps in `Prepare.md` if `Prepare.DONE` is missing. Requires:
 
 - Python 3.11+
-- The command line `git` client on `PATH`
-- The .NET SDK (for `ilspycmd`)
+- Command line `git` client on `PATH`
+- .NET SDK (for `ilspycmd`)
 
 Preparation will:
-1. Create the `Data` junction and the local Git repository inside it (with an
+1. Create `Data` junction and local Git repository inside it (with
    initial commit of `.gitignore`)
-2. Detect the current game version by inspecting the binaries
-3. Wipe `Decompiled/`, `Content/` and `CodeIndex/` if the version differs from
-   the recorded one
-4. Decompile the game assemblies and commit them with the version label
+2. Detect current game version by inspecting binaries
+3. Wipe `Decompiled/`, `Content/` and `CodeIndex/` if version differs from
+   recorded one
+4. Decompile game assemblies and commit them with version label
 5. Copy game content
-6. Build the code index
+6. Build code index
 
 ## Code Index
 
@@ -72,9 +72,9 @@ namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,d
 
 | Column | Description |
 |--------|-------------|
-| `namespace` | The namespace containing the symbol |
-| `declaring_type` | The class/struct/interface containing the symbol |
-| `method` | The method containing the symbol (empty for type-level items) |
+| `namespace` | Namespace containing the symbol |
+| `declaring_type` | Class/struct/interface containing the symbol |
+| `method` | Method containing the symbol (empty for type-level items) |
 | `symbol_name` | Field/property/event name (for member indices) |
 | `type` | Either `declaration` or `usage` |
 | `file_path` | Relative path from `Data/Decompiled/` folder |
@@ -96,20 +96,20 @@ namespace,declaring_type,method_name,signature,file_path,start_line,end_line,des
 
 | Column | Description |
 |--------|-------------|
-| `namespace` | Full namespace of the declaring class |
+| `namespace` | Full namespace of declaring class |
 | `declaring_type` | Class name (for inner classes: `ParentClass.ChildClass`) |
-| `method_name` | The method name |
-| `signature` | Full method signature on a single line (whitespace normalized) |
+| `method_name` | Method name |
+| `signature` | Full method signature on single line (whitespace normalized) |
 | `file_path` | Relative path from `Data/Decompiled/` folder |
-| `start_line` | Starting line of the signature |
-| `end_line` | Ending line of the signature (not the whole method body) |
+| `start_line` | Starting line of signature |
+| `end_line` | Ending line of signature (not whole method body) |
 | `description` | XML doc comment before the method |
 
-The signature index includes all method types: abstract methods (no body), inline `=>` methods, and block `{...}` methods. Property getters/setters are NOT indexed as signatures; they appear in the field index.
+Signature index includes all method types: abstract methods (no body), inline `=>` methods, and block `{...}` methods. Property getters/setters are NOT indexed as signatures; they appear in field index.
 
 ### Indexer: index_code.py
 
-Builds the code index using Tree-sitter for C# parsing. Uses parallel processing with two passes:
+Builds code index using Tree-sitter for C# parsing. Uses parallel processing with two passes:
 
 1. **Pass 1** - Collect all declarations (namespaces, types, methods, variables)
 2. **Pass 2** - Collect all usages by matching identifiers against known declarations
@@ -123,7 +123,7 @@ uv run index_code.py <source_root_path> <output_directory>
 
 ### search_game_code.py
 
-Search the code index for symbols by category and type.
+Search code index for symbols by category and type.
 
 ```
 uv run search_game_code.py [options] <category> <symbol_type> <patterns...>
@@ -137,21 +137,21 @@ uv run search_game_code.py [options] <category> <symbol_type> <patterns...>
 | `symbol_type` | `declaration`, `usage`, `signature` (method only), `parent`, `children`, `implements`, `implementors` (hierarchy) | What to search for |
 | `patterns` | One or more patterns | Search expressions (see below) |
 
-**Note:** `method signature` is a special subcommand that shows full method signatures with parameters. Hierarchy subcommands (`parent`, `children`, `implements`, `implementors`) work with `class` and `interface` categories.
+**Note:** `method signature` is a special subcommand showing full method signatures with parameters. Hierarchy subcommands (`parent`, `children`, `implements`, `implementors`) work with `class` and `interface` categories.
 
 #### Options
 
 | Option | Description |
 |--------|-------------|
 | `-h`, `--help` | Show help message |
-| `-c`, `--count` | Print only the count of matches |
+| `-c`, `--count` | Print only count of matches |
 | `-l N`, `--limit N` | Limit output to N results |
 | `-o N`, `--offset N` | Skip first N results (pagination) |
 | `-n NS`, `--namespace NS` | Filter to namespace and its sub-namespaces |
 
 #### Pattern Syntax
 
-Patterns match against the symbol name (not the namespace):
+Patterns match against symbol name (not namespace):
 
 | Prefix | Behavior |
 |--------|----------|
@@ -166,7 +166,7 @@ Multiple patterns must all match (AND logic).
 - Otherwise: prints `file_path:line` or `file_path:start-end` for each match (line ranges are inclusive)
 - Results sorted by code depth (namespace.class.method nesting), then alphabetically
 
-**Method signature output:** For `method signature` searches, the output includes the full signature text after the file location, separated by a pipe character:
+**Method signature output:** For `method signature` searches, output includes full signature text after file location, separated by pipe character:
 ```
 file_path:start-end|signature_text
 ```
@@ -176,7 +176,7 @@ Example:
 Sandbox.Game\Sandbox\Game\MyClass.cs:100-102|[Attribute] public static void MyMethod(int param)
 ```
 
-The signature includes any attributes on preceding lines, normalized to a single line with whitespace collapsed. Doc comments are not included in the signature text.
+Signature includes any attributes on preceding lines, normalized to single line with whitespace collapsed. Doc comments not included in signature text.
 
 ### Examples
 
@@ -227,14 +227,14 @@ busybox.exe grep ",GetPosition," Data/CodeIndex/method_usages.csv
 
 ## Reading Source Files
 
-After finding a symbol location, read the source from `Data/Decompiled/`:
+After finding a symbol location, read source from `Data/Decompiled/`:
 
 ```
 # Search result: VRage.Math/VRageMath/Vector3D.cs:13-245
 # Read: Data/Decompiled/VRage.Math/VRageMath/Vector3D.cs
 ```
 
-The first folder in the path indicates the assembly (DLL) containing the code.
+First folder in the path indicates the assembly (DLL) containing the code.
 
 ## Common Assemblies
 
@@ -256,4 +256,4 @@ All commands run on Windows. Use `busybox.exe` for UNIX-like commands with forwa
 busybox.exe grep "pattern" Data/CodeIndex/class_declarations.csv
 ```
 
-Use `uv run` to execute Python scripts with the virtual environment.
+Use `uv run` to execute Python scripts with virtual environment.

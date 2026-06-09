@@ -9,9 +9,9 @@ allowed-tools: Read, Bash(*Prepare.bat*), Bash(*Prepare.sh*), Bash(*Clean.bat*),
 
 Torch plugin development for Space Engineers version 1.
 
-This skill is for the Torch framework itself: plugin lifecycle, manifests, commands, managers, patch helpers, and server UI integration. Use `se-dev-game-code` or `se-dev-server-code` alongside it when the task crosses into Keen internals.
+This skill is for Torch framework itself: plugin lifecycle, manifests, commands, managers, patch helpers, and server UI integration. Use `se-dev-game-code` or `se-dev-server-code` alongside it when task crosses into Keen internals.
 
-**Compatibility:** Plugins built with this skill target **Torch only** — they are **not** compatible with [Magnetar](https://magnetar.se), which uses a different patcher and SDK. For Magnetar server plugins use the `se-dev-plugin` and `se-dev-plugin-sdk` skills. When starting from the [se-server-plugin-template](https://github.com/viktor-ferenczi/se-server-plugin-template), use its **`last-torch-compatible`** tag as the basis, not the current `main` (which has dropped the Torch target). See [TorchPlugin.md](TorchPlugin.md).
+**Compatibility:** Plugins built with this skill target **Torch only** — **not** compatible with [Magnetar](https://magnetar.se), which uses different patcher and SDK. For Magnetar server plugins use `se-dev-plugin` and `se-dev-plugin-sdk` skills. When starting from [se-server-plugin-template](https://github.com/viktor-ferenczi/se-server-plugin-template), use its **`last-torch-compatible`** tag as basis, not current `main` (which dropped Torch target). See [TorchPlugin.md](TorchPlugin.md).
 
 **CRITICAL: Commands run in a UNIX shell. Use bash syntax. On Windows this is BusyBox; on Linux/macOS use the native shell.**
 
@@ -22,7 +22,7 @@ Examples:
 
 **Actions:**
 
-- **prepare**: Run the one-time preparation (`Prepare.bat` on Windows, `Prepare.sh` on Linux/macOS, or `run_prepare.sh` as wrapper)
+- **prepare**: Run one-time preparation (`Prepare.bat` on Windows, `Prepare.sh` on Linux/macOS, or `run_prepare.sh` as wrapper)
 - **bash**: Run UNIX shell commands via busybox
 - **search**: Search indexed Torch source using `search_torch.py`
 
@@ -39,25 +39,25 @@ Check these patterns in order:
 
 ## Requirements
 
-The host system must have the following on `PATH`:
+Host system must have following on `PATH`:
 
 - **Python** 3.11 or newer
 - **git** command line client
 
-If the user already has a local Torch checkout, set `TORCH_ROOT` to that repository root before preparation. Otherwise the skill clones `https://github.com/TorchAPI/Torch` into its persistent data folder.
+If user already has local Torch checkout, set `TORCH_ROOT` to that repository root before preparation. Otherwise skill clones `https://github.com/TorchAPI/Torch` into its persistent data folder.
 
 ## Getting Started
 
 **CRITICAL: Before running ANY commands, read [CommandExecution.md](CommandExecution.md).**
 
-If the `Prepare.DONE` file is missing in this folder, run the one-time preparation first. See [Prepare.md](Prepare.md).
+If `Prepare.DONE` file missing in this folder, run one-time preparation first. See [Prepare.md](Prepare.md).
 
 ## Essential Documentation
 
 - [CommandExecution.md](CommandExecution.md) - command execution rules and quick start
 - [QuickStart.md](QuickStart.md) - first searches and common task entry points
 - [TorchPlugin.md](TorchPlugin.md) - Torch plugin authoring patterns
-- [Architecture.md](Architecture.md) - where to inspect each subsystem in the Torch source tree
+- [Architecture.md](Architecture.md) - where to inspect each subsystem in Torch source tree
 - [CodeSearch.md](CodeSearch.md) - complete code search reference
 - [Troubleshooting.md](Troubleshooting.md) - common failure modes and what to check
 
@@ -85,12 +85,12 @@ uv run search_torch.py class declaration PatchContext -n Torch.Managers.PatchMan
 
 ## General Rules
 
-- Search only the indexed Torch repository selected during preparation.
+- Search only indexed Torch repository selected during preparation.
 - Prefer `manifest.xml` metadata over `[PluginAttribute]`; `PluginAttribute` is obsolete in Torch.
 - Prefer `torch.Managers.GetManager<T>()` or `session.Managers.GetManager<T>()` over obsolete `ITorchBase.GetManager<T>()`.
-- Use `TorchPluginBase` as the normal starting point unless the task clearly needs a lower-level implementation.
-- If the task is about Space Engineers game behavior rather than Torch framework behavior, use `se-dev-game-code` or `se-dev-server-code` as a companion skill.
+- Use `TorchPluginBase` as normal starting point unless task clearly needs lower-level implementation.
+- If task is about Space Engineers game behavior rather than Torch framework behavior, use `se-dev-game-code` or `se-dev-server-code` as companion skill.
 
 ## Remarks
 
-The original source of this skill: https://github.com/viktor-ferenczi/se-dev-skills
+Original source of this skill: https://github.com/viktor-ferenczi/se-dev-skills

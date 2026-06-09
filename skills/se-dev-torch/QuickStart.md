@@ -4,19 +4,19 @@ Use this file when you need to get moving inside Torch quickly.
 
 ## 1. Prepare the skill
 
-If you already have a local checkout:
+If you already have local checkout:
 
 ```bash
 TORCH_ROOT=/path/to/Torch ./Prepare.sh
 ```
 
-If you do not, just run:
+If not, run:
 
 ```bash
 ./Prepare.sh
 ```
 
-Preparation writes the chosen source root to `Data/torch_root.txt` and builds the code index under `Data/CodeIndex`.
+Preparation writes chosen source root to `Data/torch_root.txt` and builds code index under `Data/CodeIndex`.
 
 ## 2. Start with the right source area
 
@@ -52,7 +52,7 @@ uv run search_torch.py interface declaration ITorchSessionManager -n Torch.API.S
 
 ## 5. When Torch is not enough
 
-Torch explains the framework side. For Keen classes, game events, or dedicated server internals, pair this with:
+Torch explains framework side. For Keen classes, game events, or dedicated server internals, pair this with:
 
 - `se-dev-game-code`
 - `se-dev-server-code`

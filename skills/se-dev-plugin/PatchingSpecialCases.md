@@ -1,10 +1,10 @@
 # Patching Special Cases
 
-This document covers advanced Harmony features: finalizers, reverse patches, and auxiliary methods.
+Covers advanced Harmony features: finalizers, reverse patches, auxiliary methods.
 
 ## Finalizers
 
-Finalizers wrap the original method and all patches in a try/finally block. They are **guaranteed to execute** regardless of exceptions.
+Finalizers wrap original method and all patches in try/finally block. **Guaranteed to execute** regardless of exceptions.
 
 ### When to Use Finalizers
 
@@ -74,7 +74,7 @@ static Exception Finalizer(Exception __exception, ref int __result)
 
 ## Reverse Patches
 
-Reverse patches let you call the **original unpatched implementation** of a method, or copy a private method into your code.
+Reverse patches let you call **original unpatched implementation** of method, or copy private method into your code.
 
 ### When to Use Reverse Patches
 
@@ -88,12 +88,12 @@ Reverse patches let you call the **original unpatched implementation** of a meth
 [HarmonyPatch]
 static class MyPatches
 {
-    // This stub will contain the original implementation
+    // Stub holds original implementation
     [HarmonyReversePatch]
     [HarmonyPatch(typeof(MyClass), nameof(MyClass.Calculate))]
     static int OriginalCalculate(MyClass instance, int input)
     {
-        // Stub - Harmony replaces this with the original code
+        // Stub - Harmony replaces with original code
         throw new NotImplementedException("Stub");
     }
 
@@ -104,11 +104,11 @@ static class MyPatches
         {
             if (input < 0)
             {
-                // Call the original for negative inputs
+                // Call original for negative inputs
                 __result = OriginalCalculate(__instance, input);
                 return false;
             }
-            return true; // Let modified version handle positive
+            return true; // Modified version handles positive
         }
     }
 }
@@ -117,10 +117,10 @@ static class MyPatches
 ### Reverse Patch Types
 
 ```csharp
-// Get the original, unmodified IL
+// Get original, unmodified IL
 [HarmonyReversePatch(HarmonyReversePatchType.Original)]
 
-// Get the method with existing transpilers applied
+// Get method with existing transpilers applied
 [HarmonyReversePatch(HarmonyReversePatchType.Snapshot)]
 ```
 
@@ -135,15 +135,15 @@ static void CallPrivateMethod(MyClass instance, string arg)
 }
 ```
 
-**Warning:** For instance methods, ensure `this` types match. Static methods are safer.
+**Warning:** For instance methods, ensure `this` types match. Static methods safer.
 
 ## Auxiliary Methods
 
-These methods control the patching lifecycle.
+These methods control patching lifecycle.
 
 ### Prepare
 
-Called before patching. Return `false` to skip the patch:
+Called before patching. Return `false` to skip patch:
 
 ```csharp
 [HarmonyPatch(typeof(OptionalFeature), "DoThing")]
@@ -151,7 +151,7 @@ static class OptionalPatch
 {
     static bool Prepare()
     {
-        // Only apply if the target type exists
+        // Apply only if target type exists
         return AccessTools.TypeByName("OptionalFeature") != null;
     }
 
@@ -169,7 +169,7 @@ static bool Prepare(MethodBase original, Harmony harmony)
 }
 ```
 
-**Note:** `Prepare` is called multiple times: once with `original = null`, then once per target method.
+**Note:** `Prepare` called multiple times: once with `original = null`, then once per target method.
 
 ### Cleanup
 
@@ -214,7 +214,7 @@ static class DynamicPatch
 
 ### TargetMethods
 
-Apply the same patch to multiple methods:
+Apply same patch to multiple methods:
 
 ```csharp
 [HarmonyPatch]
@@ -241,7 +241,7 @@ static class MultiTargetPatch
 }
 ```
 
-**Note:** `TargetMethods` must return at least one method. Use `Prepare` returning `false` if you need to skip entirely.
+**Note:** `TargetMethods` must return at least one method. Use `Prepare` returning `false` to skip entirely.
 
 ## Priority and Ordering
 
@@ -284,7 +284,7 @@ For fine control:
 ### Properties
 
 ```csharp
-// Patch the getter
+// Patch getter
 [HarmonyPatch(typeof(MyClass), nameof(MyClass.MyProperty), MethodType.Getter)]
 static class PropertyGetterPatch
 {
@@ -294,7 +294,7 @@ static class PropertyGetterPatch
     }
 }
 
-// Patch the setter
+// Patch setter
 [HarmonyPatch(typeof(MyClass), nameof(MyClass.MyProperty), MethodType.Setter)]
 static class PropertySetterPatch
 {
@@ -308,18 +308,18 @@ static class PropertySetterPatch
 ### Events
 
 ```csharp
-// Patch the add accessor
+// Patch add accessor
 [HarmonyPatch(typeof(MyClass), nameof(MyClass.MyEvent), MethodType.Adder)]
 static class EventAddPatch { /* ... */ }
 
-// Patch the remove accessor
+// Patch remove accessor
 [HarmonyPatch(typeof(MyClass), nameof(MyClass.MyEvent), MethodType.Remover)]
 static class EventRemovePatch { /* ... */ }
 ```
 
 ## Patching Enumerator Methods
 
-Methods returning `IEnumerable<T>` or `IEnumerator<T>` are compiled into state machines. The actual logic is in a compiler-generated `MoveNext` method:
+Methods returning `IEnumerable<T>` or `IEnumerator<T>` compile into state machines. Logic lives in compiler-generated `MoveNext` method:
 
 ```csharp
 [HarmonyPatch]
@@ -327,7 +327,7 @@ static class EnumeratorPatch
 {
     static MethodBase TargetMethod()
     {
-        // Find the compiler-generated type
+        // Find compiler-generated type
         var enumeratorType = AccessTools.Inner(typeof(MyClass), "<GetItems>d__5");
         return AccessTools.Method(enumeratorType, "MoveNext");
     }
@@ -336,7 +336,7 @@ static class EnumeratorPatch
 }
 ```
 
-Alternatively, use a postfix with pass-through to filter results:
+Alternatively, use postfix with pass-through to filter results:
 
 ```csharp
 [HarmonyPatch(typeof(MyClass), nameof(MyClass.GetItems))]
@@ -358,4 +358,4 @@ static class FilterPatch
 - [Patching.md](Patching.md) - Basic patch structure
 - [PatchInjections.md](PatchInjections.md) - Special parameters
 - [TranspilerPatching.md](TranspilerPatching.md) - IL-level patching
-- [AccessTools.md](AccessTools.md) - Finding methods dynamically
+- [AccessTools.md](AccessTools.md) - Find methods dynamically

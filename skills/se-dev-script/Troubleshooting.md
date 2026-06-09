@@ -1,6 +1,6 @@
 # Troubleshooting Guide
 
-This guide helps you resolve common issues when searching script code.
+This guide helps resolve common issues when searching script code.
 
 ## NO-MATCHES Results
 
@@ -24,7 +24,7 @@ This guide helps you resolve common issues when searching script code.
 
 3. **Index not built**:
    ```bash
-   # Build/rebuild the index
+   # Build/rebuild index
    uv run index_scripts.py
    ```
 
@@ -43,7 +43,7 @@ This guide helps you resolve common issues when searching script code.
 ### Debugging Strategy
 
 ```bash
-# Step 1: Check if any scripts are indexed
+# Step 1: Check if any scripts indexed
 cat ScriptCodeIndex/plugins.json 2>/dev/null || echo "No index"
 
 # Step 2: Count files indexed
@@ -90,12 +90,12 @@ uv run search_scripts.py class usage Program --limit 10 --offset 20
 
 ### Re-indexing After Subscribing to New Scripts
 
-**IMPORTANT**: The game must download scripts before they can be indexed.
+**IMPORTANT**: Game must download scripts before they can be indexed.
 
 ```bash
 # 1. Subscribe to scripts on Steam Workshop
-# 2. Start the game, open PB, browse script list (downloads them)
-# 3. Exit the game
+# 2. Start game, open PB, browse script list (downloads them)
+# 3. Exit game
 # 4. Re-index
 uv run index_scripts.py
 ```
@@ -175,7 +175,7 @@ uv run search_scripts.py field usage argument --limit 20
 Scripts can only use names from `PBApiWhitelist.txt`. 
 
 ```bash
-# Check if name is available to PB scripts
+# Check if name available to PB scripts
 grep "IMyThrust" PBApiWhitelist.txt
 ```
 
@@ -186,14 +186,14 @@ To understand interfaces and base classes:
 # Wrong skill - won't find definition
 uv run search_scripts.py interface declaration IMyTerminalBlock
 
-# Right skill - find the actual definition
+# Right skill - find actual definition
 # (switch to se-dev-game-code skill)
 uv run search_code.py interface declaration IMyTerminalBlock
 ```
 
 ### 4. Look for Merged Scripts
 
-Many scripts are merged from multiple files. Look for comments like:
+Many scripts merged from multiple files. Look for comments like:
 ```bash
 grep -r "// .*\.cs" SteamScripts/*/Script.cs | head -5
 ```

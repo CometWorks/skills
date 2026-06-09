@@ -4,7 +4,7 @@
 
 **⚠️ IMPORTANT: Read [CommandExecution.md](../CommandExecution.md) for complete guidance on running commands correctly.**
 
-Run `Prepare.bat` on Windows or `prepare.sh` on Linux to set up the skill environment. This is required before using the skill.
+Run `Prepare.bat` on Windows or `prepare.sh` on Linux to set up skill environment. Required before using skill.
 
 ## Quick Check Status
 
@@ -26,8 +26,8 @@ test -f "Prepare.DONE" && echo "READY" || echo "NOT_READY"
 
 If `Prepare.DONE` is missing:
 
-1. Review the requirements and instructions in [Prepare.md](../Prepare.md).
-2. Execute preparation using the skill folder as working directory:
+1. Review requirements and instructions in [Prepare.md](../Prepare.md).
+2. Run preparation using skill folder as working directory:
 
 **Recommended approach (using workdir parameter):**
 ```bash
@@ -50,28 +50,28 @@ Prepare.bat
 
 **⚠️ CRITICAL:** See [CommandExecution.md](../CommandExecution.md) for details on:
 - Why `&&` doesn't work in CMD
-- How to use the workdir parameter correctly
+- How to use workdir parameter correctly
 - Common mistakes and how to avoid them
 
 ## Critical Rules
 
-- **DO NOT** create the `Prepare.DONE` file yourself.
-- It is automatically created by the preparation script only upon a successful run.
-- Creating it manually is "faking" success and will lead to errors.
+- **DO NOT** create `Prepare.DONE` file yourself.
+- Preparation script creates it automatically only on successful run.
+- Creating it manually "fakes" success and leads to errors.
 
 ## What Preparation Does
 
-The preparation script:
+Preparation script:
 - Verifies Python ≥ 3.11 and installs `uv` if needed.
-- Sets up the Python virtual environment via `uv sync`.
-- On Windows downloads `busybox.exe` for UNIX-style shell commands. On Linux uses the native shell tools.
-- Creates `Data/` as a junction to `%USERPROFILE%\.se-dev\mod` so persistent
-  data (mod inventory, hashes, code index) lives outside the skill folder.
-- Creates `LocalMods/` as a junction to `%AppData%\SpaceEngineers\Mods`.
+- Sets up Python virtual environment via `uv sync`.
+- On Windows downloads `busybox.exe` for UNIX-style shell commands. On Linux uses native shell tools.
+- Creates `Data/` as junction to `%USERPROFILE%\.se-dev\mod` so persistent
+  data (mod inventory, hashes, code index) lives outside skill folder.
+- Creates `LocalMods/` as junction to `%AppData%\SpaceEngineers\Mods`.
 - Runs `list_mods.py` to refresh `Data/mods.json` (cheap; safe to rerun).
 - Runs `index_mods.py` to (incrementally) rebuild `Data/CodeIndex/`.
-  Only mods whose .cs content has changed since the last run are reparsed.
+  Only mods whose .cs content changed since last run are reparsed.
 
-The Steam Workshop content folder is **not** symlinked into the skill —
-it is read in-place via the path resolved from `SE_GAME_ROOT` or the
+Steam Workshop content folder is **not** symlinked into skill —
+read in-place via path resolved from `SE_GAME_ROOT` or
 Steam registry entry.

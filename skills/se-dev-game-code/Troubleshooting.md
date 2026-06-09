@@ -1,6 +1,6 @@
 # Troubleshooting Guide
 
-This guide helps you resolve common issues when searching game code.
+This guide helps resolve common issues when searching game code.
 
 ## NO-MATCHES Results
 
@@ -29,9 +29,9 @@ This guide helps you resolve common issues when searching game code.
    ```
 
 4. **Index not built yet**:
-   - Check if `Data/CodeIndex/` exists (the `Data` junction must be present in the skill folder)
+   - Check if `Data/CodeIndex/` exists (`Data` junction must be present in skill folder)
    - If missing, preparation didn't complete successfully
-   - Re-run `./Prepare.bat` from the skill directory
+   - Re-run `./Prepare.bat` from skill directory
 
 ### Debugging Strategy
 
@@ -42,7 +42,7 @@ uv run search_game_code.py class usage Entity --count
 # Step 2: If 0, try broader search with regex
 uv run search_game_code.py class usage "re:.*Entity.*" --count
 
-# Step 3: Check what files are available
+# Step 3: Check what files available
 ls Data/Decompiled/Sandbox.Game/Sandbox/Game/Entities/*.cs | head -10
 
 # Step 4: Try direct file search as fallback
@@ -61,7 +61,7 @@ uv run search_game_code.py class usage MyEntity --count
 ```
 
 ### 2. Use Limit to Preview
-View just the first few results:
+View first few results:
 
 ```bash
 # Show first 20 matches
@@ -103,17 +103,17 @@ uv run search_game_code.py class usage MyEntity --limit 10 --offset 20
 If searches return unexpected results or after game updates:
 
 ```bash
-# Delete the index (Data/Content can also be removed if needed)
+# Delete index (Data/Content can also be removed if needed)
 rm -rf Data/CodeIndex/
 
-# Re-run preparation (this will rebuild the index)
+# Re-run preparation (rebuilds index)
 ./Prepare.bat
 ```
 
-`Prepare.bat` also detects game updates automatically: if the binaries' version
+`Prepare.bat` also detects game updates automatically: if binaries' version
 differs from `Data/game_version.txt`, the `Decompiled/`, `Content/` and
 `CodeIndex/` folders are wiped and rebuilt. Earlier decompiled versions remain
-available in the local Git history under `Data/.git/`.
+available in local Git history under `Data/.git/`.
 
 ### Checking Index Status
 
@@ -139,8 +139,8 @@ Each skill searches different code:
 | Plugin code from PluginHub | `se-dev-plugin` |
 | PB script examples from Workshop | `se-dev-script` |
 
-If you're looking for examples of how others use game APIs, use `se-dev-mod` or `se-dev-script`.
-If you need to understand the game's internal implementation, use `se-dev-game-code`.
+If looking for examples of how others use game APIs, use `se-dev-mod` or `se-dev-script`.
+If you need to understand game's internal implementation, use `se-dev-game-code`.
 
 ## Search Tips
 
@@ -185,7 +185,7 @@ uv run search_game_code.py class parent MyTerminalBlock
 # Find what inherits from MyTerminalBlock
 uv run search_game_code.py class children MyTerminalBlock
 
-# Find interfaces implemented by a class
+# Find interfaces implemented by class
 uv run search_game_code.py class implements MyTerminalBlock
 
 # Find classes implementing an interface
@@ -194,7 +194,7 @@ uv run search_game_code.py interface implementors IMyTerminalBlock
 
 ## Still Having Issues?
 
-If you're still getting NO-MATCHES or unexpected results:
+If still getting NO-MATCHES or unexpected results:
 
 1. **Verify preparation completed**:
    ```bash
@@ -211,7 +211,7 @@ If you're still getting NO-MATCHES or unexpected results:
    grep -r "MyCubeBlock" Data/Decompiled/Sandbox.Game/ | head -3
    ```
 
-4. **Check the logs**:
+4. **Check logs**:
    ```bash
    tail -20 Prepare.log
    ```
