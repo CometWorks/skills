@@ -6,7 +6,7 @@ Search PB script code using `uv run search_scripts.py` from this skill folder.
 
 ## Prerequisites
 
-Before searching, ensure the script code index exists. If `ScriptCodeIndex/` directory is missing, run:
+Before searching, ensure script code index exists. If `ScriptCodeIndex/` directory missing, run:
 
 ```cmd
 uv run index_scripts.py
@@ -89,11 +89,11 @@ uv run search_scripts.py -i class declaration inventory
 
 ## Script List
 
-After indexing, the list of discovered scripts is saved to `ScriptCodeIndex/scripts.json`. This file contains information about each script including its source (steam/local) and path.
+After indexing, list of discovered scripts saved to `ScriptCodeIndex/scripts.json`. This file contains info about each script including its source (steam/local) and path.
 
 ## When to Search
 
 Search script code when:
 - Looking for examples of how other scripts implement specific features
 - Understanding patterns used in PB script development
-- Finding usage examples of the PB API in real scripts
+- Finding usage examples of PB API in real scripts

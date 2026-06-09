@@ -1,6 +1,6 @@
 # Code Search
 
-The Torch skill indexes the selected Torch repository into CSV files under `Data/CodeIndex`.
+Torch skill indexes selected Torch repository into CSV files under `Data/CodeIndex`.
 
 Use `uv run search_torch.py ...` from this skill folder.
 
@@ -67,7 +67,7 @@ uv run search_torch.py method declaration re:.*Command
 uv run search_torch.py class declaration plugin -i
 ```
 
-If you omit `text:` or `re:`, plain text matching is used.
+If you omit `text:` or `re:`, plain text matching used.
 
 ## Hierarchy and implementation queries
 
@@ -77,21 +77,21 @@ uv run search_torch.py interface implementors ITorchPlugin
 uv run search_torch.py class implements TorchPluginBase
 ```
 
-Hierarchy files are also written as text trees:
+Hierarchy files also written as text trees:
 
 - `Data/CodeIndex/class_hierarchy.txt`
 - `Data/CodeIndex/interface_hierarchy.txt`
 
 ## Output interpretation
 
-- `file_path` is relative to the Torch repository root chosen during preparation.
-- `namespace`, `declaring_type`, and `method` columns let you reconstruct the full context.
-- `start_line` and `end_line` point to the source location in the indexed checkout.
+- `file_path` is relative to Torch repository root chosen during preparation.
+- `namespace`, `declaring_type`, and `method` columns let you reconstruct full context.
+- `start_line` and `end_line` point to source location in indexed checkout.
 
 ## Search strategy
 
-1. Start with declarations for the framework types you expect.
+1. Start with declarations for framework types you expect.
 2. Use method signatures to locate extension points.
 3. Switch to usages to find concrete patterns.
-4. Add `-n` early when you know the subsystem.
+4. Add `-n` early when you know subsystem.
 5. Use `--count` before broad searches like `Manager`, `Plugin`, or `Command`.

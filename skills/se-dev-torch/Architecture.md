@@ -1,12 +1,12 @@
 # Torch Architecture Map
 
-Use this file to choose the right source area before reading individual files.
+Use this file to choose right source area before reading individual files.
 
 ## Main source roots
 
 | Area | Source root | Purpose |
 |------|-------------|---------|
-| Public API | `Torch.API/` | Interfaces and contracts intended for plugins |
+| Public API | `Torch.API/` | Interfaces and contracts for plugins |
 | Core implementation | `Torch/` | Plugin manager, command system, managers, patches, shared UI |
 | Dedicated server host | `Torch.Server/` | Server bootstrap, WPF host UI, server-side managers |
 | In-game bridge mod | `Torch.Mod/` | Mod-side communication and message types |
@@ -57,7 +57,7 @@ Use this file to choose the right source area before reading individual files.
 
 ## High-value search anchors
 
-Use these when you need an entry point fast:
+Use these when you need entry point fast:
 
 ```bash
 uv run search_torch.py class declaration TorchBase
@@ -77,7 +77,7 @@ uv run search_torch.py namespace declaration PatchManager
 
 ## When to leave this skill
 
-If the answer depends on Keen engine behavior rather than Torch framework behavior, switch to:
+If answer depends on Keen engine behavior rather than Torch framework behavior, switch to:
 
 - `se-dev-game-code`
 - `se-dev-server-code`

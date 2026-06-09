@@ -12,7 +12,7 @@ Search plugin code using `uv run search_plugins.py` from this skill folder.
 uv run download_pluginhub.py
 ```
 
-This downloads/updates the PluginHub registry with all available plugins.
+Downloads/updates PluginHub registry with all available plugins.
 
 ### 2. List Available Plugins
 
@@ -20,7 +20,7 @@ This downloads/updates the PluginHub registry with all available plugins.
 uv run list_plugins.py                    # List all plugins
 uv run list_plugins.py --local            # List only locally available plugins
 uv run list_plugins.py --search "camera"  # Search plugins by name/description
-uv run list_plugins.py -v                 # Verbose output with descriptions
+uv run list_plugins.py -v                 # Verbose output, descriptions
 ```
 
 ### 3. Download Plugin Source
@@ -37,7 +37,7 @@ uv run download_plugin_source.py ToolSwitcherPlugin
 uv run index_plugins.py
 ```
 
-This indexes all downloaded plugin source code.
+Indexes all downloaded plugin source code.
 
 ## Quick Reference
 
@@ -64,8 +64,8 @@ uv run search_plugins.py <category> <symbol_type> <pattern> [options]
 - `namespace` - Namespaces
 
 ### Symbol Types
-- `declaration` - Where symbols are defined
-- `usage` - Where symbols are used
+- `declaration` - Where symbols defined
+- `usage` - Where symbols used
 - `signature` - Method signatures (method category only)
 - `parent` - Parent class/interface (class/interface categories)
 - `children` - Child classes/interfaces (class/interface categories)
@@ -73,7 +73,7 @@ uv run search_plugins.py <category> <symbol_type> <pattern> [options]
 - `implementors` - Classes implementing an interface (interface category)
 
 ### Options
-- `-c, --count` - Print only the count of matches
+- `-c, --count` - Print only count of matches
 - `-l, --limit N` - Limit number of results
 - `-o, --offset N` - Skip first N results
 - `-n, --namespace PREFIX` - Filter by namespace prefix
@@ -120,9 +120,9 @@ After indexing, `Data/plugins.json` contains:
 
 ## Workflow
 
-1. **Find relevant plugins**: Use `list_plugins.py --search` to find plugins with features you want to learn from
-2. **Download sources**: Use `download_plugin_source.py` to get the source code
-3. **Index**: Run `index_plugins.py` to build the search index
+1. **Find relevant plugins**: Use `list_plugins.py --search` to find plugins with features to learn from
+2. **Download sources**: Use `download_plugin_source.py` to get source code
+3. **Index**: Run `index_plugins.py` to build search index
 4. **Search**: Use `search_plugins.py` to find code patterns
 
 ## When to Search

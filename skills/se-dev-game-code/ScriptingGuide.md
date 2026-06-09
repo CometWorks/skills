@@ -1,13 +1,13 @@
 # Custom Scripting Guide
 
-How to build custom utility scripts to work with the decompiled code and indexes.
+How to build custom utility scripts to work with decompiled code and indexes.
 
 ## Python Environment
 
-A Python virtual environment in this folder was made available by the preparation process.
+Preparation process made a Python virtual environment available in this folder.
 
 - Use this environment to write short, targeted, reusable utility scripts
-- Build a catalog of scripts in `UtilityScripts.md` next to this file
+- Build catalog of scripts in `UtilityScripts.md` next to this file
 - Run scripts with: `uv run script_name.py` (from this folder as CWD)
 - See available Python packages in `pyproject.toml`
 
@@ -32,8 +32,8 @@ busybox.exe sed -i 's/old/new/g' file.txt
 
 **CRITICAL:** Always use forward slashes (`/`) in file paths passed to busybox.
 
-- Backslashes are interpreted as escape characters by bash
-- Backslashes will be silently removed, mangling paths
+- Backslashes interpreted as escape characters by bash
+- Backslashes silently removed, mangling paths
 - Windows accepts forward slashes natively
 
 **Correct:**
@@ -49,7 +49,7 @@ busybox.exe grep "pattern" C:\Users\name\folder
 
 ### Using PowerShell Instead
 
-Alternatively, use Windows PowerShell which handles backslash paths natively:
+Alternatively, use Windows PowerShell, which handles backslash paths natively:
 
 ```powershell
 Get-ChildItem -Recurse -Filter "*.cs" | Select-String "pattern"
@@ -60,7 +60,7 @@ Get-ChildItem -Recurse -Filter "*.cs" | Select-String "pattern"
 1. **Keep scripts focused** - One task per script
 2. **Document in UtilityScripts.md** - Add entries as you create scripts
 3. **Use the indexes** - Leverage existing CSV files instead of parsing source
-4. **Handle paths correctly** - Follow the guidelines above
+4. **Handle paths correctly** - Follow guidelines above
 5. **Test on Windows** - Always verify scripts work on Windows
 
 ## Example Scripts
@@ -122,7 +122,7 @@ if __name__ == "__main__":
 
 ### Working with CSV Indexes
 
-All index files are in `Data/CodeIndex/`. Use Python's `csv` module:
+All index files in `Data/CodeIndex/`. Use Python's `csv` module:
 
 ```python
 import csv
@@ -136,7 +136,7 @@ with open("Data/CodeIndex/class_declarations.csv", "r", encoding="utf-8") as f:
 
 ### Reading Decompiled Source
 
-Files are in `Data/Decompiled/`:
+Files in `Data/Decompiled/`:
 
 ```python
 from pathlib import Path
@@ -152,7 +152,7 @@ with open(file_path, "r", encoding="utf-8") as f:
 
 ### Searching Content Data
 
-Game content is in `Data/Content/`. See `ContentTypes.md` for structure.
+Game content in `Data/Content/`. See `ContentTypes.md` for structure.
 
 ```python
 from pathlib import Path

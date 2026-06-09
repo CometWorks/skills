@@ -1,8 +1,8 @@
 # In-game Script Merge Tool for Space Engineers
 
-`ScriptMerge` is a command line tool for merging in-game scripts from multiple source code files. 
+`ScriptMerge` is command line tool for merging in-game scripts from multiple source code files. 
 
-It can also minify the script for release, so it can fit under the 100k characters limit. 
+Can also minify script for release, so it fits under 100k characters limit. 
 
 Please consider supporting my work on [Patreon](https://www.patreon.com/semods) or one time via [PayPal](https://www.paypal.com/paypalme/vferenczi/).
 
@@ -10,17 +10,17 @@ Please consider supporting my work on [Patreon](https://www.patreon.com/semods) 
 
 - Install .NET Framework 4.8.1 (if you don't have it)
 - Create .Net Framework 4.8.1 Class Library project
-- Configure the project for C# 6.0 syntax
-- Reference these NuGet packages from the project:
+- Configure project for C# 6.0 syntax
+- Reference these NuGet packages from project:
   - `SpaceEngineers.ScriptingReferences`
   - `System.Collections.Immutable` 
-- Use the `Script/Skeleton.cs` file from this repository as a starting point for your script code
-- See the `TODO` comments in the skeleton for more
-- See the **Hints** below
+- Use the `Script/Skeleton.cs` file from this repository as starting point for your script code
+- See `TODO` comments in skeleton for more
+- See **Hints** below
 
 ## Merge your script
 
-Build and use `IngameScriptMergeTool` to merge your script source into a single file:
+Build and use `IngameScriptMergeTool` to merge script source into single file:
 
 ### Help 
 
@@ -52,14 +52,14 @@ Options:
 - Deploy debug merge: `IngameScriptMergeTool -d "Name Of My Script"`
 - Deploy release merge: `IngameScriptMergeTool -maur -d "Name Of My Script"` 
 
-The deployment target is SE's script folder: `%AppData%\SpaceEngineers\IngameScript\local\Name Of My Script`
+Deployment target is SE's script folder: `%AppData%\SpaceEngineers\IngameScript\local\Name Of My Script`
 
 ## Hints
 
 - For debugging 3D math use the [(DevTool) Programmable Block DebugAPI](https://steamcommunity.com/sharedfiles/filedetails/?id=2654858862) mod and its PB API
-- Add your unit tests (if any) into a separate namespace (for example `Tests`)
-- Make sure to wrap all debug code into `#if DEBUG` directives
-- Subdirectories are allowed, use `/` as a delimiter, or example: `My Subdir/Name Of My Script`
+- Add unit tests (if any) into separate namespace (for example `Tests`)
+- Wrap all debug code into `#if DEBUG` directives
+- Subdirectories allowed, use `/` as delimiter, for example: `My Subdir/Name Of My Script`
 
 ### Excluding names from shortening
 
@@ -69,16 +69,16 @@ The deployment target is SE's script folder: `%AppData%\SpaceEngineers\IngameScr
 
 ### Header
 
-Adding `//!!` anywhere in a namespace declaration will move that namespace block to the
-top of the merged script and exludes it from variable renaming and minification.
-This is useful to add documentation and configuration supposed to be editable by the player. 
+Adding `//!!` anywhere in namespace declaration moves that namespace block to
+top of merged script and excludes it from variable renaming and minification.
+Useful to add documentation and configuration supposed to be editable by player. 
 
 ```cs
 namespace Script {
     //!!
     /* Example script */
     static class Config {
-        // This is a configuration variable
+        // Configuration variable
         public static ConfigVar = 1; 
     }
 }
@@ -87,12 +87,12 @@ namespace Script {
 ### Automatically updating code in PBs
 
 - Enable the [ScriptDev](https://github.com/viktor-ferenczi/se-script-dev) plugin in Pulsar, Apply, restart SE.
-- Append the script's name in square brackets to your PB's name: `Programmable Block [Name Of My Script]`
-- The plugin will update the code in your PB whenever the `Script.cs` file changes.
+- Append script's name in square brackets to PB's name: `Programmable Block [Name Of My Script]`
+- Plugin updates code in PB whenever `Script.cs` file changes.
 
 ### Debug and release only code
 
-You can wrap debug and release code into directives as you would in regular C# code:
+Wrap debug and release code into directives as in regular C# code:
 
 ```cs
 #if DEBUG
@@ -104,28 +104,28 @@ You can wrap debug and release code into directives as you would in regular C# c
 #endif
 ```
 
-The directives themselves are removed, only their body are preserved during merging.
+Directives themselves are removed, only their body preserved during merging.
 
 ### Multiple scripts with code sharing
 
-You can develop multiple scripts in the same solution. You can also split your code into any number of projects.
-All what matters while merging the script is the namespaces the tool takes the code from. 
+You can develop multiple scripts in same solution. You can also split code into any number of projects.
+All that matters while merging script is the namespaces the tool takes code from. 
 
-Put your shared code into a separate namespace, then use the `--namespaces` (`-n`) option to select the namespaces
-to build your script from. 
+Put shared code into separate namespace, then use the `--namespaces` (`-n`) option to select namespaces
+to build script from. 
 
-For example to develop two scripts in the same solution you could use these namespaces:
+For example to develop two scripts in same solution use these namespaces:
 - SharedCode
 - FirstScript
 - SecondScript
 
-Then invoke the merge tool with these parameters to deploy them separately:
+Then invoke merge tool with these parameters to deploy them separately:
 - `-n SharedCode,FirstScript -d "First Script"`
 - `-n SharedCode,SecondScript -d "Second Script"`
 
 ### PB API whitelist checking
 
-This is a simpler tool than MDK and does not depend on Visual Studio. However, it does not verify
-the script against the PB API whitelist, currently. It could be implemented based on the same whitelist
-file of MDK, should enough script developers request it. The type information is already available,
-since it is required for proper minification.
+Simpler tool than MDK, does not depend on Visual Studio. However, currently does not verify
+script against PB API whitelist. Could be implemented based on same whitelist
+file of MDK, should enough script developers request it. Type information already available,
+since required for proper minification.

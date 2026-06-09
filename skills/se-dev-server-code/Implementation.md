@@ -1,10 +1,10 @@
 # Code Search Implementation Details
 
-Technical documentation for contributors and those working on the skill itself.
+Technical docs for contributors and those working on the skill itself.
 
 ## Index File Formats
 
-All CSV files are located in `Data/CodeIndex/` after preparation.
+All CSV files live in `Data/CodeIndex/` after preparation.
 
 ### Standard Index Files
 
@@ -16,9 +16,9 @@ namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,d
 
 #### Column Descriptions
 
-- `namespace` - The namespace containing the symbol
-- `declaring_type` - The class/struct/interface containing the symbol
-- `method` - The method containing the symbol (empty for type-level declarations)
+- `namespace` - Namespace containing the symbol
+- `declaring_type` - Class/struct/interface containing the symbol
+- `method` - Method containing the symbol (empty for type-level declarations)
 - `symbol_name` - Field/property/event name (for member indices)
 - `type` - Either `declaration` or `usage`
 - `file_path` - Relative path from `Data/Decompiled/` folder
@@ -54,7 +54,7 @@ namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,d
 | `constructor_declarations.csv` | Constructor declarations |
 | `constructor_usages.csv` | Constructor references |
 
-**Note:** The `access`, `modifiers`, `member_type`, and `params` columns are populated for member declarations (fields, properties, events, methods, constructors) and empty for type/namespace declarations and all usage entries.
+**Note:** The `access`, `modifiers`, `member_type`, and `params` columns are populated for member declarations (fields, properties, events, methods, constructors), empty for type/namespace declarations and all usage entries.
 
 ### Method Signatures CSV
 
@@ -68,15 +68,15 @@ namespace,declaring_type,method_name,signature,file_path,start_line,end_line,des
 
 #### Column Descriptions
 
-- `namespace` - Full namespace of the declaring class
+- `namespace` - Full namespace of declaring class
 - `declaring_type` - Class name (for inner classes: `ParentClass.ChildClass`)
-- `method_name` - The method name
-- `signature` - Full method signature on a single line (whitespace normalized)
+- `method_name` - Method name
+- `signature` - Full method signature on single line (whitespace normalized)
 - `file_path` - Relative path from `Data/Decompiled/` folder
 - `start_line`, `end_line` - Line range of signature only (not whole method body)
 - `description` - XML doc comment before the method
 
-**Includes:** Abstract methods, inline `=>` methods, and block `{...}` methods.
+**Includes:** Abstract methods, inline `=>` methods, block `{...}` methods.
 
 **Excludes:** Property getters/setters (indexed in field declarations).
 
@@ -90,14 +90,14 @@ Tracks class-to-class inheritance (base classes only).
 child_namespace,child_class,parent_namespace,parent_class,file_path,start_line,end_line
 ```
 
-- `child_namespace` - Namespace of the child class
-- `child_class` - Name of the child class
-- `parent_namespace` - Namespace of the parent/base class
-- `parent_class` - Name of the parent/base class
-- `file_path` - Source file containing the child class declaration
-- `start_line`, `end_line` - Location of the child class declaration
+- `child_namespace` - Namespace of child class
+- `child_class` - Name of child class
+- `parent_namespace` - Namespace of parent/base class
+- `parent_class` - Name of parent/base class
+- `file_path` - Source file containing child class declaration
+- `start_line`, `end_line` - Location of child class declaration
 
-**Note:** Only classes are indexed (not structs, as structs cannot inherit from classes).
+**Note:** Only classes are indexed (not structs, since structs cannot inherit from classes).
 
 ### Interface Hierarchy CSV
 
@@ -109,12 +109,12 @@ Tracks interface-to-interface inheritance (interfaces extending other interfaces
 child_namespace,child_interface,parent_namespace,parent_interface,file_path,start_line,end_line
 ```
 
-- `child_namespace` - Namespace of the child interface
-- `child_interface` - Name of the child interface
-- `parent_namespace` - Namespace of the parent interface
-- `parent_interface` - Name of the parent interface
-- `file_path` - Source file containing the child interface declaration
-- `start_line`, `end_line` - Location of the child interface declaration
+- `child_namespace` - Namespace of child interface
+- `child_interface` - Name of child interface
+- `parent_namespace` - Namespace of parent interface
+- `parent_interface` - Name of parent interface
+- `file_path` - Source file containing child interface declaration
+- `start_line`, `end_line` - Location of child interface declaration
 
 ### Interface Implementation CSV
 
@@ -126,11 +126,11 @@ Tracks which classes/structs implement which interfaces.
 implementing_namespace,implementing_type,interfaces,file_path,start_line,end_line
 ```
 
-- `implementing_namespace` - Namespace of the implementing class/struct
-- `implementing_type` - Name of the class/struct
+- `implementing_namespace` - Namespace of implementing class/struct
+- `implementing_type` - Name of class/struct
 - `interfaces` - **Comma-separated** list of fully-qualified interface names (format: `Namespace.InterfaceName`)
-- `file_path` - Source file containing the class/struct declaration
-- `start_line`, `end_line` - Location of the class/struct declaration
+- `file_path` - Source file containing class/struct declaration
+- `start_line`, `end_line` - Location of class/struct declaration
 
 **Example row:**
 ```csv
@@ -143,7 +143,7 @@ Sandbox.Game,MyTerminalBlock,"VRage.Game.ModAPI.IMyTerminalBlock,Sandbox.ModAPI.
 
 **File:** `class_hierarchy.txt`
 
-Tree-style visualization of complete class hierarchy, similar to the `tree` command.
+Tree-style visualization of complete class hierarchy, like `tree` command.
 
 **Format:**
 ```
@@ -195,7 +195,7 @@ VRage.ModAPI.IMyEntity
 
 ### Data Structures
 
-The indexer uses these dataclasses:
+Indexer uses these dataclasses:
 
 ```python
 @dataclass
@@ -293,7 +293,7 @@ class InterfaceImplementationEntry:
 ### Generic Type Handling
 
 - Strips generic parameters: `List<T>` becomes `List`
-- Stores only the base type name in hierarchy entries
+- Stores only base type name in hierarchy entries
 
 ### Tree Generation
 
@@ -359,7 +359,7 @@ CATEGORY_FILES = {
 
 **For `parent` and `implements`:**
 1. Search child/implementing column
-2. Output one line per match with simple format
+2. Output one line per match in simple format
 
 **For `children` and `implementors`:**
 1. Search parent/interface column
@@ -369,7 +369,7 @@ CATEGORY_FILES = {
 
 ### Namespace Compression
 
-The `compress_namespace_hierarchy()` function:
+`compress_namespace_hierarchy()` function:
 - Parses FQNs into namespace paths + type names
 - Builds tree structure grouping by shared prefixes
 - Flattens single-child chains: `A.B.C.Class`

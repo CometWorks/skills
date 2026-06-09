@@ -1,6 +1,6 @@
 # Looking at Other Plugins as Examples
 
-You can look into the source code of any other plugin registered on the `PluginHub` as examples, they are all open source.
+Look into the source code of any other plugin registered on the `PluginHub` as examples, all open source.
 
 ## Finding and Downloading Plugins
 
@@ -18,7 +18,7 @@ uv run list_plugins.py --search "tool"
 
 ### Step 2: Download Plugin Source
 
-**IMPORTANT**: You must use the EXACT plugin name as shown in the list output.
+**IMPORTANT**: Must use the EXACT plugin name as shown in the list output.
 
 ```bash
 # ✅ CORRECT - exact name with proper capitalization and spacing
@@ -45,15 +45,15 @@ uv run search_plugins.py method signature Patch
 
 ## Manual Plugin Discovery (Alternative Method)
 
-Look into the `PluginHub` folder at the same directory level as this skill file. It should have a `Plugins` 
+Look into the `PluginHub` folder at the same directory level as this skill file. Should have a `Plugins` 
 subdirectory with XML files in it.
 
-You can find the right plugins to look into by searching in the XML files in the `PluginHub\Plugins` folder.
+Find the right plugins to look into by searching in the XML files in the `PluginHub\Plugins` folder.
 They have `FriendlyName` and `Description` which should be enough to identify what they are about in most cases.
 The `DotNetCompat` plugin is special (internal plugin), only use it if you want good examples for preloader patches.
 
-Each XML file corresponds to a plugin registered on the PluginHub. The `<RepoId>` (or if it is not present
-then the `Id`) field will tell you the GitHub repository ID of the plugin. 
+Each XML file corresponds to a plugin registered on the PluginHub. The `<RepoId>` (or if not present,
+then the `Id`) field tells you the GitHub repository ID of the plugin. 
 
 ## Plugin Storage
 
@@ -61,7 +61,7 @@ Plugin sources are downloaded to an OS-specific temp folder by default:
 - **Windows**: `%TEMP%/se-dev-plugin/plugins/`
 - **Linux**: `/tmp/se-dev-plugin/plugins/`
 
-You can override this by:
+Override this by:
 1. Setting the `SE_PLUGIN_DOWNLOAD_FOLDER` environment variable
 2. Adding `plugin_download_folder: /path/to/folder` to `CLAUDE.md` or `AGENTS.md` in your project
 

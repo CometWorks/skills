@@ -1,6 +1,6 @@
 # Troubleshooting Guide
 
-This guide helps you resolve common issues when searching server code.
+This guide helps resolve common issues when searching server code.
 
 ## NO-MATCHES Results
 
@@ -29,9 +29,9 @@ This guide helps you resolve common issues when searching server code.
    ```
 
 4. **Index not built yet**:
-   - Check if `Data/CodeIndex/` exists (the `Data` junction must be present in the skill folder)
+   - Check if `Data/CodeIndex/` exists (`Data` junction must be present in skill folder)
    - If missing, preparation didn't complete successfully
-   - Re-run `./Prepare.bat` from the skill directory
+   - Re-run `./Prepare.bat` from skill directory
 
 ### Debugging Strategy
 
@@ -61,7 +61,7 @@ uv run search_server_code.py class usage MyEntity --count
 ```
 
 ### 2. Use Limit to Preview
-View just the first few results:
+View first few results:
 
 ```bash
 # Show first 20 matches
@@ -69,7 +69,7 @@ uv run search_server_code.py class usage MyEntity --limit 20
 ```
 
 ### 3. Refine Your Search
-Make your pattern more specific:
+Make pattern more specific:
 
 ```bash
 # Too broad (returns 861 results)
@@ -106,14 +106,14 @@ If searches return unexpected results or after server updates:
 # Delete the index (Data/Content can also be removed if needed)
 rm -rf Data/CodeIndex/
 
-# Re-run preparation (this will rebuild the index)
+# Re-run preparation (this rebuilds the index)
 ./Prepare.bat
 ```
 
-`Prepare.bat` also detects server updates automatically: if the binaries' version
+`Prepare.bat` also detects server updates automatically: if binaries' version
 differs from `Data/game_version.txt`, the `Decompiled/`, `Content/` and
 `CodeIndex/` folders are wiped and rebuilt. Earlier decompiled versions remain
-available in the local Git history under `Data/.git/`.
+available in local Git history under `Data/.git/`.
 
 ### Checking Index Status
 
@@ -139,8 +139,8 @@ Each skill searches different code:
 | Plugin code from PluginHub | `se-dev-plugin` |
 | PB script examples from Workshop | `se-dev-script` |
 
-If you're looking for examples of how others use game APIs, use `se-dev-mod` or `se-dev-script`.
-If you need to understand the server's internal implementation, use `se-dev-server-code`.
+If looking for examples of how others use game APIs, use `se-dev-mod` or `se-dev-script`.
+If you need to understand server's internal implementation, use `se-dev-server-code`.
 
 ## Search Tips
 
@@ -194,7 +194,7 @@ uv run search_server_code.py interface implementors IMyTerminalBlock
 
 ## Still Having Issues?
 
-If you're still getting NO-MATCHES or unexpected results:
+If still getting NO-MATCHES or unexpected results:
 
 1. **Verify preparation completed**:
    ```bash

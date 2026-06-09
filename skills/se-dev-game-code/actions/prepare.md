@@ -2,9 +2,9 @@
 
 > **Part of the se-dev-game-code skill.** Invoked to run the one-time preparation.
 
-**⚠️ IMPORTANT: Read [CommandExecution.md](../CommandExecution.md) for complete guidance on running commands correctly.**
+**⚠️ IMPORTANT: Read [CommandExecution.md](../CommandExecution.md) for full guidance on running commands correctly.**
 
-Run `Prepare.bat` on Windows or `prepare.sh` on Linux to set up the skill environment. This is required before using the skill.
+Run `Prepare.bat` on Windows or `prepare.sh` on Linux to set up skill environment. Required before using skill.
 
 ## Quick Check Status
 
@@ -26,8 +26,8 @@ test -f "Prepare.DONE" && echo "READY" || echo "NOT_READY"
 
 If `Prepare.DONE` is missing:
 
-1. Review the requirements and instructions in [Prepare.md](../Prepare.md).
-2. Execute preparation using the skill folder as working directory:
+1. Review requirements and instructions in [Prepare.md](../Prepare.md).
+2. Execute preparation using skill folder as working directory:
 
 **Recommended approach (using workdir parameter):**
 ```bash
@@ -50,28 +50,28 @@ Prepare.bat
 
 **⚠️ CRITICAL:** See [CommandExecution.md](../CommandExecution.md) for details on:
 - Why `&&` doesn't work in CMD
-- How to use the workdir parameter correctly
+- How to use workdir parameter correctly
 - Common mistakes and how to avoid them
 
 ## Critical Rules
 
-- **DO NOT** create the `Prepare.DONE` file yourself.
-- It is automatically created by the preparation script only upon a successful run.
-- Creating it manually is "faking" success and will lead to errors.
+- **DO NOT** create `Prepare.DONE` file yourself.
+- Preparation script creates it automatically only on successful run.
+- Creating it manually fakes success and leads to errors.
 
 ## What Preparation Does
 
-The preparation script:
-- Verifies that Python 3.11+ and the command line `git` client are available
-- Sets up the Python virtual environment
-- On Windows downloads `busybox.exe`. On Linux uses the native shell tools.
+Preparation script:
+- Verifies Python 3.11+ and command line `git` client available
+- Sets up Python virtual environment
+- On Windows downloads `busybox.exe`. On Linux uses native shell tools.
 - Installs `ilspycmd` for decompilation.
-- Creates the `Data` junction pointing to `%USERPROFILE%\.se-dev\game-code\`
-- Initialises a local Git repository inside `Data/` on first run (with an initial commit of `.gitignore`)
-- Detects the current game version directly from the binaries
-- Wipes `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` whenever the version differs from the recorded one (older versions remain in the local Git history)
-- Decompiles the game DLLs to C# and optionally to IL code (needs uncommenting a line in `DecompileDll.sh` if this is required)
-- Records the new game version in `Data/game_version.txt` and commits the decompiled sources with the version label as the commit message
+- Creates `Data` junction pointing to `%USERPROFILE%\.se-dev\game-code\`
+- Initialises local Git repository inside `Data/` on first run (with initial commit of `.gitignore`)
+- Detects current game version directly from binaries
+- Wipes `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` whenever version differs from recorded one (older versions remain in local Git history)
+- Decompiles game DLLs to C# and optionally to IL code (needs uncommenting a line in `DecompileDll.sh` if required)
+- Records new game version in `Data/game_version.txt` and commits decompiled sources with version label as commit message
 - Copies game content data into `Data/Content`
-- Builds the code search index in `Data/CodeIndex`
-- Verifies the environment is ready for use
+- Builds code search index in `Data/CodeIndex`
+- Verifies environment ready for use

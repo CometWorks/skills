@@ -18,7 +18,7 @@ Examples:
 
 **Actions:**
 
-- **prepare**: Run the one-time preparation (`Prepare.bat` on Windows, `prepare.sh` on Linux)
+- **prepare**: Run one-time preparation (`Prepare.bat` on Windows, `prepare.sh` on Linux)
 - **bash**: Run UNIX shell commands via busybox
 - **search**: Search mod code using `search_mods.py`
 
@@ -37,7 +37,7 @@ Check these patterns **in order** - first match wins:
 
 **⚠️ CRITICAL: Before running ANY commands, read [CommandExecution.md](CommandExecution.md) to avoid common mistakes that cause command failures.**
 
-If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time preparation steps first. See the [prepare action](./actions/prepare.md).
+If `Prepare.DONE` file is missing in this folder, you MUST run one-time preparation steps first. See [prepare action](./actions/prepare.md).
 
 ## Essential Documentation
 
@@ -45,26 +45,26 @@ If the `Prepare.DONE` file is missing in this folder, you MUST run the one-time 
 
 ## Mod Development
 
-Use only names matching the Mod API whitelist: [ModApiWhitelist.txt](ModApiWhitelist.txt)
-The whitelist was exported from game version `1.208.015` using MDK2's `Mdk.Extractor`.
+Use only names matching Mod API whitelist: [ModApiWhitelist.txt](ModApiWhitelist.txt)
+Whitelist exported from game version `1.208.015` using MDK2's `Mdk.Extractor`.
 
-Mods are released on the Steam Workshop or Mod.IO, mostly on the former.
-Mods are compiled by the game on world loading with a Mod API whitelist enforced,
-which is supposed to guarantee safety and security. Mods may still crash the game with an exception.
+Mods released on Steam Workshop or Mod.IO, mostly the former.
+Game compiles mods on world loading with Mod API whitelist enforced,
+supposed to guarantee safety and security. Mods may still crash game with an exception.
 
-Use the `se-dev-game-code` skill to search the game's decompiled code. You may need this to
-understand how the game's internals work and how to interface with it properly. Stick to
-game code searches corresponding to names on the Mod API whitelist for efficiency.
+Use `se-dev-game-code` skill to search game's decompiled code. May need this to
+understand how game's internals work and how to interface with it properly. Stick to
+game code searches corresponding to names on Mod API whitelist for efficiency.
 
 ## Folder Structure
 
-- `Data/` — junction/symlink to the per-user persistent mod data folder (`%USERPROFILE%\.se-dev\mod` on Windows, `~/.se-dev/mod` on Linux). Persistent skill data lives here:
+- `Data/` — junction/symlink to per-user persistent mod data folder (`%USERPROFILE%\.se-dev\mod` on Windows, `~/.se-dev/mod` on Linux). Persistent skill data lives here:
   - `Data/mods.json` — quick inventory of all installed mods (workshop_id, path, has_scripts, ...).
-  - `Data/mod_hashes.json` — per-mod aggregate sha1 used by the indexer for change detection.
+  - `Data/mod_hashes.json` — per-mod aggregate sha1 used by indexer for change detection.
   - `Data/CodeIndex/` — full Tree-sitter C# index (one CSV per category, plus hierarchy trees).
-- `LocalMods/` — junction/symlink to the game's local-mod folder (`%AppData%\SpaceEngineers\Mods` on Windows, the Proton appdata equivalent on Linux).
-- Steam Workshop content is read in-place from the Steam folder; **it is not copied or symlinked**
-  into the skill. The workshop folder is resolved from `SE_GAME_ROOT` (env var) or the Steam
+- `LocalMods/` — junction/symlink to game's local-mod folder (`%AppData%\SpaceEngineers\Mods` on Windows, Proton appdata equivalent on Linux).
+- Steam Workshop content read in-place from Steam folder; **not copied or symlinked**
+  into skill. Workshop folder resolved from `SE_GAME_ROOT` (env var) or Steam
   registry entry for app id 244850.
 
 ## References
@@ -76,7 +76,7 @@ game code searches corresponding to names on the Mod API whitelist for efficienc
 
 ## Mod Code Search
 
-Search the source code of Steam and local mods for examples and patterns:
+Search source code of Steam and local mods for examples and patterns:
 
 ```bash
 # Search for patterns
@@ -91,22 +91,22 @@ uv run search_mods.py class usage Init --count
 uv run search_mods.py class usage Init --limit 10
 ```
 
-Before searching, ensure the index exists. If `Data/CodeIndex/` is missing, run:
+Before searching, ensure index exists. If `Data/CodeIndex/` missing, run:
 ```bash
 uv run list_mods.py     # quick inventory (always cheap)
 uv run index_mods.py    # full code index (incremental: only changed mods reparsed)
 ```
 
 **Re-indexing after new subscriptions:** When you subscribe to new mods on Steam Workshop,
-load them in a world once (so the game downloads them), then re-run the two commands above
-(or just `Prepare.bat`). The indexer hashes each mod's .cs files and only reparses mods
-whose hash changed since the previous run, so reruns are fast.
+load them in a world once (so game downloads them), then re-run the two commands above
+(or just `Prepare.bat`). Indexer hashes each mod's .cs files and only reparses mods
+whose hash changed since previous run, so reruns are fast.
 
 See [search action](./actions/search.md) for complete documentation.
 
 ## Action References
 
-Follow the detailed instructions in:
+Follow detailed instructions in:
 
 - [prepare action](./actions/prepare.md) - One-time preparation
 - [bash action](./actions/bash.md) - Running UNIX shell commands via busybox
@@ -114,4 +114,4 @@ Follow the detailed instructions in:
 
 ## Remarks
 
-The original source of this skill: https://github.com/viktor-ferenczi/se-dev-skills
+Original source of this skill: https://github.com/viktor-ferenczi/se-dev-skills

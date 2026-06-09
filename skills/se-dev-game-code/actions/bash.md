@@ -2,11 +2,11 @@
 
 > **Part of the se-dev-game-code skill.** Invoked when running UNIX shell commands.
 
-**⚠️ IMPORTANT: Read [CommandExecution.md](../CommandExecution.md) for complete guidance on running commands correctly.**
+**⚠️ IMPORTANT: Read [CommandExecution.md](../CommandExecution.md) for full guidance on running commands correctly.**
 
 ## Quick Reference
 
-Run UNIX-like commands using `busybox.exe` as a prefix:
+Run UNIX-like commands using `busybox.exe` as prefix:
 
 ```bash
 busybox.exe grep -r "pattern" folder
@@ -20,17 +20,17 @@ busybox.exe cat file.txt
    - ✅ Correct: `busybox.exe grep "pattern" C:/Users/name/folder`
    - ❌ Wrong: `busybox.exe grep "pattern" C:\Users\name\folder`
 
-2. **Use the skill folder as working directory**
-   - Best approach: Use the `workdir` parameter in your bash tool
-   - Alternative: Change to skill folder first, then run commands
+2. **Use skill folder as working directory**
+   - Best: use `workdir` parameter in bash tool
+   - Alternative: change to skill folder first, then run commands
 
-3. **Run commands directly** - Don't open an interactive bash shell unless needed
+3. **Run commands directly** - Don't open interactive bash shell unless needed
 
-4. **Windows accepts forward slashes natively** - This works everywhere on Windows
+4. **Windows accepts forward slashes natively** - Works everywhere on Windows
 
 ## Alternative: Use PowerShell
 
-If busybox doesn't work for a specific task, use PowerShell instead:
+If busybox fails for a task, use PowerShell instead:
 
 ```powershell
 Get-ChildItem -Recurse -Filter "*.cs" | Select-String "pattern"
@@ -41,7 +41,7 @@ PowerShell handles backslash paths correctly.
 ## Complete Documentation
 
 For detailed examples, troubleshooting, and best practices, see:
-- **[CommandExecution.md](../CommandExecution.md)** - Complete command execution guide
+- **[CommandExecution.md](../CommandExecution.md)** - Full command execution guide
 
 ## Available Commands
 
@@ -50,7 +50,7 @@ BusyBox provides many standard UNIX utilities including:
 - `find` - Find files by name/pattern
 - `cat`, `head`, `tail` - View file contents
 - `sed`, `awk` - Text processing
-- `sort`, `uniq` - Sorting and deduplication
+- `sort`, `uniq` - Sort and dedup
 - `wc` - Word/line counting
 - And many more
 
@@ -58,6 +58,6 @@ Run `busybox.exe --list` to see all available commands.
 
 ## Python Virtual Environment
 
-A Python virtual environment is available in this skill folder. Use `uv run script_name.py` to run scripts with the correct environment.
+Python virtual environment available in this skill folder. Use `uv run script_name.py` to run scripts with correct environment.
 
 See available packages in `pyproject.toml`.

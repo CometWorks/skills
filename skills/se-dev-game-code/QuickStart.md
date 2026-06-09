@@ -4,7 +4,7 @@ This skill provides instant access to Space Engineers' decompiled C# source code
 
 ## Prerequisites
 
-If `Prepare.DONE` is missing, run the preparation first (see `Prepare.md`).
+If `Prepare.DONE` is missing, run preparation first (see `Prepare.md`).
 
 ## Essential Commands
 
@@ -42,7 +42,7 @@ uv run search_game_code.py method declaration GetPosition
 uv run search_game_code.py method signature GetPosition
 ```
 
-Shows full method signatures including parameters and return types. See `CodeSearch.md` for more details.
+Shows full method signatures including parameters and return types. See `CodeSearch.md` for details.
 
 ### Find Class Hierarchy
 
@@ -56,8 +56,8 @@ Output: `Sandbox.Game.MyGrid:VRage.Game.Entity.MyEntity`
 
 Results show: `relative_path:line` or `relative_path:start-end`
 
-To read the actual code:
-- Results are relative to the `Data/Decompiled/` folder
+To read the code:
+- Results relative to `Data/Decompiled/` folder
 - Example: `VRage.Math/VRageMath/Vector3D.cs:13-2293`
 - Read: `Data/Decompiled/VRage.Math/VRageMath/Vector3D.cs`
 
