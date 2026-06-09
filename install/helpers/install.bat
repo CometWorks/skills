@@ -15,7 +15,7 @@ set "TARGET=%~1"
 
 :: Get the absolute path to the skills folder (relative to this script's location)
 set "SCRIPT_DIR=%~dp0"
-set "SKILLS_DIR=%SCRIPT_DIR%..\skills"
+set "SKILLS_DIR=%SCRIPT_DIR%\..\skills"
 
 :: Convert to absolute path
 pushd "%SKILLS_DIR%"
