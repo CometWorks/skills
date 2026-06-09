@@ -13,4 +13,4 @@ Preloader initialization, copy into the plugin's project folder, then customize:
 Example preloader patch: `Examples/Client/DecodePixelDataPrepatch.cs`
 
 Currently, preloader patching is available only on the game client (Pulsar feature) and not available
-on the server side (DS, Torch).
+on the server side (Magnetar).

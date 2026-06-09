@@ -10,7 +10,7 @@ Choose one of these templates and click on the green "Use this template" button 
 
 **Please follow the `README` after cloning your plugin project locally.**
 
-*The server template is more complex, it also includes a client template with shared code for all targets. You need the server template only if your client plugin must have a server side companion plugin (like MGP) or is a server-only plugin.*
+*The server template is more complex. It has two targets — the game client (loaded by [Pulsar](https://github.com/SpaceGT/Pulsar)) and the dedicated server (loaded by [Magnetar](https://magnetar.se)) — plus a `Shared` project for code used by both. You need the server template only if your client plugin must have a server side companion plugin (like MGP) or is a server-only plugin. The server plugin's configuration is handled by Magnetar's PluginSdk (see the `se-dev-plugin-sdk` skill).*
 
 *Good luck!*
 ### Channels
@@ -28,11 +28,20 @@ There are two ways to build and debug your client plugin locally:
 - **Set up a "dev" folder in Pulsar's Sources dialog** for the plugin. You must pass the `-sources` option to Pulsar to access this dialog. This setup is essential for pre-release testing to make sure Pulsar can also build your plugin, because it may happen that the IDE can build it, but Pulsar fails with an error. You can make Debug or Release builds inside a plugin dev folder. A Debug build should allow your IDE to connect the debugger to the `Legacy.exe` process (the game running in Pulsar). A Release build allows for testing the exact same build which players will have on their machines when they install your plugin. Once a dev folder is added in the Sources dialog, you can add that dev folder to the regular plugin list (and save in profiles). Make sure to assign the plugin's XML "info" file in the dialog you open by double clicking on your dev folder added to the Plugins list. *(BUG: Currently this association is not saved. There is a PR to fix this.)*
 
 ## Release your plugin
+
+### Client plugins → PluginHub
 - Fill in the fields of the `YourPluginName.xml` file you can find in your project's folder.  (This file came with the plugin template. If you haven't used the template, then you can find one in the [PluginHub](https://github.com/StarCpt/PluginHub/) repository.)
 - Fork the [PluginHub](https://github.com/StarCpt/PluginHub/) repository and make a PR adding your XML file to the `Plugins` folder, where all the plugins are defined.
 - Wait for the PR to be merged. It will involve a human reviewing the source code of your plugin, so please be patient.
 
-Updating your plugin is the same workflow by changing your XML in the [PluginHub](https://github.com/StarCpt/PluginHub/).
+Updating your plugin is the same workflow by changing your XML in the [PluginHub](https://github.com/StarCpt/PluginHub/). Pulsar lists and loads client plugins from the PluginHub.
+
+### Server plugins → MagnetarHub
+- Fill in the fields of the server plugin's XML descriptor that came with the server template.
+- Fork the [MagnetarHub](https://github.com/viktor-ferenczi/MagnetarHub) repository and make a PR adding your XML file to the `Plugins` folder.
+- Wait for the PR to be merged (a human reviews the source code).
+
+Magnetar lists and loads server plugins from the MagnetarHub. Server admins configure them remotely through [Quasar](https://github.com/viktor-ferenczi/Quasar), the Magnetar control plane, which lists the MagnetarHub plugins and renders each plugin's configuration UI.
 
 ## Pusar
 ### Paths 
@@ -61,7 +70,7 @@ You can add your usual plugins made by other developers to all the saved profile
 
 ## FAQ
 - *Which C# versions are supported?*
-Up to C# 13 is known to work, in general use at least C# 7.3 for plugins. (Mods are limited to C# 7.3, PB scripts are limited to C# 6.0, because they are compiled by the game.)
+Plugins have no C# language version limit. The templates set `LangVersion` to `latestMinor`, so you get the latest language features your compiler supports. (Mods are limited to C# 7.3, PB scripts are limited to C# 6.0, because they are compiled by the game.)
 - *Can I use NuGet packages?*
 Yes. They must support `.net standard 2.0` or `.net framework 4.8`. (If you want your plugin usable with `Interim.exe` (.NET 10), then `.net standard 2.0` it is.)
 - *Can I use additional data files?*

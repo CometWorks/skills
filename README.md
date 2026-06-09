@@ -51,12 +51,13 @@ If you want to use BusyBox in your other projects, then this is also available a
 
 ## Skills
 
+* [se-dev](skills/se-dev/SKILL.md) – Big-picture overview and table of contents for all the skills below (start here)
 * [se-dev-script](skills/se-dev-script/SKILL.md) – In-game script development
 * [se-dev-mod](skills/se-dev-mod/SKILL.md) – Mod development
-* [se-dev-plugin](skills/se-dev-plugin/SKILL.md) – Plugin development
-* [se-dev-torch](skills/se-dev-torch/SKILL.md) – Torch plugin development and Torch source search
+* [se-dev-plugin](skills/se-dev-plugin/SKILL.md) – Plugin development (client via Pulsar, server via Magnetar)
 * [se-dev-game-code](skills/se-dev-game-code/SKILL.md) – Searchable decompiled C# game code (recommended companion for all the other skills)
 * [se-dev-server-code](skills/se-dev-server-code/SKILL.md) – Searchable decompiled C# Dedicated Server code (for server side mod and plugin development)
+* [se-dev-torch](skills/se-dev-torch/SKILL.md) – Torch plugin development and Torch source search (legacy; Torch-only)
 
 _Enjoy!_
 
@@ -126,14 +127,14 @@ Tree-sitter's C# parser, originally developed for the (now defunct) *Ask Your Co
 
 If you suspect something is not working in these skills, then issue the following test prompt in an empty project:
 
+_Add `se-dev-server-code` to the list if you plan to develop server side plugins._
+
 ```md
 Check whether you can see these skills:
 - `se-dev-script`
 - `se-dev-mod`
 - `se-dev-plugin`
-- `se-dev-torch`
 - `se-dev-game-code`
-- `se-dev-server-code`
 
 If you see them, then make sure they're prepared for first use.
 

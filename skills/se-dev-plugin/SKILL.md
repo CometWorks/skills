@@ -64,9 +64,17 @@ Progressive documentation for Harmony patching (start with basics, then read adv
 5. **[PatchingSpecialCases.md](PatchingSpecialCases.md)** - Finalizers, reverse patches, auxiliary methods, priority
 6. **[PreloaderPatching.md](PreloaderPatching.md)** - Pre-JIT patching (Mono.Cecil, client only)
 
+## Targets: Client and Server
+
+Plugins target one or both of:
+- **Client** — runs inside the game client, loaded by [Pulsar](https://github.com/SpaceGT/Pulsar), released on the [PluginHub](https://github.com/StarCpt/PluginHub/).
+- **Server** — runs inside the dedicated server, loaded by [Magnetar](https://magnetar.se), released on the [MagnetarHub](https://github.com/viktor-ferenczi/MagnetarHub). Server plugins declare their configuration through Magnetar's PluginSdk; use the **`se-dev-plugin-sdk`** skill for that. Admins configure server plugins remotely via [Quasar](https://github.com/viktor-ferenczi/Quasar), the Magnetar control plane.
+
+A client-only plugin uses the [client plugin template](https://github.com/viktor-ferenczi/se-client-plugin-template). A plugin that also needs a server side companion (or is server-only) uses the [server plugin template](https://github.com/viktor-ferenczi/se-server-plugin-template), which has a `ClientPlugin` target, a `ServerPlugin` target and a `Shared` project. See [ServerPlugin.md](ServerPlugin.md).
+
 ## Plugin Distribution
 
-Plugins are released exclusively on the PluginHub. All plugins must be open source, since they are compiled on
+Client plugins are released exclusively on the PluginHub. All client plugins must be open source, since they are compiled on
 the player's machine from the GitHub source revision identified by its PluginHub registration. Plugins are
 reviewed for safety and security on submission, but only on a best effort basis, without any legal guarantees.
 Plugins are running native code and can do anything.
@@ -76,9 +84,11 @@ understand how the game's internals work and how to interface with it and patch 
 
 ## References
 
-- [Pulsar](https://github.com/SpaceGT/Pulsar) Plugin loader for Space Engineers
+- [Pulsar](https://github.com/SpaceGT/Pulsar) Plugin loader for the Space Engineers game client
 - [Pulsar Installer](https://github.com/StarCpt/Pulsar-Installer) Installer for Pulsar on Windows
 - [PluginHub](https://github.com/StarCpt/PluginHub/) Public plugin registry for Pulsar
+- [Magnetar](https://magnetar.se) Plugin loader for the Space Engineers dedicated server
+- [MagnetarHub](https://github.com/viktor-ferenczi/MagnetarHub) Public plugin registry for Magnetar
 
 ## Plugin Code Search
 

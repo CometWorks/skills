@@ -1,4 +1,4 @@
-﻿#if TORCH || DEDICATED
+﻿#if DEDICATED
 
 using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
