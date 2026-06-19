@@ -11,7 +11,7 @@ Torch plugin development for Space Engineers version 1.
 
 This skill is for Torch framework itself: plugin lifecycle, manifests, commands, managers, patch helpers, and server UI integration. Use `se-dev-game-code` or `se-dev-server-code` alongside it when task crosses into Keen internals.
 
-**Compatibility:** Plugins built with this skill target **Torch only** — **not** compatible with [Magnetar](https://magnetar.se), which uses different patcher and SDK. For Magnetar server plugins use `se-dev-plugin` and `se-dev-plugin-sdk` skills. When starting from [se-server-plugin-template](https://github.com/viktor-ferenczi/se-server-plugin-template), use its **`last-torch-compatible`** tag as basis, not current `main` (which dropped Torch target). See [TorchPlugin.md](TorchPlugin.md).
+**Compatibility:** Plugins built with this skill target **Torch only** — **not** compatible with [Magnetar](https://magnetar.se), which uses different patcher and SDK. For Magnetar server plugins use `se-dev-plugin` and `se-dev-plugin-sdk` skills. When starting from [se-server-plugin-template](https://github.com/CometWorks/server-plugin-template), use its **`last-torch-compatible`** tag as basis, not current `main` (which dropped Torch target). See [TorchPlugin.md](TorchPlugin.md).
 
 **CRITICAL: Commands run in a UNIX shell. Use bash syntax. On Windows this is BusyBox; on Linux/macOS use the native shell.**
 

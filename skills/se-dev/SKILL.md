@@ -32,12 +32,12 @@ A plugin targets the **game client**, the **dedicated server**, or both (sharing
 |---|---|---|---|
 | **Loader** | Pulsar | Magnetar | Torch |
 | **Registry** | PluginHub | MagnetarHub | torchapi.net |
-| **Admin UI** | in-game config dialog | [Quasar](https://github.com/viktor-ferenczi/Quasar) (remote control plane) | Torch WPF UI |
+| **Admin UI** | in-game config dialog | [Quasar](https://github.com/CometWorks/quasar) (remote control plane) | Torch WPF UI |
 | **Skill** | `se-dev-plugin` (`ClientPlugin`) | `se-dev-plugin` (`ServerPlugin`) + `se-dev-plugin-sdk` | `se-dev-torch` |
 
 - **[Pulsar](https://github.com/SpaceGT/Pulsar)** — plugin & mod loader for game client. Lists and loads plugins from **[PluginHub](https://github.com/StarCpt/PluginHub/)**. Compiles client plugins from source on player's machine.
-- **[Magnetar](https://magnetar.se)** — plugin loader for dedicated server (hard fork of Pulsar). Lists and loads server plugins from **[MagnetarHub](https://github.com/viktor-ferenczi/MagnetarHub)**. Server plugins declare their configuration through Magnetar's **PluginSdk**.
-- **[Quasar](https://github.com/viktor-ferenczi/Quasar)** — control plane with Web UI to manage Magnetar instances. Lists Magnetar-compatible server plugins from MagnetarHub and lets admins configure them remotely; configuration UI is the layout each plugin declares via PluginSdk.
+- **[Magnetar](https://magnetar.se)** — plugin loader for dedicated server (hard fork of Pulsar). Lists and loads server plugins from **[MagnetarHub](https://github.com/CometWorks/magnetar-hub)**. Server plugins declare their configuration through Magnetar's **PluginSdk**.
+- **[Quasar](https://github.com/CometWorks/quasar)** — control plane with Web UI to manage Magnetar instances. Lists Magnetar-compatible server plugins from MagnetarHub and lets admins configure them remotely; configuration UI is the layout each plugin declares via PluginSdk.
 - **[Torch](https://torchapi.com/)** — older, separate dedicated-server host with its own plugin model. **Torch plugins not compatible with Magnetar and vice versa.** Covered only by `se-dev-torch` / `se-dev-torch-book` skills, kept for maintaining existing Torch plugins.
 
 ## Skill map
@@ -46,7 +46,7 @@ A plugin targets the **game client**, the **dedicated server**, or both (sharing
 - **[se-dev-script](../se-dev-script/SKILL.md)** — In-game (Programmable Block) script development. Search example PB scripts.
 - **[se-dev-mod](../se-dev-mod/SKILL.md)** — Mod development. Search example mod code; Mod API whitelist.
 - **[se-dev-plugin](../se-dev-plugin/SKILL.md)** — Client and server plugin development (Harmony patching, transpilers, preloader). Search plugin source from PluginHub.
-- **[se-dev-plugin-sdk](https://github.com/viktor-ferenczi/Magnetar/tree/main/skills/se-dev-plugin-sdk)** — Handbook for Magnetar's PluginSdk: declaring server config variables, UI layout Quasar renders, server-side chat commands, server lifecycle (save/reload/quit/restart), path resolution and environment-agnostic logging. Use together with `se-dev-plugin` for server plugins. *(Lives in [Magnetar](https://github.com/viktor-ferenczi/Magnetar) repo.)*
+- **[se-dev-plugin-sdk](https://github.com/CometWorks/magnetar/tree/main/skills/se-dev-plugin-sdk)** — Handbook for Magnetar's PluginSdk: declaring server config variables, UI layout Quasar renders, server-side chat commands, server lifecycle (save/reload/quit/restart), path resolution and environment-agnostic logging. Use together with `se-dev-plugin` for server plugins. *(Lives in [Magnetar](https://github.com/CometWorks/magnetar) repo.)*
 - **[se-dev-torch](../se-dev-torch/SKILL.md)** — Torch plugin development (legacy server host). Torch-only; not Magnetar-compatible.
 
 ### Reference skills (read/search the game internals)
@@ -67,8 +67,8 @@ internals with the other.
 
 ## Plugin templates
 
-- [se-client-plugin-template](https://github.com/viktor-ferenczi/se-client-plugin-template) — client-only plugin.
-- [se-server-plugin-template](https://github.com/viktor-ferenczi/se-server-plugin-template) — client + Magnetar server plugin (`ClientPlugin`, `ServerPlugin`, `Shared`). For **Torch** plugin, base it on template's `last-torch-compatible` tag, not `main`.
+- [se-client-plugin-template](https://github.com/CometWorks/client-plugin-template) — client-only plugin.
+- [se-server-plugin-template](https://github.com/CometWorks/server-plugin-template) — client + Magnetar server plugin (`ClientPlugin`, `ServerPlugin`, `Shared`). For **Torch** plugin, base it on template's `last-torch-compatible` tag, not `main`.
 
 ## Remarks
 

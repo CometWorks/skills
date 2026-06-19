@@ -4,10 +4,10 @@ This file covers Torch-specific authoring model. Read [Architecture.md](Architec
 
 > **Compatibility:** Plugins developed according to this guide are compatible **only with Torch**, not with [Magnetar](https://magnetar.se). Torch and Magnetar are different dedicated-server hosts with different patcher and SDK — Torch plugin will not load into Magnetar, and Magnetar plugin will not load into Torch. For Magnetar server plugins use `se-dev-plugin` and `se-dev-plugin-sdk` skills instead.
 >
-> If you base Torch plugin on [se-server-plugin-template](https://github.com/viktor-ferenczi/se-server-plugin-template), check out **`last-torch-compatible`** tag as starting point — current `main` branch dropped Torch target and now targets Magnetar:
+> If you base Torch plugin on [se-server-plugin-template](https://github.com/CometWorks/server-plugin-template), check out **`last-torch-compatible`** tag as starting point — current `main` branch dropped Torch target and now targets Magnetar:
 >
 > ```bash
-> git clone https://github.com/viktor-ferenczi/se-server-plugin-template
+> git clone https://github.com/CometWorks/server-plugin-template
 > cd se-server-plugin-template
 > git checkout last-torch-compatible
 > ```

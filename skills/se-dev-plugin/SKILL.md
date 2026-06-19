@@ -68,9 +68,9 @@ Progressive documentation for Harmony patching (start with basics, then read adv
 
 Plugins target one or both of:
 - **Client** — runs inside game client, loaded by [Pulsar](https://github.com/SpaceGT/Pulsar), released on [PluginHub](https://github.com/StarCpt/PluginHub/).
-- **Server** — runs inside dedicated server, loaded by [Magnetar](https://magnetar.se), released on [MagnetarHub](https://github.com/viktor-ferenczi/MagnetarHub). Server plugins declare their configuration through Magnetar's PluginSdk; use **`se-dev-plugin-sdk`** skill for that. Admins configure server plugins remotely via [Quasar](https://github.com/viktor-ferenczi/Quasar), the Magnetar control plane.
+- **Server** — runs inside dedicated server, loaded by [Magnetar](https://magnetar.se), released on [MagnetarHub](https://github.com/CometWorks/magnetar-hub). Server plugins declare their configuration through Magnetar's PluginSdk; use **`se-dev-plugin-sdk`** skill for that. Admins configure server plugins remotely via [Quasar](https://github.com/CometWorks/quasar), the Magnetar control plane.
 
-A client-only plugin uses [client plugin template](https://github.com/viktor-ferenczi/se-client-plugin-template). A plugin that also needs server side companion (or is server-only) uses [server plugin template](https://github.com/viktor-ferenczi/se-server-plugin-template), which has `ClientPlugin` target, `ServerPlugin` target and `Shared` project. See [ServerPlugin.md](ServerPlugin.md).
+A client-only plugin uses [client plugin template](https://github.com/CometWorks/client-plugin-template). A plugin that also needs server side companion (or is server-only) uses [server plugin template](https://github.com/CometWorks/server-plugin-template), which has `ClientPlugin` target, `ServerPlugin` target and `Shared` project. See [ServerPlugin.md](ServerPlugin.md).
 
 ## Plugin Distribution
 
@@ -88,7 +88,7 @@ understand how game's internals work and how to interface with it and patch it p
 - [Pulsar Installer](https://github.com/StarCpt/Pulsar-Installer) Installer for Pulsar on Windows
 - [PluginHub](https://github.com/StarCpt/PluginHub/) Public plugin registry for Pulsar
 - [Magnetar](https://magnetar.se) Plugin loader for Space Engineers dedicated server
-- [MagnetarHub](https://github.com/viktor-ferenczi/MagnetarHub) Public plugin registry for Magnetar
+- [MagnetarHub](https://github.com/CometWorks/magnetar-hub) Public plugin registry for Magnetar
 
 ## Plugin Code Search
 

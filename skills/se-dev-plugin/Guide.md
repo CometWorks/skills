@@ -5,8 +5,8 @@ This guide was made for human plugin developers.
 ## Start with a template
 Choose one of these templates, click the green "Use this template" button on GitHub to make your own repo, then clone that repo.
 
-- Client only plugin template: https://github.com/viktor-ferenczi/se-client-plugin-template
-- Client and server plugin template: https://github.com/viktor-ferenczi/se-server-plugin-template
+- Client only plugin template: https://github.com/CometWorks/client-plugin-template
+- Client and server plugin template: https://github.com/CometWorks/server-plugin-template
 
 **Follow the `README` after cloning your plugin project locally.**
 
@@ -38,10 +38,10 @@ Updating your plugin is the same workflow by changing your XML in the [PluginHub
 
 ### Server plugins → MagnetarHub
 - Fill in the fields of the server plugin's XML descriptor that came with the server template.
-- Fork the [MagnetarHub](https://github.com/viktor-ferenczi/MagnetarHub) repository and make a PR adding your XML file to the `Plugins` folder.
+- Fork the [MagnetarHub](https://github.com/CometWorks/magnetar-hub) repository and make a PR adding your XML file to the `Plugins` folder.
 - Wait for the PR to be merged (a human reviews the source code).
 
-Magnetar lists and loads server plugins from the MagnetarHub. Server admins configure them remotely through [Quasar](https://github.com/viktor-ferenczi/Quasar), the Magnetar control plane, which lists the MagnetarHub plugins and renders each plugin's configuration UI.
+Magnetar lists and loads server plugins from the MagnetarHub. Server admins configure them remotely through [Quasar](https://github.com/CometWorks/quasar), the Magnetar control plane, which lists the MagnetarHub plugins and renders each plugin's configuration UI.
 
 ## Pusar
 ### Paths 

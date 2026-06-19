@@ -24,4 +24,4 @@ Folder structure of a client-only plugin:
 - `ClientPlugin/Preloader.cs`: Preloader (pre-JIT) patching entry point. See [PreloaderPatching.md](PreloaderPatching.md).
 
 References:
-- [Client plugin template](https://github.com/viktor-ferenczi/se-client-plugin-template) Template repository to start new project.
+- [Client plugin template](https://github.com/CometWorks/client-plugin-template) Template repository to start new project.

@@ -12,14 +12,14 @@ Building the project:
 - DLLs built are deployed to their respective "Local" plugin folders by each project's `Deploy.bat` (Windows) or `Deploy.sh` (Linux) script:
   - Client: into Pulsar's `Local` plugin folder
   - Server: into Magnetar's `Local` plugin folder (`%AppData%\Magnetar\Local` on Windows, `~/.config/Magnetar/Local` on Linux)
-- In production server plugins distributed as pre-built `Release` DLLs. Registered into [MagnetarHub](https://github.com/viktor-ferenczi/MagnetarHub) so Magnetar can list and load them. See [Guide.md](Guide.md) for publishing workflow.
+- In production server plugins distributed as pre-built `Release` DLLs. Registered into [MagnetarHub](https://github.com/CometWorks/magnetar-hub) so Magnetar can list and load them. See [Guide.md](Guide.md) for publishing workflow.
 
 Runtime patching:
 - Use Harmony for all patches. Client and server code can be patched same way, most classes and methods available on both. Some methods run (used) only on client, some only on server, but most used on both server and client.
 - Each target (`ClientPlugin`, `ServerPlugin`) has separate main `Plugin.cs` file with `Plugin` class specific to that target. Start from there to understand target.
 
 Server-side configuration:
-- Server plugin's configuration declared and persisted through Magnetar's **PluginSdk**. Admins configure it remotely via [Quasar](https://github.com/viktor-ferenczi/Quasar) (Magnetar control plane), which renders UI layout the plugin declares.
+- Server plugin's configuration declared and persisted through Magnetar's **PluginSdk**. Admins configure it remotely via [Quasar](https://github.com/CometWorks/quasar) (Magnetar control plane), which renders UI layout the plugin declares.
 - For declaring configuration variables, remote UI layout, server-side chat commands, server lifecycle control and environment-agnostic logging, use **`se-dev-plugin-sdk`** skill.
 - Client side `Config` class (in-game configuration dialog) is separate from server side PluginSdk configuration.
 
@@ -46,5 +46,5 @@ Conditional compilation for specific targets:
 - `ClientPlugin` is `!DEDICATED`
 
 References:
-- [Server plugin template](https://github.com/viktor-ferenczi/se-server-plugin-template) Template repository to start a new client + server plugin project.
+- [Server plugin template](https://github.com/CometWorks/server-plugin-template) Template repository to start a new client + server plugin project.
 - `se-dev-plugin-sdk` skill — Magnetar's PluginSdk handbook for server-side configuration, commands and lifecycle.
