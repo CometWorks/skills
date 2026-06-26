@@ -93,4 +93,4 @@ uv run search_torch.py class declaration PatchContext -n Torch.Managers.PatchMan
 
 ## Remarks
 
-Original source of this skill: https://github.com/viktor-ferenczi/se-dev-skills
+Original source of this skill: https://github.com/CometWorks/skills

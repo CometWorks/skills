@@ -16,7 +16,7 @@ Happens if skills linked (`mklink`) into coding agent's skills folder.
 
 ## Installation
 
-`npx skills add viktor-ferenczi/se-dev-skills`
+`npx skills add CometWorks/skills`
 
 Follow wizard.
 

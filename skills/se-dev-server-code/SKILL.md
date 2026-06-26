@@ -200,4 +200,4 @@ Follow detailed instructions in:
 
 ## Remarks
 
-Original source of this skill: https://github.com/viktor-ferenczi/se-dev-skills
+Original source of this skill: https://github.com/CometWorks/skills

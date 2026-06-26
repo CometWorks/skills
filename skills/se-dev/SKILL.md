@@ -72,4 +72,4 @@ internals with the other.
 
 ## Remarks
 
-Original source of these skills: https://github.com/viktor-ferenczi/se-dev-skills
+Original source of these skills: https://github.com/CometWorks/skills
