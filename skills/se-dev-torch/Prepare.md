@@ -9,3 +9,6 @@ Notes:
 - If `TORCH_ROOT` not set, preparation clones or updates `https://github.com/TorchAPI/Torch` under skill's persistent `Data/Sources/Torch` folder.
 - Selected source root written to `Data/torch_root.txt`.
 - Re-run preparation after changing `TORCH_ROOT` or after updating Torch checkout if you want fresh index.
+- If Graphify is available, preparation builds or updates a separate graph for the selected Torch checkout.
+- If Graphify is missing, preparation prompts to install it because it is highly recommended. Set `SE_DEV_GRAPHIFY=0` to skip.
+- Set `SE_DEV_TORCH_PLUGIN_ROOT` to graph a specific Torch plugin project root instead of the Torch checkout.

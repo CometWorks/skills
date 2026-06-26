@@ -5,6 +5,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=./common-posix.sh
 source "$SCRIPT_DIR/common-posix.sh"
+# shellcheck source=../se-dev/graphify-prepare.sh
+source "$SCRIPT_DIR/../se-dev/graphify-prepare.sh"
 
 cd "$SCRIPT_DIR"
 
@@ -93,6 +95,9 @@ if [ ! -f Data/CodeIndex/content_index.csv ]; then
     log "Indexing content files"
     uv run python -u index_content.py Data/Content Data/Decompiled Data/CodeIndex
 fi
+
+SERVER_CODE_GRAPH_ROOT="${SE_DEV_SERVER_CODE_GRAPH_ROOT:-Data/Decompiled}"
+se_dev_graphify_prepare "se-dev-server-code" "$SERVER_CODE_GRAPH_ROOT"
 
 : >Prepare.DONE
 log "DONE"

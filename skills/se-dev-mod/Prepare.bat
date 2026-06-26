@@ -53,9 +53,10 @@ if %ERRORLEVEL% NEQ 0 (
 :skip_data_junction
 
 :: 6. Link the game's local Mods folder as LocalMods (user development mods)
+set "LOCAL_MODS_TARGET=%AppData%\SpaceEngineers\Mods"
 if exist LocalMods goto skip_local_mods
 echo Linking the game's local Mods folder as LocalMods
-mklink /J LocalMods "%AppData%\SpaceEngineers\Mods"
+mklink /J LocalMods "%LOCAL_MODS_TARGET%"
 if %ERRORLEVEL% EQU 0 goto skip_local_mods
 echo ERROR: Missing local Mods folder, this should not happen
 goto failed
@@ -70,6 +71,13 @@ if %ERRORLEVEL% NEQ 0 goto failed
 echo Indexing mod code (incremental: only changed mods are reparsed)
 uv run python -u index_mods.py
 if %ERRORLEVEL% NEQ 0 goto failed
+
+if defined SE_DEV_MOD_PROJECT_ROOT (
+    set "MOD_GRAPH_ROOT=%SE_DEV_MOD_PROJECT_ROOT%"
+) else (
+    set "MOD_GRAPH_ROOT=%LOCAL_MODS_TARGET%"
+)
+call "%~dp0..\se-dev\GraphifyPrepare.bat" "se-dev-mod" "%MOD_GRAPH_ROOT%"
 
 echo DONE
 del "\\?\%cd%\nul" 2>error.txt

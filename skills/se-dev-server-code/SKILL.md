@@ -2,7 +2,7 @@
 name: se-dev-server-code
 description: Allows reading the decompiled C# code of the Space Engineers Dedicated Server
 license: MIT
-allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*test_search_server_code.bat*), Bash(*uv run search_server_code.py *), Bash(*uv run index_code.py *), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*test_search_server_code.bat*), Bash(*uv run search_server_code.py *), Bash(*uv run index_code.py *), Bash(command -v graphify*), Bash(graphify*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
 # SE Dev Server Code Skill
@@ -69,6 +69,12 @@ skills/se-dev-server-code/
 ```
 
 The `Data` folder is a junction/symlink to per-user persistent server-code data directory (`%USERPROFILE%\.se-dev\server-code` on Windows, `~/.se-dev/server-code` on Linux). Treat `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` exactly as before.
+
+## Prepare-Time Graphify Graph
+
+Preparation can build a separate Graphify graph for decompiled server code under
+`Data/Decompiled`, or for `SE_DEV_SERVER_CODE_GRAPH_ROOT` when set. See
+[Prepare-time Graphify graphs](../se-dev/GraphifyPrepare.md).
 
 ## Local Versioning of Decompiled Sources
 

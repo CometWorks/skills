@@ -2,7 +2,7 @@
 name: se-dev-torch
 description: Torch plugin development for Space Engineers version 1. Search TorchAPI/Torch source code, plugin API, managers, commands, and server UI patterns.
 license: MIT
-allowed-tools: Read, Bash(*Prepare.bat*), Bash(*Prepare.sh*), Bash(*Clean.bat*), Bash(*run_prepare.sh*), Bash(*uv run search_torch.py *), Bash(*uv run index_torch.py *), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*Prepare.sh*), Bash(*Clean.bat*), Bash(*run_prepare.sh*), Bash(*uv run search_torch.py *), Bash(*uv run index_torch.py *), Bash(command -v graphify*), Bash(graphify*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
 # SE Dev Torch Skill
@@ -90,6 +90,9 @@ uv run search_torch.py class declaration PatchContext -n Torch.Managers.PatchMan
 - Prefer `torch.Managers.GetManager<T>()` or `session.Managers.GetManager<T>()` over obsolete `ITorchBase.GetManager<T>()`.
 - Use `TorchPluginBase` as normal starting point unless task clearly needs lower-level implementation.
 - If task is about Space Engineers game behavior rather than Torch framework behavior, use `se-dev-game-code` or `se-dev-server-code` as companion skill.
+- Preparation can build a separate Graphify graph for the selected Torch checkout, or for
+  `SE_DEV_TORCH_PLUGIN_ROOT` when set. See
+  [Prepare-time Graphify graphs](../se-dev/GraphifyPrepare.md).
 
 ## Remarks
 

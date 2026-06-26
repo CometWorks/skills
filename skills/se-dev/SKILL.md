@@ -49,6 +49,9 @@ A plugin targets the **game client**, the **dedicated server**, or both (sharing
 - **[se-dev-plugin-sdk](https://github.com/CometWorks/magnetar/tree/main/skills/se-dev-plugin-sdk)** — Handbook for Magnetar's PluginSdk: declaring server config variables, UI layout Quasar renders, server-side chat commands, server lifecycle (save/reload/quit/restart), path resolution and environment-agnostic logging. Use together with `se-dev-plugin` for server plugins. *(Lives in [Magnetar](https://github.com/CometWorks/magnetar) repo.)*
 - **[se-dev-torch](../se-dev-torch/SKILL.md)** — Torch plugin development (legacy server host). Torch-only; not Magnetar-compatible.
 
+### Prepare-time Graphify graphs
+- **[Prepare-time Graphify graphs](GraphifyPrepare.md)** — Optional but recommended graph maps built during each `se-dev-*` prepare run. Each subskill gets a separate `graphify-out/` under its prepared corpus root.
+
 ### Reference skills (read/search the game internals)
 - **[se-dev-game-code](../se-dev-game-code/SKILL.md)** — Search decompiled C# of game **client**. Recommended companion for client mod/plugin work.
 - **[se-dev-server-code](../se-dev-server-code/SKILL.md)** — Search decompiled C# of **dedicated server**. Companion for server-side mod/plugin work.
