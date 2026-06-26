@@ -5,6 +5,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=./common-posix.sh
 source "$SCRIPT_DIR/common-posix.sh"
+# shellcheck source=../se-dev/graphify-prepare.sh
+source "$SCRIPT_DIR/../se-dev/graphify-prepare.sh"
 
 cd "$SCRIPT_DIR"
 
@@ -34,6 +36,9 @@ uv run python -u list_scripts.py
 
 log "Indexing script code (incremental: only changed scripts are reparsed)"
 uv run python -u index_scripts.py
+
+SCRIPT_GRAPH_ROOT="${SE_DEV_SCRIPT_PROJECT_ROOT:-$LOCAL_SCRIPTS_TARGET}"
+se_dev_graphify_prepare "se-dev-script" "$SCRIPT_GRAPH_ROOT"
 
 : >Prepare.DONE
 log "DONE"

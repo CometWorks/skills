@@ -98,6 +98,13 @@ echo Indexing Torch source
 uv run python -u index_torch.py
 if %ERRORLEVEL% NEQ 0 goto failed
 
+if defined SE_DEV_TORCH_PLUGIN_ROOT (
+    set "TORCH_GRAPH_ROOT=%SE_DEV_TORCH_PLUGIN_ROOT%"
+) else (
+    set "TORCH_GRAPH_ROOT=%TORCH_SOURCE%"
+)
+call "%~dp0..\se-dev\GraphifyPrepare.bat" "se-dev-torch" "%TORCH_GRAPH_ROOT%"
+
 echo DONE
 del "\\?\%cd%\nul" 2>error.txt
 del error.txt

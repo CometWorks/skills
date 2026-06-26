@@ -8,3 +8,6 @@ Notes:
 - Actual data (decompiled sources, content files and indexes) stored under `%USERPROFILE%\.se-dev\game-code\` on Windows and `~/.se-dev/game-code/` on Linux, exposed via `Data` junction/symlink in this skill folder.
 - Local Git repository inside `Data` folder records every successful decompilation as commit whose message is the game version label (e.g. `1.208.015 b4`).
 - Subsequent runs detect game updates automatically: if game's version changes, previous `Decompiled/`, `Content/` and `CodeIndex/` directories wiped and rebuilt; previous version stays available in Git history.
+- If Graphify is available, preparation builds or updates a separate graph for `Data/Decompiled`.
+- If Graphify is missing, preparation prompts to install it because it is highly recommended. Set `SE_DEV_GRAPHIFY=0` to skip.
+- Set `SE_DEV_GAME_CODE_GRAPH_ROOT` to graph a different game-code root.

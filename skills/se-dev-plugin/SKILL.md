@@ -2,7 +2,7 @@
 name: se-dev-plugin
 description: Plugin development for Space Engineers version 1. Search plugin code from PluginHub for examples and patterns.
 license: MIT
-allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*dotnet build*), Bash(*dotnet clean*), Bash(*uv run search_plugins.py *), Bash(*uv run index_plugins.py*), Bash(*uv run list_plugins.py*), Bash(*uv run download_plugin_source.py *), Bash(*uv run download_pluginhub.py*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*dotnet build*), Bash(*dotnet clean*), Bash(*uv run search_plugins.py *), Bash(*uv run index_plugins.py*), Bash(*uv run list_plugins.py*), Bash(*uv run download_plugin_source.py *), Bash(*uv run download_pluginhub.py*), Bash(command -v graphify*), Bash(graphify*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
 # SE Dev Plugin Skill
@@ -81,6 +81,12 @@ Plugins run native code and can do anything.
 
 Use `se-dev-game-code` skill to search game's decompiled code. Need this to
 understand how game's internals work and how to interface with it and patch it properly.
+
+## Prepare-Time Graphify Graph
+
+Preparation can build a separate Graphify graph for downloaded plugin sources under
+`Data/Sources`, or for `SE_DEV_PLUGIN_PROJECT_ROOT` when set. See
+[Prepare-time Graphify graphs](../se-dev/GraphifyPrepare.md).
 
 ## References
 

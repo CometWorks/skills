@@ -5,6 +5,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=./common-posix.sh
 source "$SCRIPT_DIR/common-posix.sh"
+# shellcheck source=../se-dev/graphify-prepare.sh
+source "$SCRIPT_DIR/../se-dev/graphify-prepare.sh"
 
 cd "$SCRIPT_DIR"
 
@@ -34,6 +36,9 @@ uv run python -u list_mods.py
 
 log "Indexing mod code (incremental: only changed mods are reparsed)"
 uv run python -u index_mods.py
+
+MOD_GRAPH_ROOT="${SE_DEV_MOD_PROJECT_ROOT:-$LOCAL_MODS_TARGET}"
+se_dev_graphify_prepare "se-dev-mod" "$MOD_GRAPH_ROOT"
 
 : >Prepare.DONE
 log "DONE"
