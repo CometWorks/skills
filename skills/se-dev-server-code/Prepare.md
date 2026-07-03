@@ -1,6 +1,6 @@
 1. Run `python --version`, if it fails or not at least 3.11 then inform user and stop here.
 2. Run `git --version`, if it fails inform user that command line `git` client must be available on `PATH` and stop here.
-3. Inform user this is one time preparation, takes about 5-15 minutes. Highlight this message.
+3. Inform user this is one time preparation. Decompiling and indexing takes about 5-15 minutes; when Graphify is enabled, building the code graph over the ~10,000 decompiled files adds roughly another 10-30 minutes on the first run (a ~220k-node graph), so budget about 15-45 minutes total. The first se-dev preparation on a machine also installs Graphify (a one-time download, ~30 seconds). Set `SE_DEV_GRAPHIFY=0` to skip the graph for a faster prepare. Highlight this message.
 4. On Windows run `.\Prepare.bat >Prepare.log 2>&1`. On Linux run `./prepare.sh >Prepare.log 2>&1`. Use this same folder as CWD, where `Prepare.md` sits.
 5. Preparation succeeds if last line of `Prepare.log` is `DONE`. If it fails, inform user and stop here.
 

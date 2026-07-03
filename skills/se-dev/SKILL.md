@@ -50,7 +50,7 @@ A plugin targets the **game client**, the **dedicated server**, or both (sharing
 - **[se-dev-torch](../se-dev-torch/SKILL.md)** — Torch plugin development (legacy server host). Torch-only; not Magnetar-compatible.
 
 ### Prepare-time Graphify graphs
-- **[Prepare-time Graphify graphs](GraphifyPrepare.md)** — Optional but recommended graph maps built during each `se-dev-*` prepare run. Each subskill gets a separate `graphify-out/` under its prepared corpus root.
+- **[Prepare-time Graphify graphs](GraphifyPrepare.md)** — Optional but recommended graph maps built during each `se-dev-*` prepare run. Each subskill gets a separate `graphify-out/` under its prepared corpus root. On first preparation ask the user whether Graphify should also be prepared right away or only later. It will affect the preparation time considerably.
 
 ### Reference skills (read/search the game internals)
 - **[se-dev-game-code](../se-dev-game-code/SKILL.md)** — Search decompiled C# of game **client**. Recommended companion for client mod/plugin work.
