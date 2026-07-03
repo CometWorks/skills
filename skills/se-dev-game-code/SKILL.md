@@ -2,7 +2,7 @@
 name: se-dev-game-code
 description: Allows reading the decompiled C# code of Space Engineers version 1
 license: MIT
-allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*test_search_game_code.bat*), Bash(*uv run search_game_code.py *), Bash(*uv run index_code.py *), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*test_search_game_code.bat*), Bash(*uv run search_game_code.py *), Bash(*uv run index_code.py *), Bash(command -v graphify*), Bash(graphify*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
 # SE Dev Game Code Skill
@@ -67,6 +67,12 @@ skills/se-dev-game-code/
 ```
 
 The `Data` folder is a junction/symlink to the per-user persistent game-code data directory (`%USERPROFILE%\.se-dev\game-code` on Windows, `~/.se-dev/game-code` on Linux). Treat `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` exactly as before.
+
+## Prepare-Time Graphify Graph
+
+Preparation can build a separate Graphify graph for decompiled game code under
+`Data/Decompiled`, or for `SE_DEV_GAME_CODE_GRAPH_ROOT` when set. See
+[Prepare-time Graphify graphs](../se-dev/GraphifyPrepare.md).
 
 ## Local Versioning of Decompiled Sources
 

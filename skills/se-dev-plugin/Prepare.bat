@@ -78,6 +78,13 @@ echo Indexing plugin code (skipped if no sources cloned yet)
 uv run python -u index_plugins.py
 if %ERRORLEVEL% NEQ 0 goto failed
 
+if defined SE_DEV_PLUGIN_PROJECT_ROOT (
+    set "PLUGIN_GRAPH_ROOT=%SE_DEV_PLUGIN_PROJECT_ROOT%"
+) else (
+    set "PLUGIN_GRAPH_ROOT=%CD%\Data\Sources"
+)
+call "%~dp0..\se-dev\GraphifyPrepare.bat" "se-dev-plugin" "%PLUGIN_GRAPH_ROOT%"
+
 echo DONE
 del "\\?\%cd%\nul" 2>error.txt
 del error.txt

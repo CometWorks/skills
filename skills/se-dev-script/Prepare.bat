@@ -53,9 +53,10 @@ if %ERRORLEVEL% NEQ 0 (
 :skip_data_junction
 
 :: 6. Link the game's local IngameScripts/local folder as LocalScripts
+set "LOCAL_SCRIPTS_TARGET=%AppData%\SpaceEngineers\IngameScripts\local"
 if exist LocalScripts goto skip_local_scripts
 echo Linking the game's local IngameScripts\local folder as LocalScripts
-mklink /J LocalScripts "%AppData%\SpaceEngineers\IngameScripts\local"
+mklink /J LocalScripts "%LOCAL_SCRIPTS_TARGET%"
 if %ERRORLEVEL% EQU 0 goto skip_local_scripts
 echo ERROR: Missing local IngameScripts\local folder, this should not happen
 goto failed
@@ -70,6 +71,13 @@ if %ERRORLEVEL% NEQ 0 goto failed
 echo Indexing script code (incremental: only changed scripts are reparsed)
 uv run python -u index_scripts.py
 if %ERRORLEVEL% NEQ 0 goto failed
+
+if defined SE_DEV_SCRIPT_PROJECT_ROOT (
+    set "SCRIPT_GRAPH_ROOT=%SE_DEV_SCRIPT_PROJECT_ROOT%"
+) else (
+    set "SCRIPT_GRAPH_ROOT=%LOCAL_SCRIPTS_TARGET%"
+)
+call "%~dp0..\se-dev\GraphifyPrepare.bat" "se-dev-script" "%SCRIPT_GRAPH_ROOT%"
 
 echo DONE
 del "\\?\%cd%\nul" 2>error.txt

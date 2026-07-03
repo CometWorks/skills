@@ -9,6 +9,8 @@ if [ ! -f "$COMMON_POSIX_SH" ]; then
 fi
 # shellcheck source=./common-posix.sh
 source "$COMMON_POSIX_SH"
+# shellcheck source=../se-dev/graphify-prepare.sh
+source "$SCRIPT_DIR/../se-dev/graphify-prepare.sh"
 
 cd "$SCRIPT_DIR"
 
@@ -48,6 +50,9 @@ printf '%s\n' "$TORCH_SOURCE" > Data/torch_root.txt
 
 log "Indexing Torch source"
 uv run python -u index_torch.py
+
+TORCH_GRAPH_ROOT="${SE_DEV_TORCH_PLUGIN_ROOT:-$TORCH_SOURCE}"
+se_dev_graphify_prepare "se-dev-torch" "$TORCH_GRAPH_ROOT"
 
 : >Prepare.DONE
 log "DONE"

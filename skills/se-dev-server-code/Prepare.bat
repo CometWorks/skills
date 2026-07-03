@@ -224,6 +224,13 @@ uv run python -u index_content.py Data\Content Data\Decompiled Data\CodeIndex
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_content_index
 
+if defined SE_DEV_SERVER_CODE_GRAPH_ROOT (
+    set "SERVER_CODE_GRAPH_ROOT=%SE_DEV_SERVER_CODE_GRAPH_ROOT%"
+) else (
+    set "SERVER_CODE_GRAPH_ROOT=%CD%\Data\Decompiled"
+)
+call "%~dp0..\se-dev\GraphifyPrepare.bat" "se-dev-server-code" "%SERVER_CODE_GRAPH_ROOT%"
+
 echo DONE
 del version_check.txt 2>NUL
 del "\\?\%cd%\nul" 2>error.txt

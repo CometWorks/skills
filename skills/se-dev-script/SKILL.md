@@ -2,7 +2,7 @@
 name: se-dev-script
 description: In-game (programmable block, aka PB) script development for Space Engineers version 1. Search script code for examples and patterns.
 license: MIT
-allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*uv run search_scripts.py *), Bash(*uv run list_scripts.py*), Bash(*uv run index_scripts.py*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*uv run search_scripts.py *), Bash(*uv run list_scripts.py*), Bash(*uv run index_scripts.py*), Bash(command -v graphify*), Bash(graphify*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
 # SE Dev Script Skill
@@ -61,6 +61,12 @@ source code compression, useful to get fully detailed exception tracebacks.
 Use the `se-dev-game-code` skill to search game's decompiled code. You may need this to
 understand how game's internals work and how to script it properly. Stick to game code
 searches corresponding to names on PB API whitelist for efficiency.
+
+## Prepare-Time Graphify Graph
+
+Preparation can build a separate Graphify graph for the local PB script folder, or for
+`SE_DEV_SCRIPT_PROJECT_ROOT` when set. See
+[Prepare-time Graphify graphs](../se-dev/GraphifyPrepare.md).
 
 ## Folder Structure
 
