@@ -18,7 +18,7 @@ for line in lines:
 # Count occurrences
 ns_counts = Counter(namespaces)
 
-print("PB API Whitelist - Available Namespaces:\n")
+print("Mod API Whitelist - Available Namespaces:\n")
 print(f"{'Namespace':<40} {'Count':<10}")
 print("=" * 50)
 

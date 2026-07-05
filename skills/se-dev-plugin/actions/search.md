@@ -6,13 +6,15 @@ Search plugin code using `uv run search_plugins.py` from this skill folder.
 
 ## Prerequisites
 
-### 1. Update PluginHub (optional but recommended)
+### 1. Update the registries (optional but recommended)
 
 ```cmd
-uv run download_pluginhub.py
+uv run download_pluginhub.py     # client plugins (Pulsar)
+uv run download_magnetarhub.py   # server plugins (Magnetar)
 ```
 
-Downloads/updates PluginHub registry with all available plugins.
+Downloads/updates the PluginHub and MagnetarHub registries with all available plugins.
+Both are searched together; `list_plugins.py` tags each entry with its registry.
 
 ### 2. List Available Plugins
 
@@ -116,7 +118,7 @@ uv run search_plugins.py -i class declaration config
 
 After indexing, `Data/plugins.json` contains:
 - `indexed_plugins` - Plugins with downloaded source code
-- `available_plugins` - All plugins from PluginHub (for downloading)
+- `available_plugins` - All plugins from the registries, PluginHub + MagnetarHub (for downloading)
 
 ## Workflow
 

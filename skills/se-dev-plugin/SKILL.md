@@ -1,8 +1,8 @@
 ---
 name: se-dev-plugin
-description: Plugin development for Space Engineers version 1. Search plugin code from PluginHub for examples and patterns.
+description: Plugin development for Space Engineers version 1. Search plugin code from PluginHub (client) and MagnetarHub (server) for examples and patterns.
 license: MIT
-allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*dotnet build*), Bash(*dotnet clean*), Bash(*uv run search_plugins.py *), Bash(*uv run index_plugins.py*), Bash(*uv run list_plugins.py*), Bash(*uv run download_plugin_source.py *), Bash(*uv run download_pluginhub.py*), Bash(command -v graphify*), Bash(graphify*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*clean.sh*), Bash(*dotnet build*), Bash(*dotnet clean*), Bash(*uv run search_plugins.py *), Bash(*uv run index_plugins.py*), Bash(*uv run list_plugins.py*), Bash(*uv run download_plugin_source.py *), Bash(*uv run download_pluginhub.py*), Bash(*uv run download_magnetarhub.py*), Bash(command -v graphify*), Bash(graphify*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
 # SE Dev Plugin Skill
@@ -100,17 +100,32 @@ via [GraphifyUsage.md](../se-dev/GraphifyUsage.md).
 - [Magnetar](https://magnetar.se) Plugin loader for Space Engineers dedicated server
 - [MagnetarHub](https://github.com/CometWorks/magnetar-hub) Public plugin registry for Magnetar
 
+## Plugin Registries
+
+Two registries are searched together, both using the same GitHub-plugin XML schema:
+
+- **PluginHub** — client plugins (Pulsar). `<Id>` is `Owner/Repo`.
+- **MagnetarHub** — server plugins (Magnetar). `<Id>` is a GUID; the GitHub repo is in `<RepoId>`.
+
+Preparation clones both into `Data/PluginHub` and `Data/MagnetarHub`. Refresh them with
+`uv run download_pluginhub.py` and `uv run download_magnetarhub.py`. To point at a local
+registry checkout instead of (or in addition to) the cloned ones, set
+`SE_PLUGIN_REGISTRY_DIR` to a registry root (a folder containing `Plugins/*.xml`).
+`list_plugins.py`, `download_plugin_source.py` and the indexer all read every configured
+registry; `list_plugins.py` tags each entry with `[PluginHub]` or `[MagnetarHub]`.
+
 ## Plugin Code Search
 
-Search source code of plugins from PluginHub for examples and patterns:
+Search source code of plugins from either registry for examples and patterns:
 
 ```bash
-# List available plugins
+# List available plugins (tagged by registry), or search them
 uv run list_plugins.py
 uv run list_plugins.py --search "camera"
 
-# Download plugin's source code (use EXACT name from list)
+# Download a plugin's source (use the EXACT name, GUID/Id, or Owner/Repo from the list)
 uv run download_plugin_source.py "Tool Switcher"
+uv run download_plugin_source.py CometWorks/essentials
 
 # Index downloaded plugins (automatic after download)
 uv run index_plugins.py
@@ -126,7 +141,7 @@ uv run search_plugins.py class usage Plugin --count
 uv run search_plugins.py class usage IPlugin --limit 20
 ```
 
-PluginHub contains descriptions of all available plugins. Download sources for plugins
+The registries contain descriptions of all available plugins. Download sources for plugins
 that may help with your task, then index and search them.
 
 See [search action](./actions/search.md) for complete documentation.

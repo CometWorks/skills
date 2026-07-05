@@ -94,6 +94,9 @@ def _hash_script(files: List[Tuple[Path, str]]) -> str:
             content = abs_path.read_bytes()
         except OSError:
             continue
+        # Normalize line endings to LF so the same content hashes identically
+        # regardless of the platform it was checked out / downloaded on.
+        content = content.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
         file_hash = hashlib.sha1(content).hexdigest()
         h.update(rel_path.encode("utf-8"))
         h.update(b"\0")

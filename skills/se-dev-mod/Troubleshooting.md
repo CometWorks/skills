@@ -6,20 +6,19 @@ Resolve common issues when searching mod code.
 
 ### Common Causes
 
-1. **Wrong skill**: 
+1. **Wrong skill**:
    - Game classes like `MyCubeBlock` → use `se-dev-game-code`
    - Mod code examples → use `se-dev-mod` ✅
    - Plugin code → use `se-dev-plugin`
    - Script code → use `se-dev-script`
 
-2. **No mods subscribed or indexed**:
+2. **No mods installed or indexed**:
    ```bash
-   # Check if you have any mods
-   ls SteamMods/ | head -5
-   ls LocalMods/ | head -5
-   
-   # Check if index exists
-   test -d ModCodeIndex && echo "Index exists" || echo "Need to index"
+   # List the mods the skill can see (steam + local)
+   uv run list_mods.py
+
+   # Check if the code index exists
+   test -d Data/CodeIndex && echo "Index exists" || echo "Need to index"
    ```
 
 3. **Index not built**:
@@ -28,14 +27,14 @@ Resolve common issues when searching mod code.
    uv run index_mods.py
    ```
 
-4. **Searching for base game classes**: 
+4. **Searching for base game classes**:
    - Mods don't typically *declare* game classes like `MyGameLogicComponent`
    - They *use* them instead
    - Search for usages, not declarations:
    ```bash
    # Likely won't find anything (mods don't declare it)
    uv run search_mods.py class declaration MyGameLogicComponent
-   
+
    # Finds how mods use it
    uv run search_mods.py class usage MyGameLogicComponent
    ```
@@ -43,17 +42,17 @@ Resolve common issues when searching mod code.
 ### Debugging Strategy
 
 ```bash
-# Step 1: Check if any mods indexed
-cat ModCodeIndex/plugins.json 2>/dev/null || echo "No index"
+# Step 1: Check the mod inventory
+cat Data/mods.json 2>/dev/null || echo "No inventory - run: uv run list_mods.py"
 
 # Step 2: Count files indexed
-wc -l ModCodeIndex/*.csv 2>/dev/null
+wc -l Data/CodeIndex/*.csv 2>/dev/null
 
 # Step 3: Try a common search
 uv run search_mods.py class usage Init --count
 
 # Step 4: If still nothing, verify mods exist
-ls SteamMods/ | wc -l
+uv run list_mods.py
 ```
 
 ## Too Many Results
@@ -96,7 +95,7 @@ uv run search_mods.py class usage Init --limit 10 --offset 20
 # 1. Subscribe to mods on Steam Workshop
 # 2. Start game and load a world (downloads mods)
 # 3. Exit game
-# 4. Re-index
+# 4. Re-index (incremental: only changed mods are reparsed)
 uv run index_mods.py
 ```
 
@@ -104,21 +103,20 @@ uv run index_mods.py
 
 ```bash
 # See indexed mods
-cat ModCodeIndex/plugins.json
+cat Data/mods.json
 
-# Count mod files
-find SteamMods/ -name "*.cs" | wc -l
-find LocalMods/ -name "*.cs" | wc -l
+# Count indexed symbols per category
+wc -l Data/CodeIndex/*.csv
 
 # Check index size
-ls -lh ModCodeIndex/
+ls -lh Data/CodeIndex/
 ```
 
 ### Rebuilding Index
 
 ```bash
 # Delete old index
-rm -rf ModCodeIndex/
+rm -rf Data/CodeIndex/
 
 # Rebuild
 uv run index_mods.py
@@ -128,21 +126,21 @@ uv run index_mods.py
 
 If looking for specific functionality:
 
-### 1. Search Mod Files Directly
+### 1. Search Mod Code for a Feature
 ```bash
-# Find mods mentioning "thruster"
-grep -r "thruster" SteamMods/*/Data/Scripts/ | cut -d: -f1 | sort -u | head -10
+# Find mods that use a thruster interface
+uv run search_mods.py class usage IMyThrust --limit 10
 ```
 
-### 2. Look at Mod Names
+### 2. Browse the Mod Inventory
 ```bash
-# Browse mod directories
-ls -d SteamMods/*/ | head -20
+# List every mod the skill can see, with source and path
+uv run list_mods.py
 ```
 
 ### 3. Check Local Development Mods
 ```bash
-# Your own mods in development
+# Your own mods in development (symlink to the game's local-mod folder)
 ls LocalMods/
 ```
 
@@ -182,7 +180,7 @@ uv run search_mods.py class declaration MyGameLogicComponent
 
 # Right skill - finds actual definition
 # (switch to se-dev-game-code skill)
-uv run search_code.py class declaration MyGameLogicComponent
+uv run search_game_code.py class declaration MyGameLogicComponent
 ```
 
 ## Common Mod Patterns to Search For
@@ -205,21 +203,20 @@ uv run search_mods.py class usage MyCubeBlockDefinition --limit 15
 
 1. **Verify mods exist**:
    ```bash
-   ls SteamMods/ | wc -l
-   ls LocalMods/ | wc -l
+   uv run list_mods.py
    ```
 
 2. **Check preparation completed**:
    ```bash
-   test -f Prepare.DONE && echo "OK" || echo "Run ./Prepare.bat"
+   test -f Prepare.DONE && echo "OK" || echo "Run Prepare.bat (Windows) or ./prepare.sh (Linux)"
    ```
 
 3. **Verify index exists**:
    ```bash
-   test -d ModCodeIndex && echo "OK" || echo "Run: uv run index_mods.py"
+   test -d Data/CodeIndex && echo "OK" || echo "Run: uv run index_mods.py"
    ```
 
-4. **Try fallback search**:
+4. **Try a broad usage search**:
    ```bash
-   grep -r "class.*Init" SteamMods/*/Data/Scripts/*.cs | head -5
+   uv run search_mods.py class usage Init --limit 5
    ```

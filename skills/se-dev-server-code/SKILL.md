@@ -2,7 +2,7 @@
 name: se-dev-server-code
 description: Allows reading the decompiled C# code of the Space Engineers Dedicated Server
 license: MIT
-allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*test_search_server_code.bat*), Bash(*test_graphify_server_code*), Bash(*graphify-check.sh*), Bash(*GraphifyCheck.bat*), Bash(*uv run search_server_code.py *), Bash(*uv run index_code.py *), Bash(command -v graphify*), Bash(graphify*), Bash(*GRAPHIFY_MAX_GRAPH_BYTES*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*clean.sh*), Bash(*test_search_server_code.bat*), Bash(*test_graphify_server_code*), Bash(*graphify-check.sh*), Bash(*GraphifyCheck.bat*), Bash(*uv run search_server_code.py *), Bash(*uv run index_code.py *), Bash(command -v graphify*), Bash(graphify*), Bash(*GRAPHIFY_MAX_GRAPH_BYTES*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
 # SE Dev Server Code Skill

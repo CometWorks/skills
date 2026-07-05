@@ -20,7 +20,13 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from plugin_paths import PLUGIN_SOURCES_DIR, PLUGINHUB_DIR, PLUGINS_DIR, SCRIPT_DIR
+from plugin_paths import (
+    PLUGIN_SOURCES_DIR,
+    SCRIPT_DIR,
+    iter_registry_xml,
+    plugin_repo_ref,
+    registry_plugin_dirs,
+)
 
 
 def parse_plugin_xml(xml_file: Path) -> dict:
@@ -30,6 +36,7 @@ def parse_plugin_xml(xml_file: Path) -> dict:
 
         plugin_info = {
             "id": "",
+            "repo": "",
             "name": "",
             "commit": "",
             "source_dirs": [],
@@ -38,6 +45,11 @@ def parse_plugin_xml(xml_file: Path) -> dict:
         id_elem = root.find("Id")
         if id_elem is not None and id_elem.text:
             plugin_info["id"] = id_elem.text.strip()
+
+        # The GitHub "Owner/Repo" reference comes from <RepoId> (MagnetarHub
+        # style, where <Id> is a GUID) and falls back to <Id> (PluginHub style,
+        # where <Id> itself is "Owner/Repo").
+        plugin_info["repo"] = plugin_repo_ref(root)
 
         name_elem = root.find("FriendlyName")
         if name_elem is not None and name_elem.text:
@@ -60,25 +72,29 @@ def parse_plugin_xml(xml_file: Path) -> dict:
 
 
 def find_plugin(search_term: str) -> dict:
-    if not PLUGINS_DIR.exists():
-        print(f"PluginHub not found at {PLUGINHUB_DIR}", file=sys.stderr)
-        print("Run: uv run download_pluginhub.py", file=sys.stderr)
+    if not registry_plugin_dirs():
+        print("No plugin registry found.", file=sys.stderr)
+        print("Run: uv run download_pluginhub.py  and/or  uv run download_magnetarhub.py",
+              file=sys.stderr)
         return None
 
     search_lower = search_term.lower()
     matches = []
 
-    for xml_file in PLUGINS_DIR.glob("*.xml"):
+    for xml_file in iter_registry_xml():
         plugin = parse_plugin_xml(xml_file)
         if plugin:
             if plugin["id"].lower() == search_lower:
                 return plugin
+            if plugin["repo"].lower() == search_lower:
+                return plugin
             if plugin["name"].lower() == search_lower:
                 return plugin
-            repo_name = plugin["id"].split("/")[-1] if "/" in plugin["id"] else plugin["id"]
+            repo_name = plugin["repo"].split("/")[-1] if "/" in plugin["repo"] else plugin["repo"]
             if repo_name.lower() == search_lower:
                 return plugin
             if (search_lower in plugin["id"].lower() or
+                search_lower in plugin["repo"].lower() or
                 search_lower in plugin["name"].lower() or
                 search_lower in repo_name.lower()):
                 matches.append(plugin)
@@ -100,13 +116,18 @@ def _run_git(args: list, cwd=None) -> int:
 
 
 def clone_plugin(plugin: dict) -> bool:
-    if not plugin["id"] or "/" not in plugin["id"]:
-        print(f"Invalid plugin ID format: {plugin.get('id')}", file=sys.stderr)
+    repo_ref = plugin.get("repo") or plugin.get("id", "")
+    if "/" not in repo_ref:
+        print(
+            f"Invalid repository reference '{repo_ref}': expected GitHub Owner/Repo style "
+            f"(from <RepoId>, or <Id> as a fallback).",
+            file=sys.stderr,
+        )
         return False
 
     PLUGIN_SOURCES_DIR.mkdir(parents=True, exist_ok=True)
 
-    owner, repo = plugin["id"].split("/", 1)
+    owner, repo = repo_ref.split("/", 1)
     commit = plugin.get("commit", "").strip()
     repo_url = f"https://github.com/{owner}/{repo}.git"
     dest_dir = PLUGIN_SOURCES_DIR / repo
@@ -138,6 +159,7 @@ def clone_plugin(plugin: dict) -> bool:
     result = subprocess.run(["uv", "run", str(index_script)], cwd=SCRIPT_DIR)
     if result.returncode != 0:
         print("Warning: Indexing failed", file=sys.stderr)
+        return False
 
     return True
 

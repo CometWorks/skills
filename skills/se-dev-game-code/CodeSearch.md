@@ -2,7 +2,7 @@
 
 Search the decompiled Space Engineers C# codebase efficiently.
 
-**IMPORTANT:** All commands run on Windows. This skill folder must be current working directory.
+**IMPORTANT:** Commands use UNIX shell (bash) syntax. On Windows they run via the bundled `busybox.exe`; on Linux they use the native shell. This skill folder must be the current working directory.
 
 ## Running Commands
 

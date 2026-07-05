@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-List Plugins from PluginHub
+List Plugins from the configured registries (PluginHub + MagnetarHub)
 
-Lists all available plugins from the PluginHub registry, showing which ones
-have their source code downloaded locally.
+Lists all available plugins from every configured registry, tagged by registry
+and showing which ones have their source code downloaded locally.
 
 Usage:
     python list_plugins.py [options]
@@ -19,7 +19,21 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-from plugin_paths import PLUGIN_SOURCES_DIR, PLUGINHUB_DIR, PLUGINS_DIR
+from plugin_paths import (
+    MAGNETAR_PLUGINS_DIR,
+    PLUGIN_SOURCES_DIR,
+    PLUGINS_DIR,
+    plugin_repo_ref,
+    registry_plugin_dirs,
+)
+
+
+def _registry_label(plugins_dir: Path) -> str:
+    if plugins_dir == PLUGINS_DIR:
+        return "PluginHub"
+    if plugins_dir == MAGNETAR_PLUGINS_DIR:
+        return "MagnetarHub"
+    return "custom"
 
 
 def parse_plugin_xml(xml_file: Path) -> dict:
@@ -30,6 +44,7 @@ def parse_plugin_xml(xml_file: Path) -> dict:
 
         plugin_info = {
             "id": "",
+            "repo": "",
             "name": "",
             "author": "",
             "tooltip": "",
@@ -38,6 +53,7 @@ def parse_plugin_xml(xml_file: Path) -> dict:
             "source_dirs": [],
             "hidden": False,
             "local": False,
+            "registry": "",
             "xml_file": xml_file.name
         }
 
@@ -45,6 +61,9 @@ def parse_plugin_xml(xml_file: Path) -> dict:
         id_elem = root.find("Id")
         if id_elem is not None and id_elem.text:
             plugin_info["id"] = id_elem.text.strip()
+
+        # GitHub "Owner/Repo": <RepoId> (MagnetarHub) or <Id> (PluginHub).
+        plugin_info["repo"] = plugin_repo_ref(root)
 
         name_elem = root.find("FriendlyName")
         if name_elem is not None and name_elem.text:
@@ -92,20 +111,32 @@ def get_local_plugin_id(plugin_dir: Path) -> str:
 
 
 def load_all_plugins() -> list:
-    """Load all plugins from PluginHub."""
-    if not PLUGINS_DIR.exists():
-        print(f"PluginHub not found at {PLUGINHUB_DIR}", file=sys.stderr)
-        print("Run: uv run download_pluginhub.py", file=sys.stderr)
+    """Load all plugins from every configured registry (PluginHub, MagnetarHub)."""
+    registry_dirs = registry_plugin_dirs()
+    if not registry_dirs:
+        print("No plugin registry found.", file=sys.stderr)
+        print("Run: uv run download_pluginhub.py  and/or  uv run download_magnetarhub.py",
+              file=sys.stderr)
         return []
 
     plugins = []
-    for xml_file in PLUGINS_DIR.glob("*.xml"):
-        plugin = parse_plugin_xml(xml_file)
-        if plugin:
+    seen = set()
+    for plugins_dir in registry_dirs:
+        registry = _registry_label(plugins_dir)
+        for xml_file in sorted(plugins_dir.glob("*.xml")):
+            plugin = parse_plugin_xml(xml_file)
+            if not plugin:
+                continue
+            key = (plugin["id"] or plugin["repo"] or plugin["xml_file"]).lower()
+            if key in seen:
+                continue
+            seen.add(key)
+            plugin["registry"] = registry
             plugin["local"] = False
             plugin["local_path"] = ""
-            if plugin["id"]:
-                repo_name = plugin["id"].split("/")[-1] if "/" in plugin["id"] else plugin["id"]
+            repo_ref = plugin.get("repo") or plugin["id"]
+            if repo_ref:
+                repo_name = repo_ref.split("/")[-1] if "/" in repo_ref else repo_ref
                 local_path = PLUGIN_SOURCES_DIR / repo_name
                 if local_path.exists():
                     plugin["local"] = True
@@ -141,7 +172,8 @@ def main():
                    search_term in p["name"].lower() or
                    search_term in p["description"].lower() or
                    search_term in p["tooltip"].lower() or
-                   search_term in p["id"].lower()]
+                   search_term in p["id"].lower() or
+                   search_term in p.get("repo", "").lower()]
 
     # Output
     if args.json:
@@ -153,8 +185,12 @@ def main():
 
         for plugin in plugins:
             status = "[LOCAL]" if plugin["local"] else "[REMOTE]"
-            print(f"{status} {plugin['name']}")
+            registry = plugin.get("registry", "")
+            reg_tag = f" [{registry}]" if registry else ""
+            print(f"{status}{reg_tag} {plugin['name']}")
             print(f"  ID: {plugin['id']}")
+            if plugin.get("repo") and plugin["repo"] != plugin["id"]:
+                print(f"  Repo: {plugin['repo']}")
             print(f"  Author: {plugin['author']}")
             if args.verbose:
                 if plugin["tooltip"]:

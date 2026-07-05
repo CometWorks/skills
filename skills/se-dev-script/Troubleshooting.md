@@ -6,20 +6,19 @@ This guide helps resolve common issues when searching script code.
 
 ### Common Causes
 
-1. **Wrong skill**: 
+1. **Wrong skill**:
    - Game classes like `MyCubeBlock` → use `se-dev-game-code`
    - Mod code examples → use `se-dev-mod`
    - Plugin code → use `se-dev-plugin`
    - PB script examples → use `se-dev-script` ✅
 
-2. **No scripts subscribed or indexed**:
+2. **No scripts installed or indexed**:
    ```bash
-   # Check if you have any scripts
-   ls SteamScripts/ | head -5
-   ls LocalScripts/ | head -5
-   
-   # Check if index exists
-   test -d ScriptCodeIndex && echo "Index exists" || echo "Need to index"
+   # List the scripts the skill can see (steam + local)
+   uv run list_scripts.py
+
+   # Check if the code index exists
+   test -d Data/CodeIndex && echo "Index exists" || echo "Need to index"
    ```
 
 3. **Index not built**:
@@ -28,14 +27,14 @@ This guide helps resolve common issues when searching script code.
    uv run index_scripts.py
    ```
 
-4. **Searching for base game classes**: 
+4. **Searching for base game classes**:
    - Scripts don't declare game classes
    - They use them through the PB API
    - Search for usages, not declarations:
    ```bash
    # Won't find anything (scripts don't declare it)
    uv run search_scripts.py class declaration IMyTerminalBlock
-   
+
    # Find how scripts use it
    uv run search_scripts.py class usage IMyTerminalBlock
    ```
@@ -43,17 +42,17 @@ This guide helps resolve common issues when searching script code.
 ### Debugging Strategy
 
 ```bash
-# Step 1: Check if any scripts indexed
-cat ScriptCodeIndex/plugins.json 2>/dev/null || echo "No index"
+# Step 1: Check the script inventory
+cat Data/scripts.json 2>/dev/null || echo "No inventory - run: uv run list_scripts.py"
 
 # Step 2: Count files indexed
-wc -l ScriptCodeIndex/*.csv 2>/dev/null
+wc -l Data/CodeIndex/*.csv 2>/dev/null
 
 # Step 3: Try searching for "Program" (every script has this)
 uv run search_scripts.py class declaration Program --count
 
 # Step 4: If still nothing, verify scripts exist
-find SteamScripts/ -name "Script.cs" | head -5
+uv run list_scripts.py
 ```
 
 ## Too Many Results
@@ -96,7 +95,7 @@ uv run search_scripts.py class usage Program --limit 10 --offset 20
 # 1. Subscribe to scripts on Steam Workshop
 # 2. Start game, open PB, browse script list (downloads them)
 # 3. Exit game
-# 4. Re-index
+# 4. Re-index (incremental: only changed scripts are reparsed)
 uv run index_scripts.py
 ```
 
@@ -104,21 +103,20 @@ uv run index_scripts.py
 
 ```bash
 # See indexed scripts
-cat ScriptCodeIndex/plugins.json
+cat Data/scripts.json
 
-# Count script files
-find SteamScripts/ -name "Script.cs" | wc -l
-find LocalScripts/ -name "Script.cs" | wc -l
+# Count indexed symbols per category
+wc -l Data/CodeIndex/*.csv
 
 # Check index size
-ls -lh ScriptCodeIndex/
+ls -lh Data/CodeIndex/
 ```
 
 ### Rebuilding Index
 
 ```bash
 # Delete old index
-rm -rf ScriptCodeIndex/
+rm -rf Data/CodeIndex/
 
 # Rebuild
 uv run index_scripts.py
@@ -172,7 +170,7 @@ uv run search_scripts.py field usage argument --limit 20
 
 ### 2. Remember the PB API Whitelist
 
-Scripts can only use names from `PBApiWhitelist.txt`. 
+Scripts can only use names from `PBApiWhitelist.txt`.
 
 ```bash
 # Check if name available to PB scripts
@@ -188,14 +186,14 @@ uv run search_scripts.py interface declaration IMyTerminalBlock
 
 # Right skill - find actual definition
 # (switch to se-dev-game-code skill)
-uv run search_code.py interface declaration IMyTerminalBlock
+uv run search_game_code.py interface declaration IMyTerminalBlock
 ```
 
 ### 4. Look for Merged Scripts
 
 Many scripts merged from multiple files. Look for comments like:
 ```bash
-grep -r "// .*\.cs" SteamScripts/*/Script.cs | head -5
+uv run search_scripts.py class usage Program --limit 5
 ```
 
 ## Common Script Patterns to Search For
@@ -217,47 +215,24 @@ uv run search_scripts.py class usage IMyRemoteControl --limit 10
 uv run search_scripts.py class usage IMyInventory --limit 15
 ```
 
-## Understanding Script File Structure
-
-PB scripts from Workshop can be:
-- Single file (`Script.cs`)
-- Multiple files in subdirectories
-- Merged/compressed (harder to read)
-
-```bash
-# Find script directories
-find SteamScripts/ -type f -name "Script.cs" -exec dirname {} \;
-
-# Check for multi-file scripts
-find SteamScripts/*/build/ -name "*.cs" | head -10
-```
-
 ## Still Having Issues?
 
 1. **Verify scripts exist**:
    ```bash
-   find SteamScripts/ -name "Script.cs" | wc -l
-   ls LocalScripts/
+   uv run list_scripts.py
    ```
 
 2. **Check preparation completed**:
    ```bash
-   test -f Prepare.DONE && echo "OK" || echo "Run ./Prepare.bat"
+   test -f Prepare.DONE && echo "OK" || echo "Run Prepare.bat (Windows) or ./prepare.sh (Linux)"
    ```
 
 3. **Verify index exists**:
    ```bash
-   test -d ScriptCodeIndex && echo "OK" || echo "Run: uv run index_scripts.py"
+   test -d Data/CodeIndex && echo "OK" || echo "Run: uv run index_scripts.py"
    ```
 
-4. **Try fallback search**:
+4. **Try a broad declaration search**:
    ```bash
-   grep -r "class Program" SteamScripts/*/Script.cs | head -5
-   ```
-
-5. **Check if scripts downloaded**:
-   ```bash
-   # Steam Workshop scripts are in numbered directories
-   # Must load in PB in-game at least once for game to download
-   ls SteamScripts/ | head -10
+   uv run search_scripts.py class declaration Program --limit 5
    ```

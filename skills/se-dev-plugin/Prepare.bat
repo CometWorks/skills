@@ -73,6 +73,11 @@ echo Updating PluginHub registry
 uv run python -u download_pluginhub.py
 if %ERRORLEVEL% NEQ 0 goto failed
 
+:: 8b. Clone or update the MagnetarHub registry (optional; continue on failure)
+echo Updating MagnetarHub registry
+uv run python -u download_magnetarhub.py
+if %ERRORLEVEL% NEQ 0 echo WARNING: MagnetarHub registry update failed; continuing without it
+
 :: 9. Index plugin code (skipped quickly if no sources cloned yet)
 echo Indexing plugin code (skipped if no sources cloned yet)
 uv run python -u index_plugins.py
