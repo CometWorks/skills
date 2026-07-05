@@ -56,11 +56,13 @@ Use `se-dev-game-code` skill to search game's decompiled code. May need this to
 understand how game's internals work and how to interface with it properly. Stick to
 game code searches corresponding to names on Mod API whitelist for efficiency.
 
-## Prepare-Time Graphify Graph
+## Optional Graphify Graph (off by default)
 
-Preparation can build a separate Graphify graph for the local mod folder, or for
-`SE_DEV_MOD_PROJECT_ROOT` when set. See
-[Prepare-time Graphify graphs](../se-dev/GraphifyPrepare.md).
+Preparation can *optionally* build a separate Graphify graph for the local mod folder (or
+`SE_DEV_MOD_PROJECT_ROOT`). It is **off by default**; build it by opting in with
+`SE_DEV_GRAPHIFY=1`. Read on demand — skip for normal search work: build via
+[GraphifyPrepare.md](../se-dev/GraphifyPrepare.md), query via
+[GraphifyUsage.md](../se-dev/GraphifyUsage.md).
 
 ## Folder Structure
 

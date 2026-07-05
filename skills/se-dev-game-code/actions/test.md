@@ -85,3 +85,24 @@ If tests fail:
 
 As last resort, force repeating the whole preparation process by running `.\Clean.bat`, then `.\Prepare.bat`.
 Notify user if you do this, because preparation may take 5-15 minutes to complete depending on hardware.
+
+## Optional: Graphify Graph Test
+
+If the optional Graphify graph was built (see [Optional Graphify Graph](../SKILL.md) and
+[GraphifyPrepare.md](../../se-dev/GraphifyPrepare.md)), verify it separately with the graph
+query smoke test — analogous to the code-search test but exercising the Graphify graph:
+
+```bash
+# Linux
+./test_graphify_game_code.sh
+```
+
+```cmd
+REM Windows
+.\test_graphify_game_code.bat
+```
+
+It first runs a health check (graph built and clustered), then a few `query`/`explain`/`path`/`affected`
+calls, ending with `ALL TESTS COMPLETED`. If it stops at the health check, the graph is
+missing or unusable (clustering not finished); rebuild it with `SE_DEV_GRAPHIFY=1` after
+confirming the ~10-30 minute cost with the user.

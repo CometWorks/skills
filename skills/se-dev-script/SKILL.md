@@ -62,11 +62,13 @@ Use the `se-dev-game-code` skill to search game's decompiled code. You may need 
 understand how game's internals work and how to script it properly. Stick to game code
 searches corresponding to names on PB API whitelist for efficiency.
 
-## Prepare-Time Graphify Graph
+## Optional Graphify Graph (off by default)
 
-Preparation can build a separate Graphify graph for the local PB script folder, or for
-`SE_DEV_SCRIPT_PROJECT_ROOT` when set. See
-[Prepare-time Graphify graphs](../se-dev/GraphifyPrepare.md).
+Preparation can *optionally* build a separate Graphify graph for the local PB script folder
+(or `SE_DEV_SCRIPT_PROJECT_ROOT`). It is **off by default**; build it by opting in with
+`SE_DEV_GRAPHIFY=1`. Read on demand — skip for normal search work: build via
+[GraphifyPrepare.md](../se-dev/GraphifyPrepare.md), query via
+[GraphifyUsage.md](../se-dev/GraphifyUsage.md).
 
 ## Folder Structure
 

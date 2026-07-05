@@ -49,8 +49,11 @@ A plugin targets the **game client**, the **dedicated server**, or both (sharing
 - **[se-dev-plugin-sdk](https://github.com/CometWorks/magnetar/tree/main/skills/se-dev-plugin-sdk)** — Handbook for Magnetar's PluginSdk: declaring server config variables, UI layout Quasar renders, server-side chat commands, server lifecycle (save/reload/quit/restart), path resolution and environment-agnostic logging. Use together with `se-dev-plugin` for server plugins. *(Lives in [Magnetar](https://github.com/CometWorks/magnetar) repo.)*
 - **[se-dev-torch](../se-dev-torch/SKILL.md)** — Torch plugin development (legacy server host). Torch-only; not Magnetar-compatible.
 
-### Prepare-time Graphify graphs
-- **[Prepare-time Graphify graphs](GraphifyPrepare.md)** — Optional but recommended graph maps built during each `se-dev-*` prepare run. Each subskill gets a separate `graphify-out/` under its prepared corpus root. On first preparation ask the user whether Graphify should also be prepared right away or only later. It will affect the preparation time considerably.
+### Optional Graphify graphs (read on demand)
+- **[GraphifyPrepare.md](GraphifyPrepare.md)** — how to build the optional per-subskill graph. Graphify is **off by default**; each subskill gets a separate `graphify-out/` only when the user opts in with `SE_DEV_GRAPHIFY=1`. On first preparation, ask the user whether to build it — it can add ~10-30 minutes for the game/server corpora. Also covers the health check that detects an unusable (unclustered) graph and the clean-and-rebuild flow.
+- **[GraphifyUsage.md](GraphifyUsage.md)** — how to query an existing graph (`query`/`explain`/`path`/`affected`), the large-graph load cap, and the query test scripts.
+
+These two docs are fetched **on demand**: skip them entirely unless the user specifically wants the Graphify graph, so the extra tooling never pollutes context during normal work.
 
 ### Reference skills (read/search the game internals)
 - **[se-dev-game-code](../se-dev-game-code/SKILL.md)** — Search decompiled C# of game **client**. Recommended companion for client mod/plugin work.

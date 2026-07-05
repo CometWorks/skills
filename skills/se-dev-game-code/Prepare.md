@@ -1,6 +1,7 @@
 1. Run `python --version`, if it fails or not at least 3.11 then inform user and stop here.
 2. Run `git --version`, if it fails inform user that command line `git` client must be available on `PATH` and stop here.
-3. Inform user this is one time preparation. Decompiling and indexing takes about 5-15 minutes; when Graphify is enabled, building the code graph over the ~10,000 decompiled files adds roughly another 10-30 minutes on the first run (a ~220k-node graph), so budget about 15-45 minutes total. The first se-dev preparation on a machine also installs Graphify (a one-time download, ~30 seconds). Set `SE_DEV_GRAPHIFY=0` to skip the graph for a faster prepare. Highlight this message.
+3. Inform user this is one time preparation. Decompiling and indexing takes about 5-15 minutes. Highlight this message.
+   - The optional Graphify graph is **off by default**. On the first preparation, ask the user whether to also build it: over the ~10,000 decompiled files it adds roughly another 10-30 minutes on the first run (a ~220k-node graph). Only if the user agrees, run prepare with `SE_DEV_GRAPHIFY=1` set (e.g. `SE_DEV_GRAPHIFY=1 ./prepare.sh`); otherwise run prepare normally and the graph is skipped. It can always be built later on another prepare run. See [Prepare-time Graphify graphs](../se-dev/GraphifyPrepare.md).
 4. On Windows run `.\Prepare.bat >Prepare.log 2>&1`. On Linux run `./prepare.sh >Prepare.log 2>&1`. Use this same folder as CWD, where `Prepare.md` is situated.
 5. Preparation successful if last line of `Prepare.log` is `DONE`. If it fails, inform user and stop here.
 
@@ -8,6 +9,5 @@ Notes:
 - Actual data (decompiled sources, content files and indexes) stored under `%USERPROFILE%\.se-dev\game-code\` on Windows and `~/.se-dev/game-code/` on Linux, exposed via `Data` junction/symlink in this skill folder.
 - Local Git repository inside `Data` folder records every successful decompilation as commit whose message is the game version label (e.g. `1.208.015 b4`).
 - Subsequent runs detect game updates automatically: if game's version changes, previous `Decompiled/`, `Content/` and `CodeIndex/` directories wiped and rebuilt; previous version stays available in Git history.
-- If Graphify is available, preparation builds or updates a separate graph for `Data/Decompiled`.
-- If Graphify is missing, preparation prompts to install it because it is highly recommended. Set `SE_DEV_GRAPHIFY=0` to skip.
+- The optional Graphify graph is off by default. With `SE_DEV_GRAPHIFY=1` set, preparation builds or updates a separate graph for `Data/Decompiled`; if `graphify` is missing it offers to install it. An interrupted/unclustered graph is detected and rebuilt from scratch. Verify a graph with `bash ../se-dev/graphify-check.sh Data/Decompiled --deep` or run `./test_graphify_game_code.sh`. See [Prepare-time Graphify graphs](../se-dev/GraphifyPrepare.md).
 - Set `SE_DEV_GAME_CODE_GRAPH_ROOT` to graph a different game-code root.
