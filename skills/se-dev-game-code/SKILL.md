@@ -2,7 +2,7 @@
 name: se-dev-game-code
 description: Allows reading the decompiled C# code of Space Engineers version 1
 license: MIT
-allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*test_search_game_code.bat*), Bash(*uv run search_game_code.py *), Bash(*uv run index_code.py *), Bash(command -v graphify*), Bash(graphify*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*test_search_game_code.bat*), Bash(*test_graphify_game_code*), Bash(*graphify-check.sh*), Bash(*GraphifyCheck.bat*), Bash(*uv run search_game_code.py *), Bash(*uv run index_code.py *), Bash(command -v graphify*), Bash(graphify*), Bash(*GRAPHIFY_MAX_GRAPH_BYTES*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
 # SE Dev Game Code Skill
@@ -68,11 +68,23 @@ skills/se-dev-game-code/
 
 The `Data` folder is a junction/symlink to the per-user persistent game-code data directory (`%USERPROFILE%\.se-dev\game-code` on Windows, `~/.se-dev/game-code` on Linux). Treat `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` exactly as before.
 
-## Prepare-Time Graphify Graph
+## Optional Graphify Graph (off by default)
 
-Preparation can build a separate Graphify graph for decompiled game code under
-`Data/Decompiled`, or for `SE_DEV_GAME_CODE_GRAPH_ROOT` when set. See
-[Prepare-time Graphify graphs](../se-dev/GraphifyPrepare.md).
+Preparation can *optionally* build a separate Graphify graph for decompiled game code
+under `Data/Decompiled` (or `SE_DEV_GAME_CODE_GRAPH_ROOT`). It is **off by default** and
+adds ~10-30 minutes on the first build, so prepare only builds it when opted in with
+`SE_DEV_GRAPHIFY=1`; ask the user first. Read these on demand — skip them for normal
+search work:
+
+- Build / health-check / rebuild: [GraphifyPrepare.md](../se-dev/GraphifyPrepare.md)
+- Query an existing graph: [GraphifyUsage.md](../se-dev/GraphifyUsage.md)
+
+Health check and query test (only meaningful once a graph is built):
+
+```bash
+bash ../se-dev/graphify-check.sh Data/Decompiled --deep   # is the graph usable?
+./test_graphify_game_code.sh                              # run a few graph queries
+```
 
 ## Local Versioning of Decompiled Sources
 

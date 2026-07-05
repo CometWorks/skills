@@ -2,9 +2,19 @@
 
 # Shared optional Graphify integration for se-dev-* prepare scripts.
 # Source this after common-posix.sh so the caller provides log().
+#
+# Graphify is STRICTLY OPTIONAL and OFF by default. Building the graph for the
+# large decompiled game/server corpora can take ~10-30 minutes on top of the
+# normal prepare time, so it is only built when the user explicitly opts in by
+# exporting SE_DEV_GRAPHIFY=1 before running prepare.
+
+# True only when the user explicitly opted in with SE_DEV_GRAPHIFY=1.
+se_dev_graphify_enabled() {
+    [ "${SE_DEV_GRAPHIFY:-0}" = "1" ]
+}
 
 se_dev_graphify_print_install_hint() {
-    log "Graphify is highly recommended for navigable maps of prepared se-dev corpora."
+    log "Graphify builds a navigable map beside the regular search indexes."
     log "Install options:"
     log "  uv tool install graphifyy"
     log "  pipx install graphifyy"
@@ -47,11 +57,6 @@ se_dev_graphify_install_platform() {
 }
 
 se_dev_graphify_ensure_available() {
-    if [ "${SE_DEV_GRAPHIFY:-1}" = "0" ]; then
-        log "Graphify disabled by SE_DEV_GRAPHIFY=0"
-        return 1
-    fi
-
     if command -v graphify >/dev/null 2>&1; then
         return 0
     fi
@@ -85,9 +90,113 @@ se_dev_graphify_ensure_available() {
     return 1
 }
 
+# Classify the state of a graph under <root>/graphify-out. Echoes one of:
+#   missing     - no graph.json (never built or failed early)
+#   incomplete  - graph.json present but clustering data (.graphify_analysis.json)
+#                 is absent or graph.json is implausibly small (build interrupted
+#                 or clustering never finished; the graph is unusable)
+#   ok          - graph.json plus clustering data present
+se_dev_graphify_status() {
+    local root="$1"
+    local out="$root/graphify-out"
+    local graph="$out/graph.json"
+
+    if [ ! -f "$graph" ]; then
+        printf 'missing\n'
+        return 0
+    fi
+
+    # A truncated/empty graph.json means the build died mid-write.
+    local size
+    size="$(wc -c <"$graph" 2>/dev/null | tr -d ' ')"
+    if [ -z "$size" ] || [ "$size" -lt 1024 ]; then
+        printf 'incomplete\n'
+        return 0
+    fi
+
+    # Clustering writes .graphify_analysis.json. Without it every node has an
+    # empty community and the graph is only half-built.
+    if [ ! -f "$out/.graphify_analysis.json" ]; then
+        printf 'incomplete\n'
+        return 0
+    fi
+
+    printf 'ok\n'
+}
+
+# du -sk that tolerates a missing path (echoes 0).
+se_dev_graphify_du_kb() {
+    local path="$1"
+    [ -e "$path" ] || { printf '0\n'; return 0; }
+    du -sk "$path" 2>/dev/null | awk '{print $1; exit}'
+}
+
+# Estimate the free space (KiB) a graph build needs under <root>. Measured on
+# the decompiled game/server corpora, the graph output (graph.json + clustering
+# + semantic cache) runs ~9x the source size (e.g. ~1.5 GiB of output for a
+# ~175 MiB corpus). We require 12x the corpus plus a fixed 1 GiB of headroom,
+# which covers the observed footprint with margin and room for the code base to
+# grow. The corpus size excludes any existing graphify-out so re-runs are not
+# double-counted.
+se_dev_graphify_required_kb() {
+    local root="$1"
+    local total_kb out_kb corpus_kb
+    total_kb="$(se_dev_graphify_du_kb "$root")"
+    out_kb="$(se_dev_graphify_du_kb "$root/graphify-out")"
+    corpus_kb=$(( total_kb - out_kb ))
+    [ "$corpus_kb" -ge 0 ] 2>/dev/null || corpus_kb=0
+    printf '%s\n' "$(( corpus_kb * 12 + 1048576 ))"
+}
+
+# Free space (KiB) on the filesystem that holds <root>.
+se_dev_graphify_avail_kb() {
+    df -Pk "$1" 2>/dev/null | awk 'NR==2 {print $4; exit}'
+}
+
+# Pre-check: is there enough disk for the graph build? Returns non-zero (and
+# logs how much is short) when there is not. Graphify is optional, so callers
+# skip the build rather than fail the whole prepare.
+se_dev_graphify_check_disk() {
+    local label="$1" root="$2"
+    local need avail
+    need="$(se_dev_graphify_required_kb "$root")"
+    avail="$(se_dev_graphify_avail_kb "$root")"
+
+    if [ -z "$avail" ]; then
+        log "Graphify: could not determine free disk space for $label; proceeding without a disk pre-check."
+        return 0
+    fi
+
+    if [ "$avail" -lt "$need" ]; then
+        log "Graphify: skipping $label - not enough free disk space for the graph."
+        log "  Needed (graph + cache + 1 GiB headroom): ~$(( need / 1024 )) MB"
+        log "  Available on the graph volume:           ~$(( avail / 1024 )) MB"
+        log "  Free up space, then re-run prepare with SE_DEV_GRAPHIFY=1. Core prepare already succeeded."
+        return 1
+    fi
+
+    log "Graphify: disk pre-check OK for $label (need ~$(( need / 1024 )) MB, have ~$(( avail / 1024 )) MB)"
+    return 0
+}
+
+# Remove a graph directory so it can be rebuilt from scratch.
+se_dev_graphify_clean() {
+    local root="$1"
+    local out="$root/graphify-out"
+    if [ -d "$out" ]; then
+        log "Graphify: removing unusable graph at $out"
+        rm -rf "$out"
+    fi
+}
+
 se_dev_graphify_prepare() {
     local label="$1"
     local root="$2"
+
+    if ! se_dev_graphify_enabled; then
+        log "Graphify: skipping $label (set SE_DEV_GRAPHIFY=1 to build the optional graph)"
+        return 0
+    fi
 
     if [ -z "$root" ]; then
         log "Graphify: skipping $label (empty root)"
@@ -102,11 +211,24 @@ se_dev_graphify_prepare() {
     se_dev_graphify_ensure_available || return 0
 
     root="$(cd -P -- "$root" && pwd)"
-    if [ -f "$root/graphify-out/graph.json" ]; then
-        log "Graphify: updating $label graph at $root"
-        graphify "$root" --update || log "WARNING: Graphify update failed for $label; prepare continues."
-    else
-        log "Graphify: building $label graph at $root"
-        graphify "$root" || log "WARNING: Graphify build failed for $label; prepare continues."
-    fi
+
+    se_dev_graphify_check_disk "$label" "$root" || return 0
+
+    local status
+    status="$(se_dev_graphify_status "$root")"
+    case "$status" in
+        ok)
+            log "Graphify: updating $label graph at $root"
+            graphify "$root" --update || log "WARNING: Graphify update failed for $label; prepare continues."
+            ;;
+        incomplete)
+            log "Graphify: $label graph is incomplete (clustering missing or interrupted); rebuilding from scratch"
+            se_dev_graphify_clean "$root"
+            graphify "$root" || log "WARNING: Graphify build failed for $label; prepare continues."
+            ;;
+        *)
+            log "Graphify: building $label graph at $root"
+            graphify "$root" || log "WARNING: Graphify build failed for $label; prepare continues."
+            ;;
+    esac
 }

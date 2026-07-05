@@ -4,8 +4,9 @@ setlocal EnableExtensions EnableDelayedExpansion
 set "GRAPHIFY_LABEL=%~1"
 set "GRAPHIFY_ROOT=%~2"
 
-if /I "%SE_DEV_GRAPHIFY%"=="0" (
-    echo Graphify disabled by SE_DEV_GRAPHIFY=0
+REM Graphify is strictly optional and OFF by default. Build only on opt-in.
+if not "%SE_DEV_GRAPHIFY%"=="1" (
+    echo Graphify: skipping %GRAPHIFY_LABEL% ^(set SE_DEV_GRAPHIFY=1 to build the optional graph^)
     exit /b 0
 )
 
@@ -26,20 +27,43 @@ where graphify >NUL 2>NUL
 if %ERRORLEVEL% NEQ 0 exit /b 0
 
 for %%I in ("%GRAPHIFY_ROOT%") do set "GRAPHIFY_ABS_ROOT=%%~fI"
+set "GRAPHIFY_OUT=%GRAPHIFY_ABS_ROOT%\graphify-out"
 
-if exist "%GRAPHIFY_ABS_ROOT%\graphify-out\graph.json" (
-    echo Graphify: updating %GRAPHIFY_LABEL% graph at %GRAPHIFY_ABS_ROOT%
-    graphify "%GRAPHIFY_ABS_ROOT%" --update
-) else (
-    echo Graphify: building %GRAPHIFY_LABEL% graph at %GRAPHIFY_ABS_ROOT%
-    graphify "%GRAPHIFY_ABS_ROOT%"
+call :check_disk "%GRAPHIFY_ABS_ROOT%"
+if %ERRORLEVEL% NEQ 0 (
+    echo Graphify: skipping %GRAPHIFY_LABEL% - not enough free disk space. Core prepare already succeeded.
+    exit /b 0
 )
 
-if %ERRORLEVEL% NEQ 0 echo WARNING: Graphify failed for %GRAPHIFY_LABEL%; prepare continues.
+if not exist "%GRAPHIFY_OUT%\graph.json" goto build
+
+REM graph.json exists; require clustering data or rebuild from scratch.
+if not exist "%GRAPHIFY_OUT%\.graphify_analysis.json" (
+    echo Graphify: %GRAPHIFY_LABEL% graph is incomplete ^(clustering missing^); rebuilding from scratch
+    rmdir /S /Q "%GRAPHIFY_OUT%"
+    goto build
+)
+
+echo Graphify: updating %GRAPHIFY_LABEL% graph at %GRAPHIFY_ABS_ROOT%
+graphify "%GRAPHIFY_ABS_ROOT%" --update
+if %ERRORLEVEL% NEQ 0 echo WARNING: Graphify update failed for %GRAPHIFY_LABEL%; prepare continues.
 exit /b 0
 
+:build
+echo Graphify: building %GRAPHIFY_LABEL% graph at %GRAPHIFY_ABS_ROOT%
+graphify "%GRAPHIFY_ABS_ROOT%"
+if %ERRORLEVEL% NEQ 0 echo WARNING: Graphify build failed for %GRAPHIFY_LABEL%; prepare continues.
+exit /b 0
+
+REM Disk pre-check: the graph output (graph.json + clustering + cache) runs ~9x
+REM the corpus size, so require 12x the corpus plus 1 GiB headroom. Returns
+REM errorlevel 1 when there is not enough free space on the graph volume.
+:check_disk
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$root=[IO.Path]::GetFullPath('%~1'); $out=Join-Path $root 'graphify-out'; $total=(Get-ChildItem -LiteralPath $root -Recurse -File -Force -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum; $og=0; if (Test-Path -LiteralPath $out) { $og=(Get-ChildItem -LiteralPath $out -Recurse -File -Force -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum }; $corpusMB=[math]::Floor(($total-$og)/1MB); $needMB=$corpusMB*12+1024; $freeMB=[math]::Floor((Get-Item -LiteralPath $root).PSDrive.Free/1MB); if ($freeMB -lt $needMB) { Write-Host ('  Needed (graph + cache + 1 GiB headroom): ~'+$needMB+' MB'); Write-Host ('  Available on the graph volume:           ~'+$freeMB+' MB'); exit 1 } else { Write-Host ('Graphify: disk pre-check OK (need ~'+$needMB+' MB, have ~'+$freeMB+' MB)'); exit 0 }"
+exit /b %ERRORLEVEL%
+
 :prompt_install
-echo Graphify is highly recommended for navigable maps of prepared se-dev corpora. >CON
+echo Graphify builds a navigable map beside the regular search indexes. >CON
 echo Install options: >CON
 echo   uv tool install graphifyy >CON
 echo   pipx install graphifyy >CON

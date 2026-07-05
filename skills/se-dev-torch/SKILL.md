@@ -90,9 +90,11 @@ uv run search_torch.py class declaration PatchContext -n Torch.Managers.PatchMan
 - Prefer `torch.Managers.GetManager<T>()` or `session.Managers.GetManager<T>()` over obsolete `ITorchBase.GetManager<T>()`.
 - Use `TorchPluginBase` as normal starting point unless task clearly needs lower-level implementation.
 - If task is about Space Engineers game behavior rather than Torch framework behavior, use `se-dev-game-code` or `se-dev-server-code` as companion skill.
-- Preparation can build a separate Graphify graph for the selected Torch checkout, or for
-  `SE_DEV_TORCH_PLUGIN_ROOT` when set. See
-  [Prepare-time Graphify graphs](../se-dev/GraphifyPrepare.md).
+- Preparation can *optionally* build a separate Graphify graph for the selected Torch
+  checkout (or `SE_DEV_TORCH_PLUGIN_ROOT`). It is **off by default**; build it by opting in
+  with `SE_DEV_GRAPHIFY=1`. Read on demand — build via
+  [GraphifyPrepare.md](../se-dev/GraphifyPrepare.md), query via
+  [GraphifyUsage.md](../se-dev/GraphifyUsage.md).
 
 ## Remarks
 
