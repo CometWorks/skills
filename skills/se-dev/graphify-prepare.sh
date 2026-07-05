@@ -1,39 +1,87 @@
 #!/usr/bin/env bash
 
-# Shared optional Graphify integration for se-dev-* prepare scripts.
+# Shared Graphify integration for se-dev-* prepare scripts.
 # Source this after common-posix.sh so the caller provides log().
 #
-# Graphify is STRICTLY OPTIONAL and OFF by default. Building the graph for the
-# large decompiled game/server corpora can take ~10-30 minutes on top of the
-# normal prepare time, so it is only built when the user explicitly opts in by
-# exporting SE_DEV_GRAPHIFY=1 before running prepare.
+# Clustering (community detection) is the slow part of a Graphify build. Graphify
+# has two backends for it:
+#   * fast: native Rust Leiden via graspologic — needs Python < 3.13 (we use 3.12).
+#   * slow: pure-Python Louvain fallback — single core, ~10-30 min on the ~220k-node
+#           game/server graphs. Used automatically when graspologic is not importable
+#           (e.g. Graphify installed on Python 3.13, where graspologic has no wheel).
+#
+# So we default the Graphify tool to Python 3.12 with the `leiden` extra. When the
+# fast Rust backend is available prepare builds the graph AUTOMATICALLY; when it can
+# not be provisioned (no uv / no Python 3.12) Graphify stays OPTIONAL and off unless
+# the user opts in with SE_DEV_GRAPHIFY=1, and prepare reports the extra time it costs.
+#
+# SE_DEV_GRAPHIFY is tri-state:
+#   unset -> auto: build when the fast Rust backend is available, skip otherwise
+#   1     -> always build (even on the slow single-core fallback)
+#   0     -> never build
 
-# True only when the user explicitly opted in with SE_DEV_GRAPHIFY=1.
-se_dev_graphify_enabled() {
-    [ "${SE_DEV_GRAPHIFY:-0}" = "1" ]
-}
+# Python version the Graphify tool runs under. Fast clustering (graspologic's Rust
+# Leiden) needs Python < 3.13; 3.13 silently drops to the slow fallback. Override
+# with SE_DEV_GRAPHIFY_PYTHON if 3.12 is unsuitable on a given machine.
+SE_DEV_GRAPHIFY_PYTHON="${SE_DEV_GRAPHIFY_PYTHON:-3.12}"
+
+# Set by se_dev_graphify_provision(): "fast" or "slow".
+SE_DEV_GRAPHIFY_SPEED="slow"
+
+se_dev_graphify_opt_in()  { [ "${SE_DEV_GRAPHIFY:-}" = "1" ]; }
+se_dev_graphify_opt_out() { [ "${SE_DEV_GRAPHIFY:-}" = "0" ]; }
 
 se_dev_graphify_print_install_hint() {
     log "Graphify builds a navigable map beside the regular search indexes."
+    log "Fast clustering needs the native Rust Leiden backend (graspologic on Python ${SE_DEV_GRAPHIFY_PYTHON})."
     log "Install options:"
-    log "  uv tool install graphifyy"
-    log "  pipx install graphifyy"
-    log "  pip install graphifyy"
+    log "  uv tool install --python ${SE_DEV_GRAPHIFY_PYTHON} 'graphifyy[leiden]'   # recommended (fast backend)"
+    log "  pipx install --python python${SE_DEV_GRAPHIFY_PYTHON} 'graphifyy[leiden]'"
+    log "  pip install 'graphifyy[leiden]'                        # only fast on Python ${SE_DEV_GRAPHIFY_PYTHON}"
     log "Then wire it into your AI platform:"
     log "  graphify install --platform [AI PLATFORM]"
 }
 
+# Install Graphify, preferring the fast native Rust Leiden backend (Python 3.12 +
+# the `leiden` extra). Falls back to a plain install (slow clustering) when the
+# fast backend cannot be arranged.
 se_dev_graphify_install_package() {
     if command -v uv >/dev/null 2>&1; then
-        uv tool install graphifyy
-    elif command -v pipx >/dev/null 2>&1; then
-        pipx install graphifyy
-    elif command -v python3 >/dev/null 2>&1; then
-        python3 -m pip install graphifyy
-    else
-        log "WARNING: Could not install Graphify automatically; missing uv, pipx, and python3."
-        return 1
+        # uv auto-downloads CPython 3.12 when it is not already present.
+        if uv tool install --python "$SE_DEV_GRAPHIFY_PYTHON" --force "graphifyy[leiden]"; then
+            return 0
+        fi
+        log "WARNING: installing graphifyy[leiden] on Python $SE_DEV_GRAPHIFY_PYTHON failed; retrying without the fast backend."
+        uv tool install --force graphifyy
+        return
     fi
+
+    local py312
+    py312="$(command -v "python$SE_DEV_GRAPHIFY_PYTHON" 2>/dev/null || true)"
+
+    if command -v pipx >/dev/null 2>&1; then
+        if [ -n "$py312" ]; then
+            pipx install --python "$py312" "graphifyy[leiden]" && return 0
+            log "WARNING: pipx install of graphifyy[leiden] failed; retrying without the fast backend."
+        else
+            log "python$SE_DEV_GRAPHIFY_PYTHON not found; the fast Rust clustering backend needs it. Installing without it (clustering will use the slow fallback)."
+        fi
+        pipx install graphifyy
+        return
+    fi
+
+    if [ -n "$py312" ]; then
+        "$py312" -m pip install "graphifyy[leiden]" && return 0
+        log "WARNING: pip install of graphifyy[leiden] on $py312 failed; retrying without the fast backend."
+    fi
+    if command -v python3 >/dev/null 2>&1; then
+        log "python$SE_DEV_GRAPHIFY_PYTHON not found; installing Graphify without the fast Rust backend (clustering will use the slow fallback)."
+        python3 -m pip install graphifyy
+        return
+    fi
+
+    log "WARNING: Could not install Graphify automatically; missing uv, pipx, and python3."
+    return 1
 }
 
 se_dev_graphify_install_platform() {
@@ -56,6 +104,9 @@ se_dev_graphify_install_platform() {
     log "  graphify install --platform [AI PLATFORM]"
 }
 
+# Interactive install path used only when the fast backend is unavailable and the
+# user opted in with SE_DEV_GRAPHIFY=1. The fast path installs non-interactively in
+# se_dev_graphify_provision().
 se_dev_graphify_ensure_available() {
     if command -v graphify >/dev/null 2>&1; then
         return 0
@@ -88,6 +139,80 @@ se_dev_graphify_ensure_available() {
 
     log "WARNING: Graphify install completed but graphify is still not on PATH; skipping graph build."
     return 1
+}
+
+# Path to the Python interpreter the installed Graphify tool runs under, or empty.
+# Reads the launcher shebang so it works for uv/pipx/pip installs alike.
+se_dev_graphify_tool_python() {
+    local gf line py
+    gf="$(command -v graphify 2>/dev/null)" || return 1
+    [ -n "$gf" ] || return 1
+    line="$(head -n 1 "$gf" 2>/dev/null)"
+    case "$line" in
+        '#!'*) ;;
+        *) return 1 ;;
+    esac
+    py="${line#\#!}"
+    py="${py%$'\r'}"                 # tolerate CRLF launchers
+    case "$py" in
+        *' '*)                       # "/usr/bin/env python3" or "python -x"
+            py="${py##* }"
+            command -v "$py" 2>/dev/null
+            return
+            ;;
+    esac
+    printf '%s\n' "$py"
+}
+
+# 0 when the Graphify tool can run the fast native Rust Leiden backend.
+se_dev_graphify_leiden_available() {
+    local py
+    py="$(se_dev_graphify_tool_python)" || return 1
+    [ -n "$py" ] && [ -x "$py" ] || return 1
+    "$py" -c "import graspologic.partition" >/dev/null 2>&1
+}
+
+# Make the fast Rust Leiden backend available when we can do so non-interactively
+# (uv present). Sets SE_DEV_GRAPHIFY_SPEED to "fast" or "slow". Never fails the run.
+se_dev_graphify_provision() {
+    SE_DEV_GRAPHIFY_SPEED="slow"
+
+    # Put uv's tool bin dir on PATH so a freshly-installed graphify is visible in
+    # this same shell (a first-time `uv tool install` otherwise needs a new shell).
+    if command -v uv >/dev/null 2>&1; then
+        local bin
+        bin="$(uv tool dir --bin 2>/dev/null || true)"
+        if [ -n "$bin" ]; then
+            case ":$PATH:" in
+                *":$bin:"*) ;;
+                *) PATH="$bin:$PATH"; export PATH ;;
+            esac
+        fi
+    fi
+
+    if se_dev_graphify_leiden_available; then
+        SE_DEV_GRAPHIFY_SPEED="fast"
+        return 0
+    fi
+
+    # Only uv can pin Graphify to Python 3.12 non-interactively (auto-fetching it
+    # if needed). Without uv we cannot guarantee the fast backend here.
+    if ! command -v uv >/dev/null 2>&1; then
+        return 0
+    fi
+
+    log "Graphify: provisioning the fast Rust clustering backend (uv + Python ${SE_DEV_GRAPHIFY_PYTHON}; one-time ~30-60s)..."
+    if uv tool install --python "$SE_DEV_GRAPHIFY_PYTHON" --force "graphifyy[leiden]" >/dev/null 2>&1; then
+        if [ -n "${SE_DEV_GRAPHIFY_PLATFORM:-}" ]; then
+            graphify install --platform "$SE_DEV_GRAPHIFY_PLATFORM" >/dev/null 2>&1 \
+                || log "WARNING: graphify platform install failed for '$SE_DEV_GRAPHIFY_PLATFORM'."
+        fi
+    else
+        log "WARNING: could not provision the fast Rust backend automatically; will use the slow fallback."
+    fi
+
+    se_dev_graphify_leiden_available && SE_DEV_GRAPHIFY_SPEED="fast"
+    return 0
 }
 
 # Classify the state of a graph under <root>/graphify-out. Echoes one of:
@@ -124,61 +249,6 @@ se_dev_graphify_status() {
     printf 'ok\n'
 }
 
-# du -sk that tolerates a missing path (echoes 0).
-se_dev_graphify_du_kb() {
-    local path="$1"
-    [ -e "$path" ] || { printf '0\n'; return 0; }
-    du -sk "$path" 2>/dev/null | awk '{print $1; exit}'
-}
-
-# Estimate the free space (KiB) a graph build needs under <root>. Measured on
-# the decompiled game/server corpora, the graph output (graph.json + clustering
-# + semantic cache) runs ~9x the source size (e.g. ~1.5 GiB of output for a
-# ~175 MiB corpus). We require 12x the corpus plus a fixed 1 GiB of headroom,
-# which covers the observed footprint with margin and room for the code base to
-# grow. The corpus size excludes any existing graphify-out so re-runs are not
-# double-counted.
-se_dev_graphify_required_kb() {
-    local root="$1"
-    local total_kb out_kb corpus_kb
-    total_kb="$(se_dev_graphify_du_kb "$root")"
-    out_kb="$(se_dev_graphify_du_kb "$root/graphify-out")"
-    corpus_kb=$(( total_kb - out_kb ))
-    [ "$corpus_kb" -ge 0 ] 2>/dev/null || corpus_kb=0
-    printf '%s\n' "$(( corpus_kb * 12 + 1048576 ))"
-}
-
-# Free space (KiB) on the filesystem that holds <root>.
-se_dev_graphify_avail_kb() {
-    df -Pk "$1" 2>/dev/null | awk 'NR==2 {print $4; exit}'
-}
-
-# Pre-check: is there enough disk for the graph build? Returns non-zero (and
-# logs how much is short) when there is not. Graphify is optional, so callers
-# skip the build rather than fail the whole prepare.
-se_dev_graphify_check_disk() {
-    local label="$1" root="$2"
-    local need avail
-    need="$(se_dev_graphify_required_kb "$root")"
-    avail="$(se_dev_graphify_avail_kb "$root")"
-
-    if [ -z "$avail" ]; then
-        log "Graphify: could not determine free disk space for $label; proceeding without a disk pre-check."
-        return 0
-    fi
-
-    if [ "$avail" -lt "$need" ]; then
-        log "Graphify: skipping $label - not enough free disk space for the graph."
-        log "  Needed (graph + cache + 1 GiB headroom): ~$(( need / 1024 )) MB"
-        log "  Available on the graph volume:           ~$(( avail / 1024 )) MB"
-        log "  Free up space, then re-run prepare with SE_DEV_GRAPHIFY=1. Core prepare already succeeded."
-        return 1
-    fi
-
-    log "Graphify: disk pre-check OK for $label (need ~$(( need / 1024 )) MB, have ~$(( avail / 1024 )) MB)"
-    return 0
-}
-
 # Remove a graph directory so it can be rebuilt from scratch.
 se_dev_graphify_clean() {
     local root="$1"
@@ -189,31 +259,10 @@ se_dev_graphify_clean() {
     fi
 }
 
-se_dev_graphify_prepare() {
+# Build or update the graph at $root, healing an incomplete (unclustered) graph.
+se_dev_graphify_run_build() {
     local label="$1"
     local root="$2"
-
-    if ! se_dev_graphify_enabled; then
-        log "Graphify: skipping $label (set SE_DEV_GRAPHIFY=1 to build the optional graph)"
-        return 0
-    fi
-
-    if [ -z "$root" ]; then
-        log "Graphify: skipping $label (empty root)"
-        return 0
-    fi
-
-    if [ ! -d "$root" ]; then
-        log "Graphify: skipping $label (missing root: $root)"
-        return 0
-    fi
-
-    se_dev_graphify_ensure_available || return 0
-
-    root="$(cd -P -- "$root" && pwd)"
-
-    se_dev_graphify_check_disk "$label" "$root" || return 0
-
     local status
     status="$(se_dev_graphify_status "$root")"
     case "$status" in
@@ -231,4 +280,40 @@ se_dev_graphify_prepare() {
             graphify "$root" || log "WARNING: Graphify build failed for $label; prepare continues."
             ;;
     esac
+}
+
+se_dev_graphify_prepare() {
+    local label="$1"
+    local root="$2"
+
+    if se_dev_graphify_opt_out; then
+        log "Graphify: skipping $label (SE_DEV_GRAPHIFY=0)"
+        return 0
+    fi
+
+    if [ -z "$root" ]; then
+        log "Graphify: skipping $label (empty root)"
+        return 0
+    fi
+
+    if [ ! -d "$root" ]; then
+        log "Graphify: skipping $label (missing root: $root)"
+        return 0
+    fi
+
+    se_dev_graphify_provision
+
+    if [ "$SE_DEV_GRAPHIFY_SPEED" = "fast" ]; then
+        log "Graphify: fast native Rust Leiden backend active — building $label automatically."
+    elif se_dev_graphify_opt_in; then
+        log "Graphify: fast Rust backend unavailable; building $label with the slow single-core fallback (expect ~10-30 min for the game/server corpora)."
+        se_dev_graphify_ensure_available || return 0
+    else
+        log "Graphify: skipping $label — the fast Rust clustering backend is unavailable (needs uv + Python ${SE_DEV_GRAPHIFY_PYTHON})."
+        log "Building now would use the slow single-core fallback (~10-30 min for the game/server corpora). Set SE_DEV_GRAPHIFY=1 to build anyway."
+        return 0
+    fi
+
+    root="$(cd -P -- "$root" && pwd)"
+    se_dev_graphify_run_build "$label" "$root"
 }

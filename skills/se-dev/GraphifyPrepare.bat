@@ -4,9 +4,16 @@ setlocal EnableExtensions EnableDelayedExpansion
 set "GRAPHIFY_LABEL=%~1"
 set "GRAPHIFY_ROOT=%~2"
 
-REM Graphify is strictly optional and OFF by default. Build only on opt-in.
-if not "%SE_DEV_GRAPHIFY%"=="1" (
-    echo Graphify: skipping %GRAPHIFY_LABEL% ^(set SE_DEV_GRAPHIFY=1 to build the optional graph^)
+REM Clustering is the slow part of a Graphify build. The fast path is graspologic's
+REM native Rust Leiden backend (needs Python 3.12); without it Graphify drops to a
+REM single-core Python fallback (~10-30 min for game/server code). We default the
+REM Graphify tool to Python 3.12 with the leiden extra. When the fast backend is
+REM available the graph is built automatically; otherwise it stays optional and only
+REM builds on opt-in (SE_DEV_GRAPHIFY=1). SE_DEV_GRAPHIFY=0 disables it entirely.
+set "GRAPHIFY_PY_VER=3.12"
+
+if "%SE_DEV_GRAPHIFY%"=="0" (
+    echo Graphify: skipping %GRAPHIFY_LABEL% ^(SE_DEV_GRAPHIFY=0^)
     exit /b 0
 )
 
@@ -20,12 +27,35 @@ if not exist "%GRAPHIFY_ROOT%\" (
     exit /b 0
 )
 
+REM Provision/detect the fast Rust Leiden backend. Positive confirmation only:
+REM any uncertainty leaves GRAPHIFY_FAST unset and we fall back to opt-in.
+call :detect_fast
+
+if "%GRAPHIFY_FAST%"=="1" (
+    where graphify >NUL 2>NUL
+    if !ERRORLEVEL! EQU 0 (
+        echo Graphify: fast native Rust Leiden backend active - building %GRAPHIFY_LABEL% automatically.
+        goto have_graphify
+    )
+    echo WARNING: fast Rust backend detected but graphify is not on PATH; skipping graph build.
+    exit /b 0
+)
+
+REM Slow single-core fallback: keep Graphify optional unless the user opted in.
+if not "%SE_DEV_GRAPHIFY%"=="1" (
+    echo Graphify: skipping %GRAPHIFY_LABEL% - fast Rust clustering backend unavailable ^(needs uv + Python %GRAPHIFY_PY_VER%^).
+    echo   Building now would use the slow single-core fallback ^(~10-30 min for game/server code^). Set SE_DEV_GRAPHIFY=1 to build anyway.
+    exit /b 0
+)
+echo Graphify: fast Rust backend unavailable; building %GRAPHIFY_LABEL% with the slow single-core fallback ^(expect ~10-30 min for game/server code^).
+
 where graphify >NUL 2>NUL
 if %ERRORLEVEL% NEQ 0 call :prompt_install
 
 where graphify >NUL 2>NUL
 if %ERRORLEVEL% NEQ 0 exit /b 0
 
+:have_graphify
 for %%I in ("%GRAPHIFY_ROOT%") do set "GRAPHIFY_ABS_ROOT=%%~fI"
 set "GRAPHIFY_OUT=%GRAPHIFY_ABS_ROOT%\graphify-out"
 
@@ -55,6 +85,39 @@ graphify "%GRAPHIFY_ABS_ROOT%"
 if %ERRORLEVEL% NEQ 0 echo WARNING: Graphify build failed for %GRAPHIFY_LABEL%; prepare continues.
 exit /b 0
 
+REM Make the fast Rust Leiden backend available and confirm it. Sets GRAPHIFY_FAST=1
+REM only on positive confirmation (graspologic imports in the Graphify tool venv).
+REM Any failure is left as "not fast" so behaviour degrades to the opt-in fallback.
+:detect_fast
+set "GRAPHIFY_FAST="
+where uv >NUL 2>NUL
+if %ERRORLEVEL% NEQ 0 goto detect_fast_done
+
+REM Put uv's tool bin dir on PATH so a freshly-installed graphify is callable here.
+for /f "usebackq delims=" %%B in (`uv tool dir --bin 2^>NUL`) do set "PATH=%%B;%PATH%"
+
+call :fast_probe
+if "%GRAPHIFY_FAST%"=="1" goto detect_fast_done
+
+echo Graphify: provisioning the fast Rust clustering backend ^(uv + Python %GRAPHIFY_PY_VER%; one-time ~30-60s^)...
+uv tool install --python %GRAPHIFY_PY_VER% --force "graphifyy[leiden]" >NUL 2>NUL
+if defined SE_DEV_GRAPHIFY_PLATFORM graphify install --platform "%SE_DEV_GRAPHIFY_PLATFORM%" >NUL 2>NUL
+call :fast_probe
+:detect_fast_done
+exit /b 0
+
+REM Probe the uv tool venv for a working graspologic (Rust Leiden). Sets GRAPHIFY_FAST=1 on success.
+:fast_probe
+set "GRAPHIFY_FAST="
+set "UVTOOLS="
+for /f "usebackq delims=" %%D in (`uv tool dir 2^>NUL`) do set "UVTOOLS=%%D"
+if not defined UVTOOLS exit /b 0
+set "GRAPHIFY_TOOL_PY=%UVTOOLS%\graphifyy\Scripts\python.exe"
+if not exist "%GRAPHIFY_TOOL_PY%" exit /b 0
+"%GRAPHIFY_TOOL_PY%" -c "import graspologic.partition" >NUL 2>NUL
+if %ERRORLEVEL% EQU 0 set "GRAPHIFY_FAST=1"
+exit /b 0
+
 REM Disk pre-check: the graph output (graph.json + clustering + cache) runs ~9x
 REM the corpus size, so require 12x the corpus plus 1 GiB headroom. Returns
 REM errorlevel 1 when there is not enough free space on the graph volume.
@@ -64,10 +127,11 @@ exit /b %ERRORLEVEL%
 
 :prompt_install
 echo Graphify builds a navigable map beside the regular search indexes. >CON
+echo Fast clustering needs the native Rust Leiden backend ^(graspologic on Python %GRAPHIFY_PY_VER%^). >CON
 echo Install options: >CON
-echo   uv tool install graphifyy >CON
-echo   pipx install graphifyy >CON
-echo   pip install graphifyy >CON
+echo   uv tool install --python %GRAPHIFY_PY_VER% "graphifyy[leiden]"   ^(recommended: fast backend^) >CON
+echo   pipx install "graphifyy[leiden]" >CON
+echo   pip install "graphifyy[leiden]" >CON
 echo Then wire it into your AI platform: >CON
 echo   graphify install --platform [AI PLATFORM] >CON
 set "GRAPHIFY_INSTALL="
@@ -79,17 +143,17 @@ if /I not "%GRAPHIFY_INSTALL%"=="y" if /I not "%GRAPHIFY_INSTALL%"=="yes" (
 
 where uv >NUL 2>NUL
 if %ERRORLEVEL% EQU 0 (
-    uv tool install graphifyy
+    uv tool install --python %GRAPHIFY_PY_VER% --force "graphifyy[leiden]"
     goto after_package_install
 )
 
 where pipx >NUL 2>NUL
 if %ERRORLEVEL% EQU 0 (
-    pipx install graphifyy
+    pipx install "graphifyy[leiden]"
     goto after_package_install
 )
 
-python -m pip install graphifyy
+python -m pip install "graphifyy[leiden]"
 
 :after_package_install
 where graphify >NUL 2>NUL

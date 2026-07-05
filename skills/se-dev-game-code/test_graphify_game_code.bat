@@ -14,16 +14,16 @@ echo GRAPHIFY HEALTH CHECK
 echo ============================================================
 where graphify >NUL 2>NUL
 if %ERRORLEVEL% NEQ 0 (
-    echo SKIP: graphify is not on PATH. Build the graph with:
-    echo   set SE_DEV_GRAPHIFY=1 ^&^& .\Prepare.bat
+    echo SKIP: graphify is not on PATH. Build the graph by running prepare:
+    echo   .\Prepare.bat   REM auto-builds with the fast Rust backend; set SE_DEV_GRAPHIFY=1 to force the slow fallback
     exit /b 1
 )
 call "%~dp0..\se-dev\GraphifyCheck.bat" "%GRAPH_ROOT%"
 if %ERRORLEVEL% NEQ 0 (
     echo.
-    echo FAIL: Graphify graph is missing or unusable. Rebuild it with:
+    echo FAIL: Graphify graph is missing or unusable. Rebuild it by re-running prepare:
     echo   rmdir /S /Q "%GRAPH_ROOT%\graphify-out"
-    echo   set SE_DEV_GRAPHIFY=1 ^&^& .\Prepare.bat
+    echo   .\Prepare.bat   REM auto-builds with the fast Rust backend; set SE_DEV_GRAPHIFY=1 to force the slow fallback
     exit /b 1
 )
 echo.

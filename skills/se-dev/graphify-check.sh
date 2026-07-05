@@ -42,7 +42,7 @@ done
 
 if [ ! -d "$ROOT" ]; then
     log "FAIL: graph root does not exist: $ROOT"
-    log "Run prepare first (with SE_DEV_GRAPHIFY=1 to build the optional graph)."
+    log "Run prepare first (it builds the graph automatically when the fast Rust backend is available; otherwise set SE_DEV_GRAPHIFY=1)."
     exit 2
 fi
 
@@ -52,15 +52,15 @@ STATUS="$(se_dev_graphify_status "$ROOT")"
 case "$STATUS" in
     missing)
         log "MISSING: no Graphify graph at $ROOT/graphify-out"
-        log "Build it with: SE_DEV_GRAPHIFY=1 <prepare script>"
+        log "Build it by running prepare (auto-builds with the fast Rust backend; otherwise set SE_DEV_GRAPHIFY=1)."
         exit 2
         ;;
     incomplete)
         log "INCOMPLETE: $ROOT/graphify-out has a graph.json but clustering data is missing."
         log "The graph is unusable and must be rebuilt from scratch."
-        log "Clean and rebuild (this can take ~10-30 min for game/server code):"
+        log "Clean and rebuild by re-running prepare (fast with the Rust backend; ~10-30 min on the slow fallback for game/server code):"
         log "  rm -rf \"$ROOT/graphify-out\""
-        log "  SE_DEV_GRAPHIFY=1 <prepare script>"
+        log "  <prepare script>   # add SE_DEV_GRAPHIFY=1 to force a build on the slow fallback"
         exit 3
         ;;
     ok)

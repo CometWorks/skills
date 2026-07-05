@@ -56,12 +56,14 @@ Use `se-dev-game-code` skill to search game's decompiled code. May need this to
 understand how game's internals work and how to interface with it properly. Stick to
 game code searches corresponding to names on Mod API whitelist for efficiency.
 
-## Optional Graphify Graph (off by default)
+## Graphify Graph
 
-Preparation can *optionally* build a separate Graphify graph for the local mod folder (or
-`SE_DEV_MOD_PROJECT_ROOT`). It is **off by default**; build it by opting in with
-`SE_DEV_GRAPHIFY=1`. Read on demand — skip for normal search work: build via
-[GraphifyPrepare.md](../se-dev/GraphifyPrepare.md), query via
+Preparation builds a separate Graphify graph for the local mod folder (or
+`SE_DEV_MOD_PROJECT_ROOT`). With the fast Rust clustering backend (Python 3.12 via `uv`,
+provisioned automatically) prepare builds it **automatically**; this corpus is small so it
+is quick either way. Where the fast backend is unavailable it stays **opt-in** with
+`SE_DEV_GRAPHIFY=1`; `SE_DEV_GRAPHIFY=0` disables it. Read on demand — skip for normal
+search work: build via [GraphifyPrepare.md](../se-dev/GraphifyPrepare.md), query via
 [GraphifyUsage.md](../se-dev/GraphifyUsage.md).
 
 ## Folder Structure
