@@ -68,13 +68,15 @@ skills/se-dev-game-code/
 
 The `Data` folder is a junction/symlink to the per-user persistent game-code data directory (`%USERPROFILE%\.se-dev\game-code` on Windows, `~/.se-dev/game-code` on Linux). Treat `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` exactly as before.
 
-## Optional Graphify Graph (off by default)
+## Graphify Graph
 
-Preparation can *optionally* build a separate Graphify graph for decompiled game code
-under `Data/Decompiled` (or `SE_DEV_GAME_CODE_GRAPH_ROOT`). It is **off by default** and
-adds ~10-30 minutes on the first build, so prepare only builds it when opted in with
-`SE_DEV_GRAPHIFY=1`; ask the user first. Read these on demand — skip them for normal
-search work:
+Preparation builds a separate Graphify graph for decompiled game code under
+`Data/Decompiled` (or `SE_DEV_GAME_CODE_GRAPH_ROOT`). Prepare installs Graphify on
+**Python 3.12 with the fast native Rust Leiden clustering backend** and, when that backend
+is available (needs `uv`), builds the graph **automatically** in ~1-2 minutes. Where the
+fast backend cannot be provisioned it falls back to the slow single-core clustering
+(~10-30 minutes) and stays **opt-in** with `SE_DEV_GRAPHIFY=1` (ask the user first);
+`SE_DEV_GRAPHIFY=0` disables it. Read these on demand — skip them for normal search work:
 
 - Build / health-check / rebuild: [GraphifyPrepare.md](../se-dev/GraphifyPrepare.md)
 - Query an existing graph: [GraphifyUsage.md](../se-dev/GraphifyUsage.md)

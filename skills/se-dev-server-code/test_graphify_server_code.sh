@@ -21,15 +21,15 @@ echo ============================================================
 echo GRAPHIFY HEALTH CHECK
 echo ============================================================
 if ! command -v graphify >/dev/null 2>&1; then
-    echo "SKIP: graphify is not on PATH. Build the graph with:"
-    echo "  SE_DEV_GRAPHIFY=1 ./prepare.sh"
+    echo "SKIP: graphify is not on PATH. Build the graph by running prepare:"
+    echo "  ./prepare.sh   # auto-builds with the fast Rust backend; add SE_DEV_GRAPHIFY=1 to force the slow fallback"
     exit 1
 fi
 if ! bash "$SKILL_DIR/../se-dev/graphify-check.sh" "$GRAPH_ROOT" --deep; then
     echo
-    echo "FAIL: Graphify graph is missing or unusable. Rebuild it with:"
+    echo "FAIL: Graphify graph is missing or unusable. Rebuild it by re-running prepare:"
     echo "  rm -rf \"$GRAPH_ROOT/graphify-out\""
-    echo "  SE_DEV_GRAPHIFY=1 ./prepare.sh"
+    echo "  ./prepare.sh   # auto-builds with the fast Rust backend; add SE_DEV_GRAPHIFY=1 to force the slow fallback"
     exit 1
 fi
 echo

@@ -90,9 +90,11 @@ uv run search_torch.py class declaration PatchContext -n Torch.Managers.PatchMan
 - Prefer `torch.Managers.GetManager<T>()` or `session.Managers.GetManager<T>()` over obsolete `ITorchBase.GetManager<T>()`.
 - Use `TorchPluginBase` as normal starting point unless task clearly needs lower-level implementation.
 - If task is about Space Engineers game behavior rather than Torch framework behavior, use `se-dev-game-code` or `se-dev-server-code` as companion skill.
-- Preparation can *optionally* build a separate Graphify graph for the selected Torch
-  checkout (or `SE_DEV_TORCH_PLUGIN_ROOT`). It is **off by default**; build it by opting in
-  with `SE_DEV_GRAPHIFY=1`. Read on demand — build via
+- Preparation builds a separate Graphify graph for the selected Torch checkout (or
+  `SE_DEV_TORCH_PLUGIN_ROOT`). With the fast Rust clustering backend (Python 3.12 via `uv`,
+  provisioned automatically) prepare builds it **automatically** (~1 minute for a Torch
+  checkout). Where the fast backend is unavailable it stays **opt-in** with
+  `SE_DEV_GRAPHIFY=1`; `SE_DEV_GRAPHIFY=0` disables it. Read on demand — build via
   [GraphifyPrepare.md](../se-dev/GraphifyPrepare.md), query via
   [GraphifyUsage.md](../se-dev/GraphifyUsage.md).
 
