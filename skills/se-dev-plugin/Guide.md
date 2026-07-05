@@ -43,7 +43,7 @@ Updating your plugin is the same workflow by changing your XML in the [PluginHub
 
 Magnetar lists and loads server plugins from the MagnetarHub. Server admins configure them remotely through [Quasar](https://github.com/CometWorks/quasar), the Magnetar control plane, which lists the MagnetarHub plugins and renders each plugin's configuration UI.
 
-## Pusar
+## Pulsar
 ### Paths 
 - Main installation folder: `%AppData%\Pulsar`
 - SE1 executable: `%AppData%\Pulsar\Legacy.exe`

@@ -25,6 +25,10 @@ mkdir -p Data/Sources
 log "Updating PluginHub registry"
 uv run python -u download_pluginhub.py
 
+log "Updating MagnetarHub registry"
+uv run python -u download_magnetarhub.py \
+    || log "WARNING: MagnetarHub registry update failed; continuing without it"
+
 log "Indexing plugin code (skipped if no sources cloned yet)"
 uv run python -u index_plugins.py
 

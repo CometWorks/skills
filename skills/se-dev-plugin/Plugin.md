@@ -35,8 +35,10 @@ Building the project:
 - To build code, invoke `dotnet build`.
 - Never run verbose builds, they give too much output. Use `Echo` instead to print variable values from build process as/if required.
 
-Search existing plugins in [PluginHub/Plugins](PluginHub/Plugins) folder. Each plugin registered with XML file.
-Before searching XML files, run `uv run download_pluginhub.py` with this same folder as CWD to create or update `PluginHub` folder.
+Search existing plugins in the registry folders [PluginHub/Plugins](PluginHub/Plugins) (client, Pulsar)
+and [MagnetarHub/Plugins](MagnetarHub/Plugins) (server, Magnetar). Each plugin registered with an XML file.
+Before searching XML files, run `uv run download_pluginhub.py` and `uv run download_magnetarhub.py` with this
+same folder as CWD to create or update the `PluginHub` and `MagnetarHub` folders.
 Plugin's GitHub repository ID defined in `<RepoId>` or if not present then in `<Id>`. Use that ID to download
 ZIP archive of plugin's source code, extract it and look into plugin's source code. Select similar plugins to download
 for task at hand to find good ideas. You may also use GitHub's search to search in plugins without downloading them.

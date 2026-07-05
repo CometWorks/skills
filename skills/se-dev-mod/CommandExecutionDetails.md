@@ -9,7 +9,7 @@ This document provides comprehensive details about command execution on Windows 
 ```bash
 # RECOMMENDED: Use workdir parameter to run commands in skill folder
 bash -c "./Prepare.bat" (with workdir set to the skill folder)
-uv run search_code.py --help (with workdir set to the skill folder)
+uv run search_mods.py --help (with workdir set to the skill folder)
 ```
 
 Most reliable approach because:
@@ -46,7 +46,7 @@ PowerShell is native Windows shell that handles backslash paths correctly:
 # PowerShell examples
 cd C:\path\to\skill\folder
 .\Prepare.bat
-uv run search_code.py --help
+uv run search_mods.py --help
 ```
 
 PowerShell uses `;` to chain commands, not `&&`:
@@ -113,8 +113,8 @@ if (Test-Path "Prepare.DONE") { "READY" } else { "NOT_READY" }
 All Python scripts in this skill must run via `uv run`:
 
 ```bash
-uv run search_code.py --class-decl "MyCubeGrid"
-uv run index_code.py
+uv run search_mods.py class declaration MyCubeGrid
+uv run index_mods.py
 ```
 
 Ensures correct Python virtual environment used.
@@ -156,25 +156,25 @@ busybox.exe grep "pattern" C:/Users/name/folder
 ### ❌ Mistake 3: Running Commands from Wrong Directory
 
 ```cmd
-C:\Users\name> uv run search_code.py --help
+C:\Users\name> uv run search_mods.py --help
 ```
-**Error:** `search_code.py` not found, wrong CWD
+**Error:** `search_mods.py` not found, wrong CWD
 
 ✅ **Solution 1:** Use workdir parameter:
 ```bash
-uv run search_code.py --help (with workdir=C:\path\to\skill\folder)
+uv run search_mods.py --help (with workdir=C:\path\to\skill\folder)
 ```
 
 ✅ **Solution 2:** Change directory first:
 ```cmd
 cd C:\path\to\skill\folder
-uv run search_code.py --help
+uv run search_mods.py --help
 ```
 
 ### ❌ Mistake 4: Forgetting to Prepare
 
 ```bash
-uv run search_code.py --class-decl "MyCubeGrid"
+uv run search_mods.py class declaration MyCubeGrid
 ```
 **Error:** Index files missing, Python environment not set up
 
@@ -200,7 +200,7 @@ test -f "Prepare.DONE" && echo "READY" || echo "NOT_READY"
 
 **Step 4:** Once prepared, run commands using workdir parameter:
 ```bash
-uv run search_code.py --help (with workdir set to skill folder)
+uv run search_mods.py --help (with workdir set to skill folder)
 ```
 
 **Step 5:** For UNIX commands, use busybox with forward slashes:
@@ -243,12 +243,12 @@ busybox.exe grep -r "MyCubeGrid" C:/path/to/Decompiled
 # Command 1
 ./Prepare.bat (workdir: skill_folder)
 # Command 2
-uv run search_code.py --help (workdir: skill_folder)
+uv run search_mods.py --help (workdir: skill_folder)
 ```
 
 **Option B:** Use PowerShell with semicolons:
 ```powershell
-cd C:\path\to\skill; .\Prepare.bat; uv run search_code.py --help
+cd C:\path\to\skill; .\Prepare.bat; uv run search_mods.py --help
 ```
 
 

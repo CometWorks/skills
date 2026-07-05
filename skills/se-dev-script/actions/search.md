@@ -6,15 +6,15 @@ Search PB script code using `uv run search_scripts.py` from this skill folder.
 
 ## Prerequisites
 
-Before searching, ensure script code index exists. If `ScriptCodeIndex/` directory missing, run:
+Before searching, ensure script code index exists. If `Data/CodeIndex/` directory missing, run:
 
 ```cmd
 uv run index_scripts.py
 ```
 
 This indexes all scripts from:
-- `SteamScripts/` - Downloaded scripts from Steam Workshop (folders with `Script.cs` file)
-- `LocalScripts/` - Local development scripts
+- Steam Workshop scripts — read in place from the Steam folder (resolved via `SE_GAME_ROOT` or the Steam registry); **not** copied into the skill
+- `LocalScripts/` - Local development scripts (junction/symlink to the game's local-script folder)
 
 ## Quick Reference
 
@@ -89,7 +89,7 @@ uv run search_scripts.py -i class declaration inventory
 
 ## Script List
 
-After indexing, list of discovered scripts saved to `ScriptCodeIndex/scripts.json`. This file contains info about each script including its source (steam/local) and path.
+After indexing, list of discovered scripts saved to `Data/scripts.json` (also refreshable on its own via `uv run list_scripts.py`). This file contains info about each script including its source (steam/local) and path.
 
 ## When to Search
 

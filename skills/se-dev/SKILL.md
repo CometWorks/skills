@@ -59,6 +59,10 @@ These two docs are fetched **on demand**: skip them entirely unless the user spe
 - **[se-dev-game-code](../se-dev-game-code/SKILL.md)** — Search decompiled C# of game **client**. Recommended companion for client mod/plugin work.
 - **[se-dev-server-code](../se-dev-server-code/SKILL.md)** — Search decompiled C# of **dedicated server**. Companion for server-side mod/plugin work.
 
+The `*-book` skills mentioned below (`se-dev-game-book`, `se-dev-server-book`, `se-dev-torch-book`)
+are **private/internal** handbooks distributed separately, not part of this public repository. Use
+them if they are installed; otherwise fall back to the corresponding `*-code` search skill.
+
 ## How to pick
 
 - **Programmable Block script?** → `se-dev-script` (+ `se-dev-game-code` / `se-dev-game-book` for API details).

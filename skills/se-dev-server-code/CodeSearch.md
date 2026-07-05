@@ -2,7 +2,7 @@
 
 Search the decompiled Space Engineers C# codebase efficiently.
 
-**IMPORTANT:** All commands run on Windows. This skill folder must be current working directory.
+**IMPORTANT:** Commands use UNIX shell (bash) syntax. On Windows they run via the bundled `busybox.exe`; on Linux they use the native shell. This skill folder must be the current working directory.
 
 ## Running Commands
 
@@ -58,7 +58,7 @@ uv run search_server_code.py -l 10 struct usage Vector3D
 
 ### Search Method Signatures
 
-Method signatures show complete method declaration including modifiers, return type, parameters, and attributes:
+Method signatures show full method declaration including modifiers, return type, parameters, and attributes:
 
 ```bash
 # Find signatures by method name

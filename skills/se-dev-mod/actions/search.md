@@ -6,15 +6,15 @@ Search mod code with `uv run search_mods.py` from this skill folder.
 
 ## Prerequisites
 
-Before searching, ensure mod code index exists. If `ModCodeIndex/` directory missing, run:
+Before searching, ensure mod code index exists. If `Data/CodeIndex/` directory missing, run:
 
 ```cmd
 uv run index_mods.py
 ```
 
 This indexes all mods from:
-- `SteamMods/` - Downloaded mods from Steam Workshop (folders with `Data/Scripts` subdirectory)
-- `LocalMods/` - Local development mods
+- Steam Workshop mods — read in place from the Steam folder (resolved via `SE_GAME_ROOT` or the Steam registry); **not** copied into the skill
+- `LocalMods/` - Local development mods (junction/symlink to the game's local-mod folder)
 
 ## Quick Reference
 
@@ -100,7 +100,7 @@ uv run search_mods.py -i class declaration player
 
 ## Mod List
 
-After indexing, list of discovered mods saved to `ModCodeIndex/mods.json`. Contains info about each mod including its source (steam/local) and path.
+After indexing, list of discovered mods saved to `Data/mods.json` (also refreshable on its own via `uv run list_mods.py`). Contains info about each mod including its source (steam/local) and path.
 
 ## When to Search
 

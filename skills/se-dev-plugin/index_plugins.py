@@ -31,9 +31,9 @@ from plugin_paths import (
     CODE_INDEX_DIR,
     PLUGIN_LIST_FILE,
     PLUGIN_SOURCES_DIR,
-    PLUGINHUB_DIR,
-    PLUGINS_DIR,
     SCRIPT_DIR,
+    iter_registry_xml,
+    plugin_repo_ref,
 )
 
 OUTPUT_DIR = CODE_INDEX_DIR
@@ -1075,11 +1075,31 @@ class FileProcessor:
             result.field_entries.append(entry)
 
 
+def _registry_by_repo_name() -> Dict[str, Tuple[str, str]]:
+    """Map local repo folder name -> (repo_ref, friendly_name) across registries."""
+    mapping: Dict[str, Tuple[str, str]] = {}
+    for xml_file in iter_registry_xml():
+        try:
+            root = ET.parse(xml_file).getroot()
+        except Exception:
+            continue
+        repo_ref = plugin_repo_ref(root)
+        if not repo_ref:
+            continue
+        repo_name = repo_ref.split("/")[-1] if "/" in repo_ref else repo_ref
+        name_elem = root.find("FriendlyName")
+        friendly = name_elem.text.strip() if (name_elem is not None and name_elem.text) else ""
+        mapping.setdefault(repo_name, (repo_ref, friendly))
+    return mapping
+
+
 def find_local_plugins(plugin_sources_dir: Path) -> List[Dict]:
     """Find plugins in the plugin sources directory"""
     plugins = []
     if not plugin_sources_dir.exists():
         return plugins
+
+    registry_by_repo = _registry_by_repo_name()
 
     for item in plugin_sources_dir.iterdir():
         if item.is_dir() and not item.name.startswith('.'):
@@ -1091,23 +1111,14 @@ def find_local_plugins(plugin_sources_dir: Path) -> List[Dict]:
                     "path": str(item)
                 }
 
-                # Try to find matching PluginHub entry
-                if PLUGINS_DIR.exists():
-                    for xml_file in PLUGINS_DIR.glob("*.xml"):
-                        try:
-                            tree = ET.parse(xml_file)
-                            root = tree.getroot()
-                            id_elem = root.find("Id")
-                            name_elem = root.find("FriendlyName")
-                            if id_elem is not None and id_elem.text:
-                                repo_name = id_elem.text.split("/")[-1]
-                                if repo_name == item.name:
-                                    plugin_info["id"] = id_elem.text
-                                    if name_elem is not None and name_elem.text:
-                                        plugin_info["name"] = name_elem.text
-                                    break
-                        except:
-                            pass
+                # Match the source folder to a registry entry (PluginHub or
+                # MagnetarHub) by repo name, so the id/name are meaningful.
+                match = registry_by_repo.get(item.name)
+                if match:
+                    repo_ref, friendly = match
+                    plugin_info["id"] = repo_ref
+                    if friendly:
+                        plugin_info["name"] = friendly
 
                 plugins.append(plugin_info)
 
@@ -1115,37 +1126,40 @@ def find_local_plugins(plugin_sources_dir: Path) -> List[Dict]:
 
 
 def get_available_plugins() -> List[Dict]:
-    """Get all available plugins from PluginHub (for reference)"""
+    """Get all available plugins from every registry (for reference)"""
     available = []
-    if not PLUGINS_DIR.exists():
-        return available
+    seen = set()
 
-    for xml_file in PLUGINS_DIR.glob("*.xml"):
+    for xml_file in iter_registry_xml():
         try:
-            tree = ET.parse(xml_file)
-            root = tree.getroot()
-            plugin_info = {"id": "", "name": "", "description": ""}
+            root = ET.parse(xml_file).getroot()
+        except Exception:
+            continue
 
-            id_elem = root.find("Id")
-            if id_elem is not None and id_elem.text:
-                plugin_info["id"] = id_elem.text.strip()
+        plugin_info = {"id": "", "repo": "", "name": "", "description": ""}
 
-            name_elem = root.find("FriendlyName")
-            if name_elem is not None and name_elem.text:
-                plugin_info["name"] = name_elem.text.strip()
+        id_elem = root.find("Id")
+        if id_elem is not None and id_elem.text:
+            plugin_info["id"] = id_elem.text.strip()
 
-            desc_elem = root.find("Description")
-            if desc_elem is not None and desc_elem.text:
-                plugin_info["description"] = desc_elem.text.strip()
-            else:
-                tooltip_elem = root.find("Tooltip")
-                if tooltip_elem is not None and tooltip_elem.text:
-                    plugin_info["description"] = tooltip_elem.text.strip()
+        plugin_info["repo"] = plugin_repo_ref(root)
 
-            if plugin_info["id"]:
-                available.append(plugin_info)
-        except:
-            pass
+        name_elem = root.find("FriendlyName")
+        if name_elem is not None and name_elem.text:
+            plugin_info["name"] = name_elem.text.strip()
+
+        desc_elem = root.find("Description")
+        if desc_elem is not None and desc_elem.text:
+            plugin_info["description"] = desc_elem.text.strip()
+        else:
+            tooltip_elem = root.find("Tooltip")
+            if tooltip_elem is not None and tooltip_elem.text:
+                plugin_info["description"] = tooltip_elem.text.strip()
+
+        key = (plugin_info["id"] or plugin_info["repo"]).lower()
+        if plugin_info["id"] and key not in seen:
+            seen.add(key)
+            available.append(plugin_info)
 
     return sorted(available, key=lambda p: p["name"].lower())
 
