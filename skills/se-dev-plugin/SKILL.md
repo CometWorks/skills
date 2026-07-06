@@ -50,6 +50,7 @@ Read appropriate documents for further details:
 - [ClientPlugin.md](ClientPlugin.md) Client plugin development (relevant on client side)
 - [ServerPlugin.md](ServerPlugin.md) Server plugin development (relevant on server side)
 - [Guide.md](Guide.md) Use this to answer questions about plugin development process in general.
+- [Review.md](Review.md) How to review a plugin for inclusion on PluginHub / MagnetarHub (manifest conformance, commit pin, security audit, from-source build).
 - [Publicizer.md](Publicizer.md) How to use Krafs publicizer to access internal, protected or private members in original game code (optional).
 - [OtherPluginsAsExamples.md](OtherPluginsAsExamples.md) How to look into source code of other plugins as examples.
 
@@ -77,7 +78,8 @@ A client-only plugin uses [client plugin template](https://github.com/CometWorks
 Client plugins released exclusively on PluginHub. All client plugins must be open source, since they are compiled on
 player's machine from GitHub source revision identified by its PluginHub registration. Plugins are
 reviewed for safety and security on submission, but only on best effort basis, without any legal guarantees.
-Plugins run native code and can do anything.
+Plugins run native code and can do anything. When reviewing a submission (or update) to PluginHub or
+MagnetarHub, follow [Review.md](Review.md).
 
 Use `se-dev-game-code` skill to search game's decompiled code. Need this to
 understand how game's internals work and how to interface with it and patch it properly.
