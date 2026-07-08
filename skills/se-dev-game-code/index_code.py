@@ -826,15 +826,11 @@ class FileProcessor:
             return
 
         base_list = self._find_base_list(node)
-        if not base_list:
-            return
-
-        base_types = self._get_base_list_types(base_list)
-        if not base_types:
-            return
+        base_types = self._get_base_list_types(base_list) if base_list else []
 
         if node.type == "interface_declaration":
-            # All items in interface base list are parent interfaces
+            # All items in an interface base list are parent interfaces.
+            # A root interface with no base list simply produces no rows.
             for parent_type in base_types:
                 parent_fqn = self._resolve_type_namespace(
                     parent_type, context["namespace"]
@@ -853,64 +849,63 @@ class FileProcessor:
                 result.interface_hierarchy_entries.append(hier_entry)
 
         elif node.type == "struct_declaration":
-            # Structs can only implement interfaces (no struct inheritance)
-            interface_fqns = []
-            for iface in base_types:
-                iface_fqn = self._resolve_type_namespace(
-                    iface, context["namespace"]
-                )
-                interface_fqns.append(iface_fqn)
-
-            impl_entry = InterfaceImplementationEntry(
-                implementing_namespace=context["namespace"],
-                implementing_type=name,
-                interfaces=",".join(interface_fqns),
-                file_path=context["file_path"],
-                start_line=node.start_point[0] + 1,
-                end_line=node.end_point[0] + 1,
-            )
-            result.interface_implementation_entries.append(impl_entry)
-
-        else:
-            # class_declaration or record_declaration
-            # First item could be base class or interface
-            first_type = base_types[0]
-            first_fqn = self._resolve_type_namespace(
-                first_type, context["namespace"]
-            )
-            first_ns, first_name = self._split_namespace_and_type(first_fqn)
-
-            # Check if first type is an interface (declared_interfaces is
-            # populated from Pass 1, so this check is now reliable)
-            is_interface = first_name in self.declared_interfaces
-
-            interfaces = []
-            if is_interface:
-                # All items are interfaces
-                interfaces = base_types
-            else:
-                # First item is base class, rest are interfaces
-                hier_entry = ClassHierarchyEntry(
-                    child_namespace=context["namespace"],
-                    child_class=name,
-                    parent_namespace=first_ns,
-                    parent_class=first_name,
+            # Structs can only implement interfaces (no struct inheritance).
+            # A struct with no base list implements nothing, so emit no row.
+            if base_types:
+                interface_fqns = [
+                    self._resolve_type_namespace(iface, context["namespace"])
+                    for iface in base_types
+                ]
+                impl_entry = InterfaceImplementationEntry(
+                    implementing_namespace=context["namespace"],
+                    implementing_type=name,
+                    interfaces=",".join(interface_fqns),
                     file_path=context["file_path"],
                     start_line=node.start_point[0] + 1,
                     end_line=node.end_point[0] + 1,
                 )
-                result.class_hierarchy_entries.append(hier_entry)
-                interfaces = base_types[1:]
+                result.interface_implementation_entries.append(impl_entry)
 
-            # Process interfaces
+        else:
+            # class_declaration or record_declaration.
+            # Every class has a base class: when none is written explicitly, or
+            # the base list contains only interfaces, the base is the implicit
+            # System.Object. We ALWAYS emit a ClassHierarchyEntry so that root
+            # classes are not missing from the hierarchy index (previously a
+            # class with no explicit class base got no row at all, hiding it
+            # from every consumer that enumerates types from the hierarchy).
+            base_class_ns, base_class_name = "System", "Object"
+            interfaces = base_types
+            if base_types:
+                first_type = base_types[0]
+                first_fqn = self._resolve_type_namespace(
+                    first_type, context["namespace"]
+                )
+                first_ns, first_name = self._split_namespace_and_type(first_fqn)
+
+                # declared_interfaces is populated in Pass 1, so this is reliable.
+                if first_name not in self.declared_interfaces:
+                    # First item is the base class; the rest are interfaces.
+                    base_class_ns, base_class_name = first_ns, first_name
+                    interfaces = base_types[1:]
+
+            hier_entry = ClassHierarchyEntry(
+                child_namespace=context["namespace"],
+                child_class=name,
+                parent_namespace=base_class_ns,
+                parent_class=base_class_name,
+                file_path=context["file_path"],
+                start_line=node.start_point[0] + 1,
+                end_line=node.end_point[0] + 1,
+            )
+            result.class_hierarchy_entries.append(hier_entry)
+
+            # Process implemented interfaces.
             if interfaces:
-                interface_fqns = []
-                for iface in interfaces:
-                    iface_fqn = self._resolve_type_namespace(
-                        iface, context["namespace"]
-                    )
-                    interface_fqns.append(iface_fqn)
-
+                interface_fqns = [
+                    self._resolve_type_namespace(iface, context["namespace"])
+                    for iface in interfaces
+                ]
                 impl_entry = InterfaceImplementationEntry(
                     implementing_namespace=context["namespace"],
                     implementing_type=name,
