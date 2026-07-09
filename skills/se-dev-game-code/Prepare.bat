@@ -100,12 +100,14 @@ if %ERRORLEVEL% NEQ 0 (
 if exist Data\.git goto skip_git_init
 echo Initializing local Git repository in the Data folder
 pushd Data
-git init
+:: Create the repository with 'main' as the default branch. The -c option sets the
+:: initial branch on modern git (>=2.28) and suppresses git's "using master" hint.
+git -c init.defaultBranch=main init
 if %ERRORLEVEL% NEQ 0 (
     popd
     goto failed
 )
-:: Ensure default branch is main
+:: Ensure default branch is main (fallback for git older than 2.28)
 git symbolic-ref HEAD refs/heads/main 2>NUL
 
 :: Required: some decompiled paths exceed the legacy MAX_PATH (260 chars),

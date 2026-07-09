@@ -216,7 +216,10 @@ ensure_git_repo() {
         return 0
     fi
 
-    git -C "$repo_dir" init >/dev/null
+    # Create the repository with 'main' as the default branch. The -c option sets
+    # the initial branch on modern git (>=2.28) and suppresses git's "using
+    # master" hint; the symbolic-ref fallback covers older git versions.
+    git -C "$repo_dir" -c init.defaultBranch=main init >/dev/null
     git -C "$repo_dir" symbolic-ref HEAD refs/heads/main 2>/dev/null || true
     cat >"$repo_dir/.gitignore" <<'EOF'
 CodeIndex/
