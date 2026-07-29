@@ -661,9 +661,35 @@ class FileProcessor:
                 if not entry.namespace and match["namespace"]:
                     entry.namespace = match["namespace"]
 
+        # Spans the tree already recorded, per name. A scanned declaration that
+        # overlaps one of them is the same declaration seen from a different
+        # starting line: the tree's span opens at the type's first attribute
+        # while the text scan opens at the declaration keyword. Emitting both
+        # produces two rows for one type, and the second one poisons every
+        # consumer that treats a declaration inside another as a nested type -
+        # a whole class's members disappear because its own duplicate row looks
+        # like a nested type covering it.
+        recorded: Dict[str, List[Tuple[int, int]]] = {}
+        for attribute in (
+            "class_entries",
+            "struct_entries",
+            "interface_entries",
+            "enum_entries",
+        ):
+            for entry in getattr(result, attribute):
+                recorded.setdefault(entry.declaring_type, []).append(
+                    (entry.start_line, entry.end_line)
+                )
+
         for declaration in scanned:
             key = (declaration["name"], declaration["start_line"])
             if key in seen:
+                continue
+            start, end = declaration["start_line"], declaration["end_line"]
+            if any(
+                start <= other_end and end >= other_start
+                for other_start, other_end in recorded.get(declaration["name"], ())
+            ):
                 continue
             attribute = self._KIND_TO_ENTRIES.get(declaration["kind"])
             if attribute is None:
