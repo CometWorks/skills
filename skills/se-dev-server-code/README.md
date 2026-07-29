@@ -51,6 +51,7 @@ In `Data/CodeIndex/` after preparation:
 | `struct_usages.csv` | Struct usages |
 | `enum_declarations.csv` | Enum declarations |
 | `enum_usages.csv` | Enum usages |
+| `enum_member_declarations.csv` | Enum member declarations (name, value, doc comment) |
 | `method_declarations.csv` | Method declarations |
 | `method_usages.csv` | Method usages |
 | `method_signatures.csv` | Method signatures (different columns, see below) |

@@ -14,6 +14,9 @@ CATEGORY_FILES = {
     "class": ("class_declarations.csv", "class_usages.csv"),
     "method": ("method_declarations.csv", "method_usages.csv"),
     "enum": ("enum_declarations.csv", "enum_usages.csv"),
+    # Enum members have no usage form of their own: a reference to `MyKeys.F1`
+    # is recorded as a usage of the enum.
+    "enum_member": ("enum_member_declarations.csv", None),
     "struct": ("struct_declarations.csv", "struct_usages.csv"),
     "interface": ("interface_declarations.csv", "interface_usages.csv"),
     "field": ("field_declarations.csv", "field_usages.csv"),
@@ -38,6 +41,7 @@ SYMBOL_COLUMNS = {
     "struct": "declaring_type",
     "interface": "declaring_type",
     "enum": "declaring_type",
+    "enum_member": "symbol_name",
     "method": "method",
     "constructor": "method",
     "field": "symbol_name",
@@ -375,7 +379,9 @@ def search_interface_implementors(patterns, ns_filter):
     with open(index_file, "r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            interfaces = row["interfaces"].split(",")
+            # Semicolon-separated: an interface's own generic arguments
+            # contain commas.
+            interfaces = row["interfaces"].split(";")
             impl_fqn = (
                 f"{row['implementing_namespace']}.{row['implementing_type']}"
                 if row["implementing_namespace"]
