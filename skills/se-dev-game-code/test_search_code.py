@@ -78,6 +78,15 @@ CHECKS = [
     # NO-MATCHES instead of failing.
     ("none", "Enum member usage form does not exist", ["enum_member", "usage", "FactionShare"]),
 
+    ("section", "DELEGATE DECLARATION", None),
+    ("any", "BreakLogicHandler delegate declaration", ["delegate", "declaration", "BreakLogicHandler"]),
+    ("none", "Delegate usage form does not exist", ["delegate", "usage", "BreakLogicHandler"]),
+    # A delegate nested in a class keeps its own name. Re-attributing it to the
+    # enclosing type would overwrite the very column its name lives in, leaving
+    # it findable only under the parent's name.
+    ("any", "Nested delegate keeps its own name", ["delegate", "declaration", "re:^BreakLogicHandlerDelegate$"]),
+    ("none", "Nested delegate is not filed under its enclosing type", ["delegate", "declaration", "re:^HkBreakOffPartsUtil$"]),
+
     # Usage rows carry the enclosing namespace/type/method as context columns next
     # to the symbol itself. Matching the wrong column silently hides most member
     # usages (they sit inside method bodies) and invents matches on method names.

@@ -17,6 +17,7 @@ CATEGORY_FILES = {
     # Enum members have no usage form of their own: a reference to `MyKeys.F1`
     # is recorded as a usage of the enum.
     "enum_member": ("enum_member_declarations.csv", None),
+    "delegate": ("delegate_declarations.csv", None),
     "struct": ("struct_declarations.csv", "struct_usages.csv"),
     "interface": ("interface_declarations.csv", "interface_usages.csv"),
     "field": ("field_declarations.csv", "field_usages.csv"),
@@ -42,6 +43,7 @@ SYMBOL_COLUMNS = {
     "interface": "declaring_type",
     "enum": "declaring_type",
     "enum_member": "symbol_name",
+    "delegate": "declaring_type",
     "method": "method",
     "constructor": "method",
     "field": "symbol_name",

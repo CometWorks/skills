@@ -250,6 +250,7 @@ class FileProcessingResult:
     struct_entries: List[IndexEntry] = field(default_factory=list)
     enum_entries: List[IndexEntry] = field(default_factory=list)
     enum_member_entries: List[IndexEntry] = field(default_factory=list)
+    delegate_entries: List[IndexEntry] = field(default_factory=list)
     method_entries: List[IndexEntry] = field(default_factory=list)
     field_entries: List[IndexEntry] = field(default_factory=list)
     property_entries: List[IndexEntry] = field(default_factory=list)
@@ -424,6 +425,8 @@ class FileProcessor:
                 self._process_struct(node, context, result)
             elif node.type == "enum_declaration":
                 self._process_enum(node, context, result)
+            elif node.type == "delegate_declaration":
+                self._process_delegate(node, context, result)
             elif node.type == "record_declaration":
                 self._process_class(node, context, result)
             elif node.type in ("method_declaration", "constructor_declaration"):
@@ -703,7 +706,14 @@ class FileProcessor:
         return self._clean_doc_comment(" ".join(comment_lines))
 
     def _reattribute_members(self, scanned: List[Dict], result: FileProcessingResult):
-        """Point each member at the innermost declaration that contains it."""
+        """Point each member at the innermost declaration that contains it.
+
+        Members only. A delegate is a type, and a type carries its own name in
+        `declaring_type` - the very column this rewrites - so re-attributing one
+        would leave a nested delegate holding its enclosing type's name and no
+        name of its own. Nested classes and structs are left alone for the same
+        reason.
+        """
         ordered = sorted(scanned, key=lambda d: (d["start_line"], -d["end_line"]))
         if not ordered:
             return
@@ -1494,6 +1504,45 @@ class FileProcessor:
 
         self._process_enum_members(node, context, result, name)
 
+    def _process_delegate(
+        self, node: Node, context: Dict, result: FileProcessingResult
+    ):
+        """Process a delegate declaration.
+
+        A delegate is a type, and 153 files in the decompiled tree declare
+        nothing else. Because there was no dispatch for `delegate_declaration`,
+        every one of those files produced no declaration row at all, which is
+        indistinguishable from a parse failure and made "did any source file
+        yield nothing?" unanswerable.
+        """
+        name = self._get_identifier_name(node)
+        if not name:
+            return
+
+        access, modifiers = self._extract_modifiers(node)
+
+        return_type = ""
+        type_node = node.child_by_field_name("type")
+        if type_node is not None:
+            return_type = self._extract_full_type_text(type_node)
+
+        entry = IndexEntry(
+            namespace=context["namespace"],
+            declaring_type=name,
+            method="",
+            symbol_name="",
+            entry_type="declaration",
+            file_path=context["file_path"],
+            start_line=node.start_point[0] + 1,
+            end_line=node.end_point[0] + 1,
+            description=self._get_preceding_comment(node, context["source_lines"]),
+            access=access,
+            modifiers=modifiers,
+            member_type=return_type,
+            params=self._extract_params_text(node),
+        )
+        result.delegate_entries.append(entry)
+
     def _process_enum_members(
         self,
         node: Node,
@@ -2044,6 +2093,7 @@ class CSharpIndexer:
         self.struct_index: List[IndexEntry] = []
         self.enum_index: List[IndexEntry] = []
         self.enum_member_index: List[IndexEntry] = []
+        self.delegate_index: List[IndexEntry] = []
         self.method_index: List[IndexEntry] = []
         self.field_index: List[IndexEntry] = []
         self.property_index: List[IndexEntry] = []
@@ -2088,6 +2138,7 @@ class CSharpIndexer:
                 self.struct_index.extend(result.struct_entries)
                 self.enum_index.extend(result.enum_entries)
                 self.enum_member_index.extend(result.enum_member_entries)
+                self.delegate_index.extend(result.delegate_entries)
                 self.method_index.extend(result.method_entries)
                 self.field_index.extend(result.field_entries)
                 self.property_index.extend(result.property_entries)
@@ -2281,6 +2332,17 @@ class CSharpIndexer:
         # empty enum_member_usages.csv would only mislead.
         def member_sort_key(e):
             return (e.namespace, e.declaring_type, e.file_path, e.start_line)
+
+        sorted_delegates = sorted(self.delegate_index, key=member_sort_key)
+        delegate_path = output_dir / "delegate_declarations.csv"
+        print(f"Writing {len(sorted_delegates)} delegate entries to {delegate_path}...")
+        total_declarations += len(sorted_delegates)
+
+        with open(delegate_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(IndexEntry.csv_header())
+            for entry in sorted_delegates:
+                writer.writerow(entry.to_csv_row())
 
         sorted_enum_members = sorted(self.enum_member_index, key=member_sort_key)
         enum_member_path = output_dir / "enum_member_declarations.csv"

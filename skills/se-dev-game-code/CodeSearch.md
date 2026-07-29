@@ -22,6 +22,7 @@ uv run search_game_code.py class declaration MyToolbar
 | `struct` | Struct declarations and usages |
 | `enum` | Enum declarations and usages |
 | `enum_member` | Enum member declarations (usages count as usages of the enum) |
+| `delegate` | Delegate declarations |
 | `method` | Method declarations and usages |
 | `field` | Field declarations and usages |
 | `property` | Property declarations and usages |
