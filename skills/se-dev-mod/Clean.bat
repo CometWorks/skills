@@ -1,8 +1,8 @@
 @echo off
-:: Clean.bat - removes everything that Prepare.bat creates inside the skill
-:: folder. The Data folder (a junction to %USERPROFILE%\.se-dev\mod) is
-:: preserved: only the junction itself is removed so the actual contents
-:: (CodeIndex, mods.json, mod_hashes.json) survive across runs.
+REM Clean.bat - removes everything that Prepare.bat creates inside the skill
+REM folder. The Data folder (a junction to %USERPROFILE%\.se-dev\mod) is
+REM preserved: only the junction itself is removed so the actual contents
+REM (CodeIndex, mods.json, mod_hashes.json) survive across runs.
 
 if exist Data      rmdir Data
 if exist LocalMods rmdir LocalMods

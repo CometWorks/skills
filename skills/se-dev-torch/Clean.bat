@@ -1,8 +1,8 @@
 @echo off
-:: Clean.bat - removes everything that Prepare.bat creates inside the skill
-:: folder. The Data folder (a junction to %USERPROFILE%\.se-dev\torch) is
-:: preserved: only the junction itself is removed so the actual contents
-:: (Sources, CodeIndex) survive across runs.
+REM Clean.bat - removes everything that Prepare.bat creates inside the skill
+REM folder. The Data folder (a junction to %USERPROFILE%\.se-dev\torch) is
+REM preserved: only the junction itself is removed so the actual contents
+REM (Sources, CodeIndex) survive across runs.
 
 if exist Data rmdir Data
 

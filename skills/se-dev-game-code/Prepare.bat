@@ -1,10 +1,10 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-:: 1. Detect game install location (env var override takes precedence)
+REM 1. Detect game install location (env var override takes precedence)
 if defined SE_GAME_ROOT goto have_game_root
 
-:: Try the game's registry key
+REM Try the game's registry key
 for /f "tokens=2*" %%A in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 244850" /v "InstallLocation" 2^>nul') do (
     set "SE_GAME_ROOT=%%B"
 )
@@ -18,7 +18,7 @@ goto failed
 :have_game_root
 echo Game Root: %SE_GAME_ROOT%
 
-:: 2. Verify Python is available
+REM 2. Verify Python is available
 echo Verifying Python
 python --version
 if %ERRORLEVEL% EQU 0 goto has_python
@@ -28,7 +28,7 @@ echo Make sure python.exe is on PATH.
 goto failed
 :has_python
 
-:: 3. Verify command line git is available
+REM 3. Verify command line git is available
 echo Verifying git
 git --version
 if %ERRORLEVEL% EQU 0 goto has_git
@@ -38,7 +38,7 @@ echo Make sure git.exe is on PATH.
 goto failed
 :has_git
 
-:: 4. Install uv if missing
+REM 4. Install uv if missing
 uv -V 2>NUL
 if %ERRORLEVEL% EQU 0 goto skip_uv
 echo Installing uv
@@ -47,20 +47,20 @@ uv -V
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_uv
 
-:: 5. Set up Python venv
+REM 5. Set up Python venv
 if exist .venv goto skip_venv
 echo Setting up Python .venv (uv sync)
 uv sync
 :skip_venv
 
-:: 6. Download busybox if missing
+REM 6. Download busybox if missing
 if exist busybox.exe goto skip_busybox
 echo Downloading busybox
 powershell -Command "$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri https://frippery.org/files/busybox/busybox64u.exe -OutFile busybox.exe"
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_busybox
 
-:: 7. Install ILSpy if missing
+REM 7. Install ILSpy if missing
 set ILSPY_VERSION=10.0.1.8346
 for /f "delims=" %%V in ('ilspycmd -v 2^>NUL') do set ILSPY_INSTALLED=%%V
 if defined ILSPY_INSTALLED (
@@ -74,11 +74,11 @@ ilspycmd -v
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_ilspycmd
 
-:: 8. Set up the Data folder under %USERPROFILE% and create a Data junction.
-:: Using %USERPROFILE% rather than %LOCALAPPDATA% keeps the data outside the
-:: UWP filesystem virtualization layer (Claude Code is a packaged app whose
-:: writes under %LOCALAPPDATA% would be silently redirected into its
-:: per-package LocalCache, hiding the data from regular tools).
+REM 8. Set up the Data folder under %USERPROFILE% and create a Data junction.
+REM Using %USERPROFILE% rather than %LOCALAPPDATA% keeps the data outside the
+REM UWP filesystem virtualization layer (Claude Code is a packaged app whose
+REM writes under %LOCALAPPDATA% would be silently redirected into its
+REM per-package LocalCache, hiding the data from regular tools).
 set "DATA_ROOT=%USERPROFILE%\.se-dev\game-code"
 echo Data Root: %DATA_ROOT%
 if not exist "%DATA_ROOT%" (
@@ -96,25 +96,25 @@ if %ERRORLEVEL% NEQ 0 (
 )
 :skip_data_junction
 
-:: 9. Initialize a local Git repository in the Data folder if missing
+REM 9. Initialize a local Git repository in the Data folder if missing
 if exist Data\.git goto skip_git_init
 echo Initializing local Git repository in the Data folder
 pushd Data
-:: Create the repository with 'main' as the default branch. The -c option sets the
-:: initial branch on modern git (>=2.28) and suppresses git's "using master" hint.
+REM Create the repository with 'main' as the default branch. The -c option sets the
+REM initial branch on modern git (>=2.28) and suppresses git's "using master" hint.
 git -c init.defaultBranch=main init
 if %ERRORLEVEL% NEQ 0 (
     popd
     goto failed
 )
-:: Ensure default branch is main (fallback for git older than 2.28)
+REM Ensure default branch is main (fallback for git older than 2.28)
 git symbolic-ref HEAD refs/heads/main 2>NUL
 
-:: Required: some decompiled paths exceed the legacy MAX_PATH (260 chars),
-:: e.g. EmptyKeys generated bindings under SpaceEngineers.Game.
+REM Required: some decompiled paths exceed the legacy MAX_PATH (260 chars),
+REM e.g. EmptyKeys generated bindings under SpaceEngineers.Game.
 git config core.longpaths true
 
-:: Write .gitignore
+REM Write .gitignore
 > .gitignore (
     echo CodeIndex/
     echo Content/
@@ -137,7 +137,7 @@ if %ERRORLEVEL% NEQ 0 (
 popd
 :skip_git_init
 
-:: 10. Link the game's Bin64 folder
+REM 10. Link the game's Bin64 folder
 if exist Bin64 goto skip_bin64
 echo Linking the game folder as Bin64
 REM It must be the folder where SpaceEngineers.exe is located:
@@ -150,7 +150,7 @@ echo environment variable to the game's root folder and try again.
 goto failed
 :skip_bin64
 
-:: 11. Determine current game version and decide whether to wipe stale outputs
+REM 11. Determine current game version and decide whether to wipe stale outputs
 echo Checking current game version
 uv run python -u check_version.py Bin64 Data > version_check.txt
 if %ERRORLEVEL% EQU 0 (
@@ -172,17 +172,17 @@ type version_check.txt
 goto failed
 :skip_wipe
 
-:: 12. Decompile the game assemblies
+REM 12. Decompile the game assemblies
 if exist Data\Decompiled\VRage.XmlSerializers goto skip_decompile
 .\busybox sh Decompile.sh
 if %ERRORLEVEL% NEQ 0 goto failed
 
-:: 12b. Fix case-collision folders (Gui vs GUI, Filesystem vs FileSystem)
+REM 12b. Fix case-collision folders (Gui vs GUI, Filesystem vs FileSystem)
 echo Fixing case-collision folders
 uv run python -u fix_case_collisions.py Data\Decompiled
 if %ERRORLEVEL% NEQ 0 goto failed
 
-:: 12a. Record the current game version and commit decompiled code
+REM 12a. Record the current game version and commit decompiled code
 echo Recording game version and committing decompiled sources
 uv run python -u check_version.py --write Bin64 Data
 if %ERRORLEVEL% NEQ 0 goto failed
@@ -203,17 +203,17 @@ if %ERRORLEVEL% NEQ 0 (
 popd
 :skip_decompile
 
-:: 13. Remove the Bin64 junction
+REM 13. Remove the Bin64 junction
 rmdir /s /q Bin64
 
-:: 14. Copy indexable content
+REM 14. Copy indexable content
 if exist Data\Content goto skip_content
 echo Copying indexable content
 uv run python -u copy_content.py "%SE_GAME_ROOT%\Content"
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_content
 
-:: 15. Build the code index
+REM 15. Build the code index
 if exist Data\CodeIndex\class_declarations.csv goto skip_code_index
 echo Indexing decompiled code
 mkdir Data\CodeIndex 2>NUL
@@ -221,7 +221,7 @@ uv run python -OO -u index_code.py Data\Decompiled Data\CodeIndex
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_code_index
 
-:: 16. Build the content index
+REM 16. Build the content index
 if exist Data\CodeIndex\content_index.csv goto skip_content_index
 echo Indexing content files
 uv run python -u index_content.py Data\Content Data\Decompiled Data\CodeIndex

@@ -1,9 +1,9 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: Space Engineers Developer Skills - Installation Script
-:: Usage: install.bat <target_skills_folder>
-:: Creates junction points for all skills in the target folder
+REM Space Engineers Developer Skills - Installation Script
+REM Usage: install.bat <target_skills_folder>
+REM Creates junction points for all skills in the target folder
 
 if "%~1"=="" (
     echo Usage: install.bat ^<target_skills_folder^>
@@ -13,11 +13,11 @@ if "%~1"=="" (
 
 set "TARGET=%~1"
 
-:: Get the absolute path to the skills folder (relative to this script's location)
+REM Get the absolute path to the skills folder (relative to this script's location)
 set "SCRIPT_DIR=%~dp0"
 set "SKILLS_DIR=%SCRIPT_DIR%\..\skills"
 
-:: Convert to absolute path
+REM Convert to absolute path
 pushd "%SKILLS_DIR%"
 set "SKILLS_DIR=%CD%"
 popd
@@ -27,7 +27,7 @@ echo Source: %SKILLS_DIR%
 echo Target: %TARGET%
 echo.
 
-:: Create target folder if it doesn't exist
+REM Create target folder if it doesn't exist
 if not exist "%TARGET%" (
     echo Creating target folder: %TARGET%
     mkdir "%TARGET%"
@@ -37,7 +37,7 @@ if not exist "%TARGET%" (
     )
 )
 
-:: List of skills to install
+REM List of skills to install
 set "SKILLS=se-dev se-dev-game-code se-dev-mod se-dev-plugin se-dev-script se-dev-server-code se-dev-torch"
 
 set "SUCCESS=0"
