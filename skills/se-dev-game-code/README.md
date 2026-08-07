@@ -28,9 +28,10 @@ Preparation will:
 2. Detect current game version by inspecting binaries
 3. Wipe `Decompiled/`, `Content/` and `CodeIndex/` if version differs from
    recorded one
-4. Decompile game assemblies and commit them with version label
-5. Copy game content
-6. Build code index
+4. Decompile game assemblies
+5. Copy game content into `Content/`
+6. Commit decompiled sources and content with version label
+7. Build code index
 
 ## Code Index
 

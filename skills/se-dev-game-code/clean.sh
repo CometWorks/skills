@@ -2,7 +2,7 @@
 # clean.sh - removes everything that prepare.sh creates inside the skill
 # folder. The Data folder (a symlink to ~/.se-dev/game-code) is
 # preserved: only the symlink itself is removed so the actual contents
-# (Decompiled, CodeIndex, Content, .git) survive across runs.
+# (Decompiled, CodeIndex, .git) survive across runs.
 set -u
 cd "$(dirname "$(readlink -f "$0")")"
 

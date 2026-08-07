@@ -7,6 +7,9 @@ REM Mirrors test_search_server_code.bat but exercises the optional Graphify grap
 
 set "GRAPH_ROOT=%SE_DEV_SERVER_CODE_GRAPH_ROOT%"
 if "%GRAPH_ROOT%"=="" set "GRAPH_ROOT=Data\Decompiled"
+REM graphify-out sits beside Decompiled, not inside it.
+set "GRAPH_OUT=%SE_DEV_SERVER_CODE_GRAPH_OUT%"
+if "%GRAPH_OUT%"=="" set "GRAPH_OUT=Data"
 if "%GRAPHIFY_MAX_GRAPH_BYTES%"=="" set "GRAPHIFY_MAX_GRAPH_BYTES=2GB"
 
 echo ============================================================
@@ -18,17 +21,17 @@ if %ERRORLEVEL% NEQ 0 (
     echo   .\Prepare.bat   REM auto-builds with the fast Rust backend; set SE_DEV_GRAPHIFY=1 to force the slow fallback
     exit /b 1
 )
-call "%~dp0..\se-dev\GraphifyCheck.bat" "%GRAPH_ROOT%"
+call "%~dp0..\se-dev\GraphifyCheck.bat" "%GRAPH_OUT%"
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo FAIL: Graphify graph is missing or unusable. Rebuild it by re-running prepare:
-    echo   rmdir /S /Q "%GRAPH_ROOT%\graphify-out"
+    echo   rmdir /S /Q "%GRAPH_OUT%\graphify-out"
     echo   .\Prepare.bat   REM auto-builds with the fast Rust backend; set SE_DEV_GRAPHIFY=1 to force the slow fallback
     exit /b 1
 )
 echo.
 
-pushd "%GRAPH_ROOT%"
+pushd "%GRAPH_OUT%"
 
 echo ============================================================
 echo QUERY - BFS traversal for a question

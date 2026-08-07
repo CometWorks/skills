@@ -51,7 +51,9 @@ case "$RC" in
         ;;
     2)
         log "Game version differs or no previous version recorded - wiping stale outputs"
-        rm -rf Data/Decompiled Data/CodeIndex Data/Content
+        # Data files are incomplete until preparation finishes for the new game version
+        rm -f Prepare.DONE
+        rm -rf Data/Decompiled Data/CodeIndex Data/Content Data/graphify-out
         mkdir -p Data/Decompiled
         ;;
     *)
@@ -60,14 +62,58 @@ case "$RC" in
         ;;
 esac
 
+NEED_COMMIT=0
+
+# Bring the Data folder up to the current layout before anything reads it.
+# Decompiled holds only decompiled C# code; Content and graphify-out sit beside
+# it. Earlier versions of this skill kept both inside Decompiled.
+if [ -d Data/Decompiled/Content ]; then
+    log "Moving Data/Decompiled/Content up to Data/Content"
+    rm -rf Data/Content
+    mv Data/Decompiled/Content Data/Content
+    NEED_COMMIT=1
+fi
+if [ -d Data/Decompiled/graphify-out ]; then
+    if [ -d Data/graphify-out ]; then
+        rm -rf Data/Decompiled/graphify-out
+    else
+        log "Moving Data/Decompiled/graphify-out up to Data/graphify-out"
+        mv Data/Decompiled/graphify-out Data/graphify-out
+    fi
+fi
+
+# Content is versioned, so it must not be ignored (older installs ignored it).
+if grep -qxF 'Content/' Data/.gitignore 2>/dev/null; then
+    grep -vxF 'Content/' Data/.gitignore >Data/.gitignore.tmp
+    mv Data/.gitignore.tmp Data/.gitignore
+    NEED_COMMIT=1
+fi
+# The Graphify graph is a large regenerable artifact, so it must be ignored.
+# This has to be in place before the commit below, which stages everything.
+if ! grep -qxF 'graphify-out/' Data/.gitignore 2>/dev/null; then
+    echo 'graphify-out/' >>Data/.gitignore
+    NEED_COMMIT=1
+fi
+
 if [ ! -d Data/Decompiled/VRage.XmlSerializers ]; then
     log "Decompiling the game assemblies"
     ILSPYCMD="$ILSPYCMD" ./Decompile.sh
 
     log "Fixing case-collision folders (Gui vs GUI, Filesystem vs FileSystem)"
     uv run python -u fix_case_collisions.py Data/Decompiled
+    NEED_COMMIT=1
+fi
 
-    log "Recording game version and committing decompiled sources"
+# Only the indexable text files are copied (no binaries), so the definition
+# files can be versioned and their changes reviewed.
+if [ ! -d Data/Content ]; then
+    log "Copying indexable content"
+    uv run python -u copy_content.py "$GAME_ROOT/Content"
+    NEED_COMMIT=1
+fi
+
+if [ "$NEED_COMMIT" = 1 ]; then
+    log "Recording game version and committing decompiled sources and content"
     uv run python -u check_version.py --write Bin64 Data
     GAME_VERSION_LABEL="$(uv run python -u check_version.py --print Bin64)"
     [ -n "$GAME_VERSION_LABEL" ] || fail "Could not determine game version label."
@@ -78,11 +124,6 @@ if [ ! -d Data/Decompiled/VRage.XmlSerializers ]; then
         -c user.name="se-dev-skills" \
         -c user.email="se-dev-skills@localhost" \
         commit -m "$GAME_VERSION_LABEL" >/dev/null || log "(No commit made: working tree clean or nothing to commit)"
-fi
-
-if [ ! -d Data/Content ]; then
-    log "Copying indexable content"
-    uv run python -u copy_content.py "$GAME_ROOT/Content"
 fi
 
 if [ ! -f Data/CodeIndex/class_declarations.csv ]; then
@@ -96,8 +137,11 @@ if [ ! -f Data/CodeIndex/content_index.csv ]; then
     uv run python -u index_content.py Data/Content Data/Decompiled Data/CodeIndex
 fi
 
+# Only the decompiled C# code is graphed; the graph itself is written beside it
+# (Data/graphify-out) so it never pollutes the graphed tree or the repository.
 GAME_CODE_GRAPH_ROOT="${SE_DEV_GAME_CODE_GRAPH_ROOT:-Data/Decompiled}"
-se_dev_graphify_prepare "se-dev-game-code" "$GAME_CODE_GRAPH_ROOT"
+GAME_CODE_GRAPH_OUT="${SE_DEV_GAME_CODE_GRAPH_OUT:-Data}"
+se_dev_graphify_prepare "se-dev-game-code" "$GAME_CODE_GRAPH_ROOT" "$GAME_CODE_GRAPH_OUT"
 
 : >Prepare.DONE
 log "DONE"

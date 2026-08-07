@@ -28,9 +28,10 @@ Preparation will:
 2. Detect current server version by inspecting binaries
 3. Wipe `Decompiled/`, `Content/` and `CodeIndex/` if version differs from
    recorded one
-4. Decompile server assemblies and commit them with version label
-5. Copy server content
-6. Build code index
+4. Decompile server assemblies
+5. Copy server content into `Content/`
+6. Commit decompiled sources and content with version label
+7. Build code index
 
 ## Code Index
 

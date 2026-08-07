@@ -1,8 +1,8 @@
 @echo off
-:: Clean.bat - removes everything that Prepare.bat creates inside the skill
-:: folder. The Data folder (a junction to %USERPROFILE%\.se-dev\script) is
-:: preserved: only the junction itself is removed so the actual contents
-:: (CodeIndex, scripts.json, script_hashes.json) survive across runs.
+REM Clean.bat - removes everything that Prepare.bat creates inside the skill
+REM folder. The Data folder (a junction to %USERPROFILE%\.se-dev\script) is
+REM preserved: only the junction itself is removed so the actual contents
+REM (CodeIndex, scripts.json, script_hashes.json) survive across runs.
 
 if exist Data         rmdir Data
 if exist LocalScripts rmdir LocalScripts

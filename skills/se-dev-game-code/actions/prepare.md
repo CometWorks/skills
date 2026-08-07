@@ -71,7 +71,7 @@ Preparation script:
 - Detects current game version directly from binaries
 - Wipes `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` whenever version differs from recorded one (older versions remain in local Git history)
 - Decompiles game DLLs to C# and optionally to IL code (needs uncommenting a line in `DecompileDll.sh` if required)
-- Records new game version in `Data/game_version.txt` and commits decompiled sources with version label as commit message
-- Copies game content data into `Data/Content`
+- Copies game content data (indexable text files only, no binaries) into `Data/Content`, so definition changes can be reviewed in Git history
+- Records new game version in `Data/game_version.txt` and commits decompiled sources and content with version label as commit message
 - Builds code search index in `Data/CodeIndex`
 - Verifies environment ready for use

@@ -59,11 +59,12 @@ After preparation the skill folder contains a `Data` junction/symlink. Actual da
 skills/se-dev-server-code/
 ├── Data/                 (junction/symlink → per-user persistent server-code data)
 │   ├── .git/             local Git repository tracking decompiled sources
-│   ├── .gitignore        ignores CodeIndex/, Content/, __pycache__, *.py[cod], *.bak, *.log
+│   ├── .gitignore        ignores CodeIndex/, graphify-out/, __pycache__, *.py[cod], *.bak, *.log
 │   ├── game_version.txt  recorded SE_VERSION / CLIENT_BUILD_NUMBER / SERVER_BUILD_NUMBER
-│   ├── Decompiled/       decompiled C# sources, organised per assembly (committed)
-│   ├── Content/          textual server content (NOT committed - regenerated)
-│   └── CodeIndex/        CSV indexes (NOT committed - regenerated)
+│   ├── Decompiled/       decompiled C# sources only, organised per assembly (committed)
+│   ├── Content/          textual server content (committed - definition changes reviewable)
+│   ├── CodeIndex/        CSV indexes (NOT committed - regenerated)
+│   └── graphify-out/     Graphify graph of Decompiled/ (NOT committed - regenerated)
 ├── Bin64/                (junction/symlink → server's DedicatedServer64, removed after preparation)
 └── ...                   skill scripts and documentation
 ```
@@ -73,7 +74,9 @@ The `Data` folder is a junction/symlink to per-user persistent server-code data 
 ## Graphify Graph
 
 Preparation builds a separate Graphify graph for decompiled server code under
-`Data/Decompiled` (or `SE_DEV_SERVER_CODE_GRAPH_ROOT`). Prepare installs Graphify on
+`Data/Decompiled` (or `SE_DEV_SERVER_CODE_GRAPH_ROOT`). The graph is written beside the
+graphed tree, to `Data/graphify-out` (or `SE_DEV_SERVER_CODE_GRAPH_OUT`), so `Data/Decompiled`
+holds nothing but decompiled C# code. Prepare installs Graphify on
 **Python 3.12 with the fast native Rust Leiden clustering backend** and, when that backend
 is available (needs `uv`), builds the graph **automatically** in ~1-2 minutes. Where the
 fast backend cannot be provisioned it falls back to the slow single-core clustering
@@ -86,7 +89,7 @@ fast backend cannot be provisioned it falls back to the slow single-core cluster
 Health check and query test (only meaningful once a graph is built):
 
 ```bash
-bash ../se-dev/graphify-check.sh Data/Decompiled --deep   # is the graph usable?
+bash ../se-dev/graphify-check.sh Data --deep   # is the graph usable?
 ./test_graphify_server_code.sh                            # run a few graph queries
 ```
 

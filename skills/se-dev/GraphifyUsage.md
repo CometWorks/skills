@@ -16,13 +16,17 @@ A graph is only usable once clustering has finished. Check first:
 
 ```bash
 # Linux, from the skill folder
-bash ../se-dev/graphify-check.sh Data/Decompiled --deep
+bash ../se-dev/graphify-check.sh Data --deep
 ```
 
 ```bat
 REM Windows
-call ..\se-dev\GraphifyCheck.bat Data\Decompiled
+call ..\se-dev\GraphifyCheck.bat Data
 ```
+
+The argument is the directory that *contains* `graphify-out/`. For the code skills
+that is `Data` (they graph `Data/Decompiled` but store the graph beside it); other
+skills keep the graph inside the graphed tree.
 
 `OK` means ready. `MISSING`/`INCOMPLETE` means it must be (re)built — see
 [GraphifyPrepare.md](GraphifyPrepare.md#health-check-and-rebuild). Confirm the rebuild
@@ -38,8 +42,8 @@ needs the cap raised:
 export GRAPHIFY_MAX_GRAPH_BYTES=2GB
 ```
 
-Run graphify from the graph root (e.g. `Data/Decompiled`) so it finds `graphify-out/graph.json`
-by default, or pass `--graph <path>`.
+Run graphify from the directory holding `graphify-out/` (for the code skills that is
+`Data`) so it finds `graphify-out/graph.json` by default, or pass `--graph <path>`.
 
 ## Query commands
 
