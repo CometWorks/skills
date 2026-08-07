@@ -223,7 +223,7 @@ ensure_git_repo() {
     git -C "$repo_dir" symbolic-ref HEAD refs/heads/main 2>/dev/null || true
     cat >"$repo_dir/.gitignore" <<'EOF'
 CodeIndex/
-Content/
+graphify-out/
 __pycache__/
 *.py[cod]
 *.bak

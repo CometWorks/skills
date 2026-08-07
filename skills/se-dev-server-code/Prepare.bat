@@ -114,7 +114,7 @@ REM Required: some decompiled paths exceed the legacy MAX_PATH (260 chars),
 REM e.g. EmptyKeys generated bindings under SpaceEngineers.Game.
 git config core.longpaths true
 
-REM Write .gitignore (Decompiled\Content is versioned, so no Content/ entry)
+REM Write .gitignore (Data\Content is versioned, so no Content/ entry)
 > .gitignore (
     echo CodeIndex/
     echo graphify-out/
@@ -164,6 +164,7 @@ if %ERRORLEVEL% EQU 2 (
     if exist Data\Decompiled rmdir /s /q Data\Decompiled
     if exist Data\CodeIndex  rmdir /s /q Data\CodeIndex
     if exist Data\Content    rmdir /s /q Data\Content
+    if exist Data\graphify-out rmdir /s /q Data\graphify-out
     mkdir Data\Decompiled 2>NUL
     goto skip_wipe
 )
@@ -172,8 +173,45 @@ type version_check.txt
 goto failed
 :skip_wipe
 
-REM 12. Decompile the server assemblies
+REM 12. Bring the Data folder up to the current layout before anything reads it.
+REM Decompiled holds only decompiled C# code; Content and graphify-out sit beside
+REM it. Earlier versions of this skill kept both inside Decompiled.
 set NEED_COMMIT=0
+if not exist Data\Decompiled\Content goto skip_move_content
+echo Moving Data\Decompiled\Content up to Data\Content
+if exist Data\Content rmdir /s /q Data\Content
+move /Y Data\Decompiled\Content Data\Content >NUL
+if %ERRORLEVEL% NEQ 0 goto failed
+set NEED_COMMIT=1
+:skip_move_content
+
+if not exist Data\Decompiled\graphify-out goto skip_move_graph
+if exist Data\graphify-out (
+    rmdir /s /q Data\Decompiled\graphify-out
+) else (
+    echo Moving Data\Decompiled\graphify-out up to Data\graphify-out
+    move /Y Data\Decompiled\graphify-out Data\graphify-out >NUL
+)
+:skip_move_graph
+
+REM Content is versioned, so it must not be ignored (older installs ignored it).
+findstr /X /L /C:"Content/" Data\.gitignore >NUL 2>NUL
+if %ERRORLEVEL% EQU 0 (
+    findstr /X /L /V /C:"Content/" Data\.gitignore >Data\.gitignore.tmp
+    move /Y Data\.gitignore.tmp Data\.gitignore >NUL
+    set NEED_COMMIT=1
+)
+
+REM The Graphify graph is a large regenerable artifact, so it must be ignored.
+REM This has to be in place before the commit below, which stages everything.
+REM Redirection precedes echo to avoid a trailing space in the line.
+findstr /X /L /C:"graphify-out/" Data\.gitignore >NUL 2>NUL
+if %ERRORLEVEL% NEQ 0 (
+    >>Data\.gitignore echo graphify-out/
+    set NEED_COMMIT=1
+)
+
+REM 13. Decompile the server assemblies
 if exist Data\Decompiled\VRage.XmlSerializers goto skip_decompile
 .\busybox sh Decompile.sh
 if %ERRORLEVEL% NEQ 0 goto failed
@@ -185,35 +223,15 @@ if %ERRORLEVEL% NEQ 0 goto failed
 set NEED_COMMIT=1
 :skip_decompile
 
-REM 13. Copy indexable content into Data\Decompiled\Content, so the indexable
-REM text files (no binaries) are versioned along with the decompiled sources
-REM and changes to the definition files can be reviewed
-if exist Data\Decompiled\Content goto skip_content
+REM 14. Copy indexable content. Only the indexable text files are copied (no
+REM binaries), so the definition files can be versioned and their changes
+REM reviewed.
+if exist Data\Content goto skip_content
 echo Copying indexable content
 uv run python -u copy_content.py "%SE_SERVER_ROOT%\Content"
 if %ERRORLEVEL% NEQ 0 goto failed
 set NEED_COMMIT=1
 :skip_content
-
-REM 14. Migrate older installs: content used to live in Data\Content and was
-REM excluded from the repo by .gitignore (that entry would also hide
-REM Decompiled\Content, so it must go)
-if exist Data\Content rmdir /s /q Data\Content
-findstr /X /L /C:"Content/" Data\.gitignore >NUL 2>NUL
-if %ERRORLEVEL% EQU 0 (
-    findstr /X /L /V /C:"Content/" Data\.gitignore >Data\.gitignore.tmp
-    move /Y Data\.gitignore.tmp Data\.gitignore >NUL
-    set NEED_COMMIT=1
-)
-
-REM The Graphify graph is built into Data\Decompiled\graphify-out after the
-REM commit below. It is a large regenerable artifact, so it must stay out of
-REM the repo. Redirection precedes echo to avoid a trailing space in the line.
-findstr /X /L /C:"graphify-out/" Data\.gitignore >NUL 2>NUL
-if %ERRORLEVEL% NEQ 0 (
-    >>Data\.gitignore echo graphify-out/
-    set NEED_COMMIT=1
-)
 
 REM 15. Record the current game version and commit decompiled code and content
 if "!NEED_COMMIT!"=="0" goto skip_commit
@@ -251,16 +269,23 @@ if %ERRORLEVEL% NEQ 0 goto failed
 REM 18. Build the content index
 if exist Data\CodeIndex\content_index.csv goto skip_content_index
 echo Indexing content files
-uv run python -u index_content.py Data\Decompiled\Content Data\Decompiled Data\CodeIndex
+uv run python -u index_content.py Data\Content Data\Decompiled Data\CodeIndex
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_content_index
 
+REM Only the decompiled C# code is graphed; the graph itself is written beside it
+REM (Data\graphify-out) so it never pollutes the graphed tree or the repository.
 if defined SE_DEV_SERVER_CODE_GRAPH_ROOT (
     set "SERVER_CODE_GRAPH_ROOT=%SE_DEV_SERVER_CODE_GRAPH_ROOT%"
 ) else (
     set "SERVER_CODE_GRAPH_ROOT=%CD%\Data\Decompiled"
 )
-call "%~dp0..\se-dev\GraphifyPrepare.bat" "se-dev-server-code" "%SERVER_CODE_GRAPH_ROOT%"
+if defined SE_DEV_SERVER_CODE_GRAPH_OUT (
+    set "SERVER_CODE_GRAPH_OUT=%SE_DEV_SERVER_CODE_GRAPH_OUT%"
+) else (
+    set "SERVER_CODE_GRAPH_OUT=%CD%\Data"
+)
+call "%~dp0..\se-dev\GraphifyPrepare.bat" "se-dev-server-code" "%SERVER_CODE_GRAPH_ROOT%" "%SERVER_CODE_GRAPH_OUT%"
 
 echo DONE
 del version_check.txt 2>NUL

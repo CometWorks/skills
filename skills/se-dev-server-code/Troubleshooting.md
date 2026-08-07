@@ -103,7 +103,7 @@ uv run search_server_code.py class usage MyEntity --limit 10 --offset 20
 If searches return unexpected results or after server updates:
 
 ```bash
-# Delete the index (Data/Decompiled/Content can also be removed if needed)
+# Delete the index (Data/Content can also be removed if needed)
 rm -rf Data/CodeIndex/
 
 # Re-run preparation (this rebuilds the index)

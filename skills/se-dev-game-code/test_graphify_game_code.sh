@@ -15,6 +15,8 @@ cd "$(dirname "$(readlink -f "$0")")"
 
 SKILL_DIR="$(pwd)"
 GRAPH_ROOT="${SE_DEV_GAME_CODE_GRAPH_ROOT:-Data/Decompiled}"
+# graphify-out sits beside Decompiled, not inside it.
+GRAPH_OUT="${SE_DEV_GAME_CODE_GRAPH_OUT:-Data}"
 export GRAPHIFY_MAX_GRAPH_BYTES="${GRAPHIFY_MAX_GRAPH_BYTES:-2GB}"
 
 echo ============================================================
@@ -25,17 +27,17 @@ if ! command -v graphify >/dev/null 2>&1; then
     echo "  ./prepare.sh   # auto-builds with the fast Rust backend; add SE_DEV_GRAPHIFY=1 to force the slow fallback"
     exit 1
 fi
-if ! bash "$SKILL_DIR/../se-dev/graphify-check.sh" "$GRAPH_ROOT" --deep; then
+if ! bash "$SKILL_DIR/../se-dev/graphify-check.sh" "$GRAPH_OUT" --deep; then
     echo
     echo "FAIL: Graphify graph is missing or unusable. Rebuild it by re-running prepare:"
-    echo "  rm -rf \"$GRAPH_ROOT/graphify-out\""
+    echo "  rm -rf \"$GRAPH_OUT/graphify-out\""
     echo "  ./prepare.sh   # auto-builds with the fast Rust backend; add SE_DEV_GRAPHIFY=1 to force the slow fallback"
     exit 1
 fi
 echo
 
 # All graphify subcommands default to graphify-out/graph.json under the cwd.
-cd "$GRAPH_ROOT"
+cd "$GRAPH_OUT"
 
 echo ============================================================
 echo QUERY - BFS traversal for a question

@@ -4,8 +4,9 @@
 #
 # Usage: graphify-check.sh <graph-root> [--deep]
 #
-#   <graph-root>  Directory that was graphed, i.e. the one containing
-#                 graphify-out/ (e.g. Data/Decompiled). Defaults to Data/Decompiled.
+#   <graph-root>  Directory containing graphify-out/ (e.g. Data for the code
+#                 skills, which graph Data/Decompiled but store the graph beside
+#                 it). Defaults to Data.
 #   --deep        Also parse graphify-out/.graphify_analysis.json and confirm it
 #                 holds a non-empty set of communities, i.e. clustering produced
 #                 real content rather than an empty stub. Needs python3.
@@ -31,7 +32,7 @@ SCRIPT_DIR="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=./graphify-prepare.sh
 source "$SCRIPT_DIR/graphify-prepare.sh"
 
-ROOT="Data/Decompiled"
+ROOT="Data"
 DEEP=0
 for arg in "$@"; do
     case "$arg" in

@@ -8,7 +8,7 @@ Skill maintains the following data under the `Data` junction (which points
 to `%USERPROFILE%\.se-dev\game-code\`):
 
 - **Data/Decompiled/** - Full decompiled C# source organized by assembly
-- **Data/Decompiled/Content/** - Game content files (definitions, translations, blueprints)
+- **Data/Content/** - Game content files (definitions, translations, blueprints)
 - **Data/CodeIndex/** - Pre-built CSV indexes for fast symbol lookup
 - **Data/.git/** - Local Git repository tracking every decompilation; commit
   message is the game version label (e.g. `1.208.015 b4`)
@@ -26,10 +26,10 @@ Preparation will:
 1. Create `Data` junction and local Git repository inside it (with
    initial commit of `.gitignore`)
 2. Detect current game version by inspecting binaries
-3. Wipe `Decompiled/` (including the copied `Content/`) and `CodeIndex/` if version differs from
+3. Wipe `Decompiled/`, `Content/` and `CodeIndex/` if version differs from
    recorded one
 4. Decompile game assemblies
-5. Copy game content into `Decompiled/Content/`
+5. Copy game content into `Content/`
 6. Commit decompiled sources and content with version label
 7. Build code index
 

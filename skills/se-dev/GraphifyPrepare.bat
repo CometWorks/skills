@@ -1,8 +1,14 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
 
+REM Usage: GraphifyPrepare.bat <label> <root> [out-dir]
+REM   <root>     the tree to graph
+REM   <out-dir>  where to put graphify-out\ (default: <root>). Pass a directory
+REM              outside <root> to keep the graphed tree free of build output.
 set "GRAPHIFY_LABEL=%~1"
 set "GRAPHIFY_ROOT=%~2"
+set "GRAPHIFY_OUT_DIR=%~3"
+if "%GRAPHIFY_OUT_DIR%"=="" set "GRAPHIFY_OUT_DIR=%GRAPHIFY_ROOT%"
 
 REM Clustering is the slow part of a Graphify build. The fast path is graspologic's
 REM native Rust Leiden backend (needs Python 3.12); without it Graphify drops to a
@@ -57,7 +63,9 @@ if %ERRORLEVEL% NEQ 0 exit /b 0
 
 :have_graphify
 for %%I in ("%GRAPHIFY_ROOT%") do set "GRAPHIFY_ABS_ROOT=%%~fI"
-set "GRAPHIFY_OUT=%GRAPHIFY_ABS_ROOT%\graphify-out"
+if not exist "%GRAPHIFY_OUT_DIR%\" mkdir "%GRAPHIFY_OUT_DIR%" 2>NUL
+for %%I in ("%GRAPHIFY_OUT_DIR%") do set "GRAPHIFY_ABS_OUT_DIR=%%~fI"
+set "GRAPHIFY_OUT=%GRAPHIFY_ABS_OUT_DIR%\graphify-out"
 
 call :check_disk "%GRAPHIFY_ABS_ROOT%"
 if %ERRORLEVEL% NEQ 0 (
@@ -74,14 +82,24 @@ if not exist "%GRAPHIFY_OUT%\.graphify_analysis.json" (
     goto build
 )
 
-echo Graphify: updating %GRAPHIFY_LABEL% graph at %GRAPHIFY_ABS_ROOT%
-graphify "%GRAPHIFY_ABS_ROOT%" --update
+echo Graphify: updating %GRAPHIFY_LABEL% graph of %GRAPHIFY_ABS_ROOT% at %GRAPHIFY_OUT%
+REM --out is passed only when it differs from the root, so the default
+REM invocation stays identical to what the other skills have always run.
+if /I "%GRAPHIFY_ABS_OUT_DIR%"=="%GRAPHIFY_ABS_ROOT%" (
+    graphify "%GRAPHIFY_ABS_ROOT%" --update
+) else (
+    graphify "%GRAPHIFY_ABS_ROOT%" --update --out "%GRAPHIFY_ABS_OUT_DIR%"
+)
 if %ERRORLEVEL% NEQ 0 echo WARNING: Graphify update failed for %GRAPHIFY_LABEL%; prepare continues.
 exit /b 0
 
 :build
-echo Graphify: building %GRAPHIFY_LABEL% graph at %GRAPHIFY_ABS_ROOT%
-graphify "%GRAPHIFY_ABS_ROOT%"
+echo Graphify: building %GRAPHIFY_LABEL% graph of %GRAPHIFY_ABS_ROOT% at %GRAPHIFY_OUT%
+if /I "%GRAPHIFY_ABS_OUT_DIR%"=="%GRAPHIFY_ABS_ROOT%" (
+    graphify "%GRAPHIFY_ABS_ROOT%"
+) else (
+    graphify "%GRAPHIFY_ABS_ROOT%" --out "%GRAPHIFY_ABS_OUT_DIR%"
+)
 if %ERRORLEVEL% NEQ 0 echo WARNING: Graphify build failed for %GRAPHIFY_LABEL%; prepare continues.
 exit /b 0
 

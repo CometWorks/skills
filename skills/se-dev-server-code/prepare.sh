@@ -53,7 +53,7 @@ case "$RC" in
         log "Game version differs or no previous version recorded - wiping stale outputs"
         # Data files are incomplete until preparation finishes for the new game version
         rm -f Prepare.DONE
-        rm -rf Data/Decompiled Data/CodeIndex Data/Content
+        rm -rf Data/Decompiled Data/CodeIndex Data/Content Data/graphify-out
         mkdir -p Data/Decompiled
         ;;
     *)
@@ -64,6 +64,37 @@ esac
 
 NEED_COMMIT=0
 
+# Bring the Data folder up to the current layout before anything reads it.
+# Decompiled holds only decompiled C# code; Content and graphify-out sit beside
+# it. Earlier versions of this skill kept both inside Decompiled.
+if [ -d Data/Decompiled/Content ]; then
+    log "Moving Data/Decompiled/Content up to Data/Content"
+    rm -rf Data/Content
+    mv Data/Decompiled/Content Data/Content
+    NEED_COMMIT=1
+fi
+if [ -d Data/Decompiled/graphify-out ]; then
+    if [ -d Data/graphify-out ]; then
+        rm -rf Data/Decompiled/graphify-out
+    else
+        log "Moving Data/Decompiled/graphify-out up to Data/graphify-out"
+        mv Data/Decompiled/graphify-out Data/graphify-out
+    fi
+fi
+
+# Content is versioned, so it must not be ignored (older installs ignored it).
+if grep -qxF 'Content/' Data/.gitignore 2>/dev/null; then
+    grep -vxF 'Content/' Data/.gitignore >Data/.gitignore.tmp
+    mv Data/.gitignore.tmp Data/.gitignore
+    NEED_COMMIT=1
+fi
+# The Graphify graph is a large regenerable artifact, so it must be ignored.
+# This has to be in place before the commit below, which stages everything.
+if ! grep -qxF 'graphify-out/' Data/.gitignore 2>/dev/null; then
+    echo 'graphify-out/' >>Data/.gitignore
+    NEED_COMMIT=1
+fi
+
 if [ ! -d Data/Decompiled/VRage.XmlSerializers ]; then
     log "Decompiling the server assemblies"
     ILSPYCMD="$ILSPYCMD" ./Decompile.sh
@@ -73,29 +104,11 @@ if [ ! -d Data/Decompiled/VRage.XmlSerializers ]; then
     NEED_COMMIT=1
 fi
 
-# Content is copied into Data/Decompiled/Content, so the indexable text files
-# (no binaries) are versioned along with the decompiled sources and changes to
-# the definition files can be reviewed.
-if [ ! -d Data/Decompiled/Content ]; then
+# Only the indexable text files are copied (no binaries), so the definition
+# files can be versioned and their changes reviewed.
+if [ ! -d Data/Content ]; then
     log "Copying indexable content"
     uv run python -u copy_content.py "$SERVER_ROOT/Content"
-    NEED_COMMIT=1
-fi
-
-# Migrate older installs: content used to live in Data/Content and was
-# excluded from the repo by .gitignore (that entry would also hide
-# Decompiled/Content, so it must go).
-rm -rf Data/Content
-if grep -qxF 'Content/' Data/.gitignore 2>/dev/null; then
-    grep -vxF 'Content/' Data/.gitignore >Data/.gitignore.tmp
-    mv Data/.gitignore.tmp Data/.gitignore
-    NEED_COMMIT=1
-fi
-
-# The Graphify graph is built into Data/Decompiled/graphify-out after the commit
-# below. It is a large regenerable artifact, so it must stay out of the repo.
-if ! grep -qxF 'graphify-out/' Data/.gitignore 2>/dev/null; then
-    echo 'graphify-out/' >>Data/.gitignore
     NEED_COMMIT=1
 fi
 
@@ -121,11 +134,14 @@ fi
 
 if [ ! -f Data/CodeIndex/content_index.csv ]; then
     log "Indexing content files"
-    uv run python -u index_content.py Data/Decompiled/Content Data/Decompiled Data/CodeIndex
+    uv run python -u index_content.py Data/Content Data/Decompiled Data/CodeIndex
 fi
 
+# Only the decompiled C# code is graphed; the graph itself is written beside it
+# (Data/graphify-out) so it never pollutes the graphed tree or the repository.
 SERVER_CODE_GRAPH_ROOT="${SE_DEV_SERVER_CODE_GRAPH_ROOT:-Data/Decompiled}"
-se_dev_graphify_prepare "se-dev-server-code" "$SERVER_CODE_GRAPH_ROOT"
+SERVER_CODE_GRAPH_OUT="${SE_DEV_SERVER_CODE_GRAPH_OUT:-Data}"
+se_dev_graphify_prepare "se-dev-server-code" "$SERVER_CODE_GRAPH_ROOT" "$SERVER_CODE_GRAPH_OUT"
 
 : >Prepare.DONE
 log "DONE"

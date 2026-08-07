@@ -1,4 +1,4 @@
-File types under the `Data/Decompiled/Content` folder:
+File types under the `Data/Content` folder:
 - `*.scf` Scenario Configuration File: Stores metadata and startup settings for custom scenarios and worlds, such as description and thumbnail path.
 - `*.sbc` Space Engineers Binary/Component: Most common file type; XML files that define game objects like blocks, components, blueprints, and physical properties.
 - `*.sbl` Sandbox Level: Contains world-state data, often used for saved games or specific scenario level layouts.

@@ -4,7 +4,8 @@ setlocal EnableExtensions EnableDelayedExpansion
 REM Standalone Graphify health check (Windows).
 REM
 REM Usage: GraphifyCheck.bat [graph-root]
-REM   graph-root  Directory containing graphify-out\ (default: Data\Decompiled)
+REM   graph-root  Directory containing graphify-out\ (default: Data). The code
+REM               skills graph Data\Decompiled but store the graph beside it.
 REM
 REM Exit codes: 0 ok, 2 missing, 3 incomplete.
 REM A non-zero result means the graph is unusable and must be rebuilt from
@@ -12,7 +13,7 @@ REM scratch. Rebuild is expensive for game/server code (~10-30 min); confirm
 REM with the user before doing it.
 
 set "ROOT=%~1"
-if "%ROOT%"=="" set "ROOT=Data\Decompiled"
+if "%ROOT%"=="" set "ROOT=Data"
 
 if not exist "%ROOT%\" (
     echo FAIL: graph root does not exist: %ROOT%

@@ -88,14 +88,17 @@ set SE_DEV_GRAPHIFY_PLATFORM=codex        REM Windows
 
 Prepare builds one graph per subskill, under that root's own `graphify-out/` directory:
 
-| Subskill | Default graph root | Override |
-|----------|--------------------|----------|
-| `se-dev-script` | local PB script folder (`IngameScripts/local`) | `SE_DEV_SCRIPT_PROJECT_ROOT` |
-| `se-dev-mod` | local mod folder (`Mods`) | `SE_DEV_MOD_PROJECT_ROOT` |
-| `se-dev-plugin` | downloaded plugin sources (`Data/Sources`) | `SE_DEV_PLUGIN_PROJECT_ROOT` |
-| `se-dev-torch` | selected Torch checkout (`TORCH_ROOT` or `Data/Sources/Torch`) | `SE_DEV_TORCH_PLUGIN_ROOT` |
-| `se-dev-game-code` | decompiled game code (`Data/Decompiled`) | `SE_DEV_GAME_CODE_GRAPH_ROOT` |
-| `se-dev-server-code` | decompiled server code (`Data/Decompiled`) | `SE_DEV_SERVER_CODE_GRAPH_ROOT` |
+Graph output goes to `<graph root>/graphify-out` unless the skill passes a separate
+output directory (third argument of `se_dev_graphify_prepare` / `GraphifyPrepare.bat`).
+
+| Subskill | Default graph root | Graph stored in | Override |
+|----------|--------------------|-----------------|----------|
+| `se-dev-script` | local PB script folder (`IngameScripts/local`) | inside the graph root | `SE_DEV_SCRIPT_PROJECT_ROOT` |
+| `se-dev-mod` | local mod folder (`Mods`) | inside the graph root | `SE_DEV_MOD_PROJECT_ROOT` |
+| `se-dev-plugin` | downloaded plugin sources (`Data/Sources`) | inside the graph root | `SE_DEV_PLUGIN_PROJECT_ROOT` |
+| `se-dev-torch` | selected Torch checkout (`TORCH_ROOT` or `Data/Sources/Torch`) | inside the graph root | `SE_DEV_TORCH_PLUGIN_ROOT` |
+| `se-dev-game-code` | decompiled game code (`Data/Decompiled`) | `Data` (`SE_DEV_GAME_CODE_GRAPH_OUT`) | `SE_DEV_GAME_CODE_GRAPH_ROOT` |
+| `se-dev-server-code` | decompiled server code (`Data/Decompiled`) | `Data` (`SE_DEV_SERVER_CODE_GRAPH_OUT`) | `SE_DEV_SERVER_CODE_GRAPH_ROOT` |
 
 Use the override variables when the subskill should graph a specific active project
 instead of the default prepared corpus.
@@ -153,14 +156,18 @@ To check a graph's health independently, run the standalone checker:
 
 ```bash
 # Linux (from the skill folder)
-bash ../se-dev/graphify-check.sh Data/Decompiled          # fast: file presence
-bash ../se-dev/graphify-check.sh Data/Decompiled --deep   # also validates clustering content
+bash ../se-dev/graphify-check.sh Data          # fast: file presence
+bash ../se-dev/graphify-check.sh Data --deep   # also validates clustering content
 ```
 
 ```bat
 REM Windows
-call ..\se-dev\GraphifyCheck.bat Data\Decompiled
+call ..\se-dev\GraphifyCheck.bat Data
 ```
+
+The argument is the directory that *contains* `graphify-out/`. For the code skills
+that is `Data` (they graph `Data/Decompiled` but store the graph beside it); other
+skills keep the graph inside the graphed tree.
 
 Exit codes: `0` ok, `2` missing (never built), `3` incomplete (must be rebuilt). If it
 reports `incomplete` or `missing` and you want the graph, delete `graphify-out/` and re-run
