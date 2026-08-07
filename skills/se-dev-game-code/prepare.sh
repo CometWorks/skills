@@ -92,6 +92,13 @@ if grep -qxF 'Content/' Data/.gitignore 2>/dev/null; then
     NEED_COMMIT=1
 fi
 
+# The Graphify graph is built into Data/Decompiled/graphify-out after the commit
+# below. It is a large regenerable artifact, so it must stay out of the repo.
+if ! grep -qxF 'graphify-out/' Data/.gitignore 2>/dev/null; then
+    echo 'graphify-out/' >>Data/.gitignore
+    NEED_COMMIT=1
+fi
+
 if [ "$NEED_COMMIT" = 1 ]; then
     log "Recording game version and committing decompiled sources and content"
     uv run python -u check_version.py --write Bin64 Data

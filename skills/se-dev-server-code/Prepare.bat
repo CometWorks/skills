@@ -117,6 +117,7 @@ git config core.longpaths true
 REM Write .gitignore (Decompiled\Content is versioned, so no Content/ entry)
 > .gitignore (
     echo CodeIndex/
+    echo graphify-out/
     echo __pycache__/
     echo *.py[cod]
     echo *.bak
@@ -205,8 +206,17 @@ if %ERRORLEVEL% EQU 0 (
     set NEED_COMMIT=1
 )
 
+REM The Graphify graph is built into Data\Decompiled\graphify-out after the
+REM commit below. It is a large regenerable artifact, so it must stay out of
+REM the repo. Redirection precedes echo to avoid a trailing space in the line.
+findstr /X /L /C:"graphify-out/" Data\.gitignore >NUL 2>NUL
+if %ERRORLEVEL% NEQ 0 (
+    >>Data\.gitignore echo graphify-out/
+    set NEED_COMMIT=1
+)
+
 REM 15. Record the current game version and commit decompiled code and content
-if "%NEED_COMMIT%"=="0" goto skip_commit
+if "!NEED_COMMIT!"=="0" goto skip_commit
 echo Recording game version and committing decompiled sources and content
 uv run python -u check_version.py --write Bin64 Data
 if %ERRORLEVEL% NEQ 0 goto failed
