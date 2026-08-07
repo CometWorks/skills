@@ -68,6 +68,41 @@ Node names are matched fuzzily; `path`/`explain` may warn when a name is ambiguo
 pick the best match. If `query` returns *No matching nodes found*, try a different symbol
 or a phrasing that mentions a concrete type/method name.
 
+## Name resolution pitfalls
+
+Fuzzy matching can settle on a **stub node** - a name that appears in some other file's
+extraction, carrying no source location and a single edge. It looks like a successful
+answer but tells you nothing. Always check the `Source:` line:
+
+```
+Node: MyCubeBlock
+  ID:        sandbox_game_..._myexhaustblock_cs_mycubeblock
+  Source:                  <-- empty: this is a stub, not the real MyCubeBlock
+  Degree:    1
+```
+
+A real hit looks like `Source: Sandbox.Game/Sandbox/Game/Entities/Blocks/MyProgrammableBlock.cs L46`
+with a degree in the dozens or hundreds. When you land on a stub:
+
+- retry with a more distinctive name (`MyProgrammableBlock` rather than `MyCubeBlock`), or
+- look the symbol up with the code index first (`search_*_code.py class declaration ...`)
+  and use the exact declared name.
+
+An `ambiguous match` warning on `path` means the same - verify the endpoints resolved to
+the symbols you meant before trusting the path.
+
+## What the graph is good and bad at
+
+- `explain`, `path` and `affected` on a **named symbol** are the reliable modes; they
+  answer questions the CSV index cannot (how symbols connect, impact of a change).
+- `query` with a **natural-language question** spends much of its token budget on hub
+  nodes (`System`, `Vector3`, `VRageMath`, ...) that everything references. Prefer naming
+  a concrete type, keep `--budget` small and follow up with `explain` on what looks
+  relevant.
+- `--context call` is sparse on the decompiled trees: most extracted edges are
+  `references`, `inherits` and `implements`, so narrowing to `call` often returns almost
+  nothing. Drop the filter, or use `affected` instead.
+
 ## Verifying a prepared graph
 
 Each decompiled-code skill ships a query smoke test that runs a representative set of the
@@ -85,5 +120,7 @@ REM Windows
 .\test_graphify_server_code.bat
 ```
 
-A healthy run ends with `ALL TESTS COMPLETED`. If it stops at the health check, the graph
-is missing or unusable and must be rebuilt.
+Every check asserts its outcome, so the exit code is authoritative: 0 with a final
+`ALL TESTS COMPLETED` banner means all queries answered, 1 with a `TESTS FAILED` banner
+lists what failed. If it stops at the health check, the graph is missing or unusable and
+must be rebuilt.

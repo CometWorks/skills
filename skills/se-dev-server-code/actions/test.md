@@ -2,21 +2,36 @@
 
 > **Part of the se-dev-server-code skill.** Invoked to run server code search tests and verify results.
 
-Run `test_search_server_code.bat` to verify server code search works correctly.
+Run the test script to verify server code search works correctly.
 
 ## Running Tests
 
 From this skill folder, run:
 
+```bash
+# Linux
+./test_search_server_code.sh
+```
+
 ```cmd
+REM Windows
 .\test_search_server_code.bat
 ```
 
 Or redirect output to file for review:
 
+```bash
+# Linux
+./test_search_server_code.sh > test_results.txt 2>&1
+```
+
 ```cmd
+REM Windows
 .\test_search_server_code.bat > test_results.txt 2>&1
 ```
+
+Both wrappers run the same checks from `test_search_code.py`, so Linux and
+Windows results are identical.
 
 ## What the Tests Cover
 
@@ -48,29 +63,33 @@ Test suite exercises all server code search capabilities:
 | Hierarchy - interface children | IMyEntity, IMyCubeBlock |
 | Hierarchy - class implements | MyTerminalBlock, MyGrid |
 | Hierarchy - interface implementors | IMyEntity, IMyTerminalBlock |
+| Member usage vs enclosing method | m_cubeBlocks, CanHavePhysics, IsWorking, InitIDs |
 | Non-matching examples | Verify empty results don't crash |
 
 ## Verifying Results
 
-Successful test run should:
+Each check asserts its own outcome, so reading the output is optional - exit
+code is authoritative:
 
-1. **Complete without errors** - No Python exceptions or crashes
-2. **Return results for known items** - Each search (except non-matching examples) returns at least one result
-3. **Show "No results found"** for non-matching examples section
-4. **End with "ALL TESTS COMPLETED"** message
+- **Exit code 0** and a final `ALL TESTS COMPLETED` banner - everything passed
+- **Exit code 1**, `FAIL:` lines next to failing checks and a `TESTS FAILED`
+  banner - the `SUMMARY` section lists every failure
+
+Searches finding nothing print `NO-MATCHES`, expected only in non-matching
+examples section and in checks asserting a symbol must *not* be found.
 
 ## Example Verification
 
 Check key searches return expected results:
 
-```cmd
-REM Should find MyPhysicsBody class
+```bash
+# Should find MyPhysicsBody class
 uv run search_server_code.py class declaration MyPhysicsBody
 
-REM Should find Vector3D struct
+# Should find Vector3D struct
 uv run search_server_code.py struct declaration Vector3D
 
-REM Should return count > 0
+# Should return count > 0
 uv run search_server_code.py -c class usage MyPhysicsBody
 ```
 
@@ -78,12 +97,13 @@ uv run search_server_code.py -c class usage MyPhysicsBody
 
 If tests fail:
 
-1. **Preparation not complete** - Run `.\Prepare.bat` first
+1. **Preparation not complete** - Run `./prepare.sh` (Linux) or `.\Prepare.bat` (Windows) first
 2. **Index not built** - Check `Data/CodeIndex/` exists and contains `.csv` files
 3. **Decompiled folder missing** - Verify `Data/Decompiled/` has `.cs` files
 4. **Python environment issues** - Try `uv sync` to reinstall dependencies
 
-As last resort, force repeating whole preparation process by running `.\Clean.bat`, then `.\Prepare.bat`.
+As last resort, force repeating whole preparation process by running `./clean.sh` then `./prepare.sh`
+(Linux), or `.\Clean.bat` then `.\Prepare.bat` (Windows).
 Notify user if you do this, because preparation may take 5-15 minutes depending on hardware.
 
 ## Optional: Graphify Graph Test
@@ -102,7 +122,11 @@ REM Windows
 .\test_graphify_server_code.bat
 ```
 
-It first runs a health check (graph built and clustered), then a few `query`/`explain`/`path`/`affected`
-calls, ending with `ALL TESTS COMPLETED`. If it stops at the health check, the graph is
-missing or unusable (clustering not finished); rebuild it with `SE_DEV_GRAPHIFY=1` after
-confirming the ~10-30 minute cost with the user.
+It first runs a health check (graph built and clustered), then asserted
+`query`/`explain`/`path`/`affected` calls, ending with `ALL TESTS COMPLETED` and exit code 0.
+If it stops at the health check, the graph is missing or unusable (clustering not finished);
+rebuild it with `SE_DEV_GRAPHIFY=1` after confirming the ~10-30 minute cost with the user.
+
+An `explain` check fails when the name resolves to a node without a source location. That
+means Graphify's fuzzy matching settled on a stub node instead of the real symbol - see
+[GraphifyUsage.md](../../se-dev/GraphifyUsage.md#name-resolution-pitfalls).

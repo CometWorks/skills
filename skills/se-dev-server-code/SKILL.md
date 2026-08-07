@@ -2,7 +2,7 @@
 name: se-dev-server-code
 description: Allows reading the decompiled C# code of the Space Engineers Dedicated Server
 license: MIT
-allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*clean.sh*), Bash(*test_search_server_code.bat*), Bash(*test_graphify_server_code*), Bash(*graphify-check.sh*), Bash(*GraphifyCheck.bat*), Bash(*uv run search_server_code.py *), Bash(*uv run index_code.py *), Bash(command -v graphify*), Bash(graphify*), Bash(*GRAPHIFY_MAX_GRAPH_BYTES*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*clean.sh*), Bash(*test_search_server_code*), Bash(*test_graphify_server_code*), Bash(*uv run test_search_code.py*), Bash(*uv run test_graphify_queries.py*), Bash(*graphify-check.sh*), Bash(*GraphifyCheck.bat*), Bash(*uv run search_server_code.py *), Bash(*uv run index_code.py *), Bash(command -v graphify*), Bash(graphify*), Bash(*GRAPHIFY_MAX_GRAPH_BYTES*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
 # SE Dev Server Code Skill
@@ -19,9 +19,9 @@ Examples:
 **Actions:**
 
 - **prepare**: Run the one-time preparation (`Prepare.bat` on Windows, `prepare.sh` on Linux)
-- **bash**: Run UNIX shell commands via busybox
+- **bash**: Run UNIX shell commands (busybox on Windows, native shell on Linux)
 - **search**: Run code searches using `search_server_code.py`
-- **test**: Test this skill by running `test_search_server_code.bat`
+- **test**: Test this skill by running `test_search_server_code.bat` on Windows or `test_search_server_code.sh` on Linux
 
 ## Routing Decision
 
@@ -189,13 +189,9 @@ Key configuration areas:
 - **World settings** (game mode, inventory size, welding speed)
 - **Network settings** (port, public/private)
 
-Configure by editing XML files directly or with utility Python scripts. See below for planned utilities.
-
-### Planned Utility Scripts (Not Yet Implemented)
-
-- **config_editor.py** — Read and modify `SpaceEngineers-Dedicated.cfg` values from command line (e.g. set server name, max players, world name)
-- **world_manager.py** — List, backup, and manage saved worlds in server data directory
-- **mod_manager.py** — List and validate mods referenced in configuration
+Configure by editing the XML files directly. This skill ships no configuration,
+world or mod management utilities - see [ScriptingGuide.md](ScriptingGuide.md) if
+you need to script such a task.
 
 ### Server-Only Assemblies
 
