@@ -4,7 +4,9 @@ import sys
 from pathlib import Path
 from typing import Set
 
-CONTENT_DST = Path('Data') / 'Content'
+# Copies live inside the Decompiled folder, so the indexable content files are
+# versioned in the local Git repository along with the decompiled sources.
+CONTENT_DST = Path('Data') / 'Decompiled' / 'Content'
 
 
 def copy_content(original_content_dir: Path, subdir: str, allowed_extensions: Set[str], exclude: Set[str] = ()):

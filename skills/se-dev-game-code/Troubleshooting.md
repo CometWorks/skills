@@ -103,7 +103,7 @@ uv run search_game_code.py class usage MyEntity --limit 10 --offset 20
 If searches return unexpected results or after game updates:
 
 ```bash
-# Delete index (Data/Content can also be removed if needed)
+# Delete index (Data/Decompiled/Content can also be removed if needed)
 rm -rf Data/CodeIndex/
 
 # Re-run preparation (rebuilds index)

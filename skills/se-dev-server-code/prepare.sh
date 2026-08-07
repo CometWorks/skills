@@ -62,14 +62,38 @@ case "$RC" in
         ;;
 esac
 
+NEED_COMMIT=0
+
 if [ ! -d Data/Decompiled/VRage.XmlSerializers ]; then
     log "Decompiling the server assemblies"
     ILSPYCMD="$ILSPYCMD" ./Decompile.sh
 
     log "Fixing case-collision folders (Gui vs GUI, Filesystem vs FileSystem)"
     uv run python -u fix_case_collisions.py Data/Decompiled
+    NEED_COMMIT=1
+fi
 
-    log "Recording game version and committing decompiled sources"
+# Content is copied into Data/Decompiled/Content, so the indexable text files
+# (no binaries) are versioned along with the decompiled sources and changes to
+# the definition files can be reviewed.
+if [ ! -d Data/Decompiled/Content ]; then
+    log "Copying indexable content"
+    uv run python -u copy_content.py "$SERVER_ROOT/Content"
+    NEED_COMMIT=1
+fi
+
+# Migrate older installs: content used to live in Data/Content and was
+# excluded from the repo by .gitignore (that entry would also hide
+# Decompiled/Content, so it must go).
+rm -rf Data/Content
+if grep -qxF 'Content/' Data/.gitignore 2>/dev/null; then
+    grep -vxF 'Content/' Data/.gitignore >Data/.gitignore.tmp
+    mv Data/.gitignore.tmp Data/.gitignore
+    NEED_COMMIT=1
+fi
+
+if [ "$NEED_COMMIT" = 1 ]; then
+    log "Recording game version and committing decompiled sources and content"
     uv run python -u check_version.py --write Bin64 Data
     GAME_VERSION_LABEL="$(uv run python -u check_version.py --print Bin64)"
     [ -n "$GAME_VERSION_LABEL" ] || fail "Could not determine game version label."
@@ -82,11 +106,6 @@ if [ ! -d Data/Decompiled/VRage.XmlSerializers ]; then
         commit -m "$GAME_VERSION_LABEL" >/dev/null || log "(No commit made: working tree clean or nothing to commit)"
 fi
 
-if [ ! -d Data/Content ]; then
-    log "Copying indexable content"
-    uv run python -u copy_content.py "$SERVER_ROOT/Content"
-fi
-
 if [ ! -f Data/CodeIndex/class_declarations.csv ]; then
     log "Indexing decompiled code"
     mkdir -p Data/CodeIndex
@@ -95,7 +114,7 @@ fi
 
 if [ ! -f Data/CodeIndex/content_index.csv ]; then
     log "Indexing content files"
-    uv run python -u index_content.py Data/Content Data/Decompiled Data/CodeIndex
+    uv run python -u index_content.py Data/Decompiled/Content Data/Decompiled Data/CodeIndex
 fi
 
 SERVER_CODE_GRAPH_ROOT="${SE_DEV_SERVER_CODE_GRAPH_ROOT:-Data/Decompiled}"

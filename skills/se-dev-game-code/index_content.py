@@ -10,7 +10,7 @@ Usage:
     python index_content.py <content_dir> <decompiled_dir> <output_dir>
 
 Example:
-    python index_content.py Content Decompiled CodeIndex
+    python index_content.py Decompiled/Content Decompiled CodeIndex
 """
 
 import csv

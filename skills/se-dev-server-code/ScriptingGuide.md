@@ -152,13 +152,13 @@ with open(file_path, "r", encoding="utf-8") as f:
 
 ### Searching Content Data
 
-Server content is in `Data/Content/`. See `ContentTypes.md` for structure.
+Server content is in `Data/Decompiled/Content/`. See `ContentTypes.md` for structure.
 
 ```python
 from pathlib import Path
 
 # Search all SBC files
-for sbc_file in Path("Data/Content/Data").rglob("*.sbc"):
+for sbc_file in Path("Data/Decompiled/Content/Data").rglob("*.sbc"):
     with open(sbc_file, "r", encoding="utf-8") as f:
         content = f.read()
         if "LargeBlockArmorBlock" in content:

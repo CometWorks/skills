@@ -2,7 +2,7 @@
 REM Clean.bat - removes everything that Prepare.bat creates inside the skill
 REM folder. The Data folder (a junction to %USERPROFILE%\.se-dev\server-code)
 REM is preserved: only the junction itself is removed so the
-REM actual contents (Decompiled, CodeIndex, Content, .git) survive across runs.
+REM actual contents (Decompiled, CodeIndex, .git) survive across runs.
 
 REM Remove the Data junction (NOT its contents - rmdir without /s deletes only
 REM the junction reparse point and leaves the target folder intact).

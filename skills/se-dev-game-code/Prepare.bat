@@ -114,10 +114,9 @@ REM Required: some decompiled paths exceed the legacy MAX_PATH (260 chars),
 REM e.g. EmptyKeys generated bindings under SpaceEngineers.Game.
 git config core.longpaths true
 
-REM Write .gitignore
+REM Write .gitignore (Decompiled\Content is versioned, so no Content/ entry)
 > .gitignore (
     echo CodeIndex/
-    echo Content/
     echo __pycache__/
     echo *.py[cod]
     echo *.bak
@@ -173,17 +172,42 @@ goto failed
 :skip_wipe
 
 REM 12. Decompile the game assemblies
+set NEED_COMMIT=0
 if exist Data\Decompiled\VRage.XmlSerializers goto skip_decompile
 .\busybox sh Decompile.sh
 if %ERRORLEVEL% NEQ 0 goto failed
 
-REM 12b. Fix case-collision folders (Gui vs GUI, Filesystem vs FileSystem)
+REM Fix case-collision folders (Gui vs GUI, Filesystem vs FileSystem)
 echo Fixing case-collision folders
 uv run python -u fix_case_collisions.py Data\Decompiled
 if %ERRORLEVEL% NEQ 0 goto failed
+set NEED_COMMIT=1
+:skip_decompile
 
-REM 12a. Record the current game version and commit decompiled code
-echo Recording game version and committing decompiled sources
+REM 13. Copy indexable content into Data\Decompiled\Content, so the indexable
+REM text files (no binaries) are versioned along with the decompiled sources
+REM and changes to the definition files can be reviewed
+if exist Data\Decompiled\Content goto skip_content
+echo Copying indexable content
+uv run python -u copy_content.py "%SE_GAME_ROOT%\Content"
+if %ERRORLEVEL% NEQ 0 goto failed
+set NEED_COMMIT=1
+:skip_content
+
+REM 14. Migrate older installs: content used to live in Data\Content and was
+REM excluded from the repo by .gitignore (that entry would also hide
+REM Decompiled\Content, so it must go)
+if exist Data\Content rmdir /s /q Data\Content
+findstr /X /L /C:"Content/" Data\.gitignore >NUL 2>NUL
+if %ERRORLEVEL% EQU 0 (
+    findstr /X /L /V /C:"Content/" Data\.gitignore >Data\.gitignore.tmp
+    move /Y Data\.gitignore.tmp Data\.gitignore >NUL
+    set NEED_COMMIT=1
+)
+
+REM 15. Record the current game version and commit decompiled code and content
+if "%NEED_COMMIT%"=="0" goto skip_commit
+echo Recording game version and committing decompiled sources and content
 uv run python -u check_version.py --write Bin64 Data
 if %ERRORLEVEL% NEQ 0 goto failed
 
@@ -201,19 +225,12 @@ if %ERRORLEVEL% NEQ 0 (
     echo (No commit made: working tree clean or nothing to commit)
 )
 popd
-:skip_decompile
+:skip_commit
 
-REM 13. Remove the Bin64 junction
+REM 16. Remove the Bin64 junction
 rmdir /s /q Bin64
 
-REM 14. Copy indexable content
-if exist Data\Content goto skip_content
-echo Copying indexable content
-uv run python -u copy_content.py "%SE_GAME_ROOT%\Content"
-if %ERRORLEVEL% NEQ 0 goto failed
-:skip_content
-
-REM 15. Build the code index
+REM 17. Build the code index
 if exist Data\CodeIndex\class_declarations.csv goto skip_code_index
 echo Indexing decompiled code
 mkdir Data\CodeIndex 2>NUL
@@ -221,10 +238,10 @@ uv run python -OO -u index_code.py Data\Decompiled Data\CodeIndex
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_code_index
 
-REM 16. Build the content index
+REM 18. Build the content index
 if exist Data\CodeIndex\content_index.csv goto skip_content_index
 echo Indexing content files
-uv run python -u index_content.py Data\Content Data\Decompiled Data\CodeIndex
+uv run python -u index_content.py Data\Decompiled\Content Data\Decompiled Data\CodeIndex
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_content_index
 

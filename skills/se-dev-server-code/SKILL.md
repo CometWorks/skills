@@ -59,16 +59,16 @@ After preparation the skill folder contains a `Data` junction/symlink. Actual da
 skills/se-dev-server-code/
 ├── Data/                 (junction/symlink → per-user persistent server-code data)
 │   ├── .git/             local Git repository tracking decompiled sources
-│   ├── .gitignore        ignores CodeIndex/, Content/, __pycache__, *.py[cod], *.bak, *.log
+│   ├── .gitignore        ignores CodeIndex/, __pycache__, *.py[cod], *.bak, *.log
 │   ├── game_version.txt  recorded SE_VERSION / CLIENT_BUILD_NUMBER / SERVER_BUILD_NUMBER
 │   ├── Decompiled/       decompiled C# sources, organised per assembly (committed)
-│   ├── Content/          textual server content (NOT committed - regenerated)
+│   │   └── Content/      textual server content (committed - definition changes reviewable)
 │   └── CodeIndex/        CSV indexes (NOT committed - regenerated)
 ├── Bin64/                (junction/symlink → server's DedicatedServer64, removed after preparation)
 └── ...                   skill scripts and documentation
 ```
 
-The `Data` folder is a junction/symlink to per-user persistent server-code data directory (`%USERPROFILE%\.se-dev\server-code` on Windows, `~/.se-dev/server-code` on Linux). Treat `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` exactly as before.
+The `Data` folder is a junction/symlink to per-user persistent server-code data directory (`%USERPROFILE%\.se-dev\server-code` on Windows, `~/.se-dev/server-code` on Linux). Treat `Data/Decompiled`, `Data/Decompiled/Content` and `Data/CodeIndex` exactly as before.
 
 ## Graphify Graph
 
@@ -97,7 +97,7 @@ The `Data` folder is a local Git repository. Every successful preparation create
 This means:
 
 - **All previously decompiled server versions are preserved** in local Git history. You can `git checkout` any past commit inside `Data/` to inspect or diff against older build.
-- **Server updates are detected automatically** by comparing binaries' embedded version constants with `Data/game_version.txt`. If they differ (or file is missing), `Decompiled/`, `Content/` and `CodeIndex/` are wiped and fresh decompilation runs.
+- **Server updates are detected automatically** by comparing binaries' embedded version constants with `Data/game_version.txt`. If they differ (or file is missing), `Decompiled/` (including the copied `Content/`) and `CodeIndex/` are wiped and fresh decompilation runs.
 - This makes it easy to **update plugins, mods and scripts for compatibility with new server releases**: diff the relevant source between two commits inside `Data/` to see exactly what changed.
 
 Repository uses internal author/email (`se-dev-skills@localhost`) so commits work even on machines without configured global Git identity.
@@ -150,7 +150,7 @@ For building your own utility scripts to work with the indexes and decompiled co
 
 ## Server Content Data
 
-Textual part of server's `Content` is copied into `Data/Content` folder for free text search:
+Textual part of server's `Content` is copied into `Data/Decompiled/Content` folder for free text search:
 - Language translations, including string IDs
 - Block and other entity definitions
 - Default blueprints and scenarios
@@ -159,7 +159,7 @@ Textual part of server's `Content` is copied into `Data/Content` folder for free
 ### Content Index
 
 `Data/CodeIndex/content_index.csv` maps every textual content file to decompiled C#
-source files that reference it. Columns: `rel_path` (path relative to `Data/Content/`)
+source files that reference it. Columns: `rel_path` (path relative to `Data/Decompiled/Content/`)
 and `usage` (path of a C# source file in `Data/Decompiled/` that references it). Each
 content file appears once per usage, so you can filter and page by `rel_path` to see
 all C# code that loads or references a given content file. Files with no known usages
@@ -205,9 +205,9 @@ Configure by editing XML files directly or with utility Python scripts. See belo
 ## General Rules
 
 - In `Data/Decompiled` folder search only inside C# source files (*.cs) in general. If you work on transpiler or preloader patches, then also search IL code (*.il) files.
-- In `Data/Content` folder search files appropriate for the task. See [ContentTypes.md](ContentTypes.md) for list of types.
+- In `Data/Decompiled/Content` folder search files appropriate for the task. See [ContentTypes.md](ContentTypes.md) for list of types.
 - Do not search for decompiled server code outside `Data/Decompiled` folder. Decompiled server source tree must be there if preparation succeeded.
-- Do not search for server content data outside `Data/Content` folder. Copied server content must be there if preparation succeeded.
+- Do not search for server content data outside `Data/Decompiled/Content` folder. Copied server content must be there if preparation succeeded.
 
 ## Action References
 
