@@ -51,6 +51,8 @@ case "$RC" in
         ;;
     2)
         log "Game version differs or no previous version recorded - wiping stale outputs"
+        # Data files are incomplete until preparation finishes for the new game version
+        rm -f Prepare.DONE
         rm -rf Data/Decompiled Data/CodeIndex Data/Content
         mkdir -p Data/Decompiled
         ;;

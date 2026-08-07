@@ -159,6 +159,8 @@ if %ERRORLEVEL% EQU 0 (
 )
 if %ERRORLEVEL% EQU 2 (
     echo Game version differs or no previous version recorded - wiping stale outputs
+    REM Data files are incomplete until preparation finishes for the new game version
+    if exist Prepare.DONE del Prepare.DONE
     if exist Data\Decompiled rmdir /s /q Data\Decompiled
     if exist Data\CodeIndex  rmdir /s /q Data\CodeIndex
     if exist Data\Content    rmdir /s /q Data\Content
