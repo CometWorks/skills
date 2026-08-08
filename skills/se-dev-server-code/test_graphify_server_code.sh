@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
-# Graphify query smoke test for the decompiled dedicated-server graph.
+# Graphify query smoke test for the decompiled server-code graph (Linux).
 #
-# Mirrors test_search_server_code.sh (which tests the CSV code index) but
-# exercises the optional Graphify graph instead: it first verifies the graph is
-# healthy (built and clustered), then runs a handful of query / explain / path /
-# affected calls to confirm the graph answers questions.
+# Mirrors test_search_server_code.sh (which tests the CSV code index) but exercises
+# the optional Graphify graph instead: it first verifies the graph is healthy
+# (built and clustered), then runs the asserted query / explain / path / affected
+# checks in test_graphify_queries.py, shared with the Windows wrapper.
 #
-# The server-code graph.json is larger than Graphify's default 512 MB load cap,
-# so GRAPHIFY_MAX_GRAPH_BYTES is raised here.
+# The server-code graph.json is larger than Graphify's default 512 MB load cap, so
+# GRAPHIFY_MAX_GRAPH_BYTES is raised here.
 
 set -u
 cd "$(dirname "$(readlink -f "$0")")"
@@ -36,50 +36,4 @@ if ! bash "$SKILL_DIR/../se-dev/graphify-check.sh" "$GRAPH_OUT" --deep; then
 fi
 echo
 
-# All graphify subcommands default to graphify-out/graph.json under the cwd.
-cd "$GRAPH_OUT"
-
-echo ============================================================
-echo QUERY - BFS traversal for a question
-echo ============================================================
-echo "--- How does the dedicated server start a session? ---"
-graphify query "How does the dedicated server start a session?" --budget 400
-echo
-echo "--- How does the server handle multiplayer clients? ---"
-graphify query "How does the server handle multiplayer clients?" --budget 400
-echo
-
-echo ============================================================
-echo QUERY - narrowed by edge context
-echo ============================================================
-echo "--- Call edges out of MyCubeGrid ---"
-graphify query "MyCubeGrid" --context call --budget 300
-echo
-
-echo ============================================================
-echo EXPLAIN - a node and its neighbours
-echo ============================================================
-echo "--- Explain MySession ---"
-graphify explain "MySession"
-echo
-echo "--- Explain MyEntity ---"
-graphify explain "MyEntity"
-echo
-
-echo ============================================================
-echo PATH - shortest path between two nodes
-echo ============================================================
-echo "--- MyCubeBlock -> MyEntity ---"
-graphify path "MyCubeBlock" "MyEntity"
-echo
-
-echo ============================================================
-echo AFFECTED - reverse traversal for impact
-echo ============================================================
-echo "--- What is affected by MyEntity? ---"
-graphify affected "MyEntity" --depth 1
-echo
-
-echo ============================================================
-echo ALL TESTS COMPLETED
-echo ============================================================
+uv run test_graphify_queries.py "$GRAPH_OUT"

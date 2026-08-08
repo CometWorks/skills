@@ -2,8 +2,10 @@
 setlocal EnableExtensions
 cd /d "%~dp0"
 
-REM Graphify query smoke test for the decompiled dedicated-server graph.
+REM Graphify query smoke test for the decompiled server-code graph (Windows).
 REM Mirrors test_search_server_code.bat but exercises the optional Graphify graph.
+REM The asserted checks live in test_graphify_queries.py, shared with the Linux
+REM wrapper. Exits non-zero if any check failed.
 
 set "GRAPH_ROOT=%SE_DEV_SERVER_CODE_GRAPH_ROOT%"
 if "%GRAPH_ROOT%"=="" set "GRAPH_ROOT=Data\Decompiled"
@@ -31,51 +33,5 @@ if %ERRORLEVEL% NEQ 0 (
 )
 echo.
 
-pushd "%GRAPH_OUT%"
-
-echo ============================================================
-echo QUERY - BFS traversal for a question
-echo ============================================================
-echo --- How does the dedicated server start a session? ---
-graphify query "How does the dedicated server start a session?" --budget 400
-echo.
-echo --- How does the server handle multiplayer clients? ---
-graphify query "How does the server handle multiplayer clients?" --budget 400
-echo.
-
-echo ============================================================
-echo QUERY - narrowed by edge context
-echo ============================================================
-echo --- Call edges out of MyCubeGrid ---
-graphify query "MyCubeGrid" --context call --budget 300
-echo.
-
-echo ============================================================
-echo EXPLAIN - a node and its neighbours
-echo ============================================================
-echo --- Explain MySession ---
-graphify explain "MySession"
-echo.
-echo --- Explain MyEntity ---
-graphify explain "MyEntity"
-echo.
-
-echo ============================================================
-echo PATH - shortest path between two nodes
-echo ============================================================
-echo --- MyCubeBlock -^> MyEntity ---
-graphify path "MyCubeBlock" "MyEntity"
-echo.
-
-echo ============================================================
-echo AFFECTED - reverse traversal for impact
-echo ============================================================
-echo --- What is affected by MyEntity? ---
-graphify affected "MyEntity" --depth 1
-echo.
-
-popd
-
-echo ============================================================
-echo ALL TESTS COMPLETED
-echo ============================================================
+uv run test_graphify_queries.py "%GRAPH_OUT%"
+exit /b %ERRORLEVEL%

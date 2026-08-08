@@ -56,6 +56,10 @@ uv run search_game_code.py -l 10 method usage GetPosition
 uv run search_game_code.py -l 10 struct usage Vector3D
 ```
 
+The pattern matches the used symbol itself, including usages inside method
+bodies. The enclosing namespace, type and method are not searchable - to narrow
+a usage search, filter by namespace with `-n` or grep the reported files.
+
 ### Search Method Signatures
 
 Method signatures show full method declaration including modifiers, return type, parameters, and attributes:
@@ -80,6 +84,11 @@ Sandbox.Game/MyClass.cs:100-102|public static void MyMethod(int param)
 ```
 
 **Note:** Signatures always declarations. No `method signature usage` - use `method usage` instead to find method call sites.
+
+**Note:** Patterns match the method *name*, not the signature text. The full
+signature is only printed. Searching for a return type, parameter type or
+attribute (`text:MTAThread`, `"text:string[] args"`) returns NO-MATCHES - grep
+the declaration files for those instead.
 
 ## Search Options
 

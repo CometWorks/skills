@@ -6,13 +6,24 @@
 
 ## Quick Reference
 
-Run UNIX-like commands using `busybox.exe` as prefix:
+On Linux run the commands directly in the native shell:
+
+```bash
+grep -r "pattern" folder
+find . -name "*.cs"
+cat file.txt
+```
+
+On Windows the same commands run through the bundled BusyBox, used as prefix:
 
 ```bash
 busybox.exe grep -r "pattern" folder
 busybox.exe find . -name "*.cs"
 busybox.exe cat file.txt
 ```
+
+The rest of this page covers the Windows specifics. On Linux only rule 2 and 3
+below apply, and neither BusyBox nor PowerShell are involved.
 
 ## Critical Rules (Summary)
 
