@@ -52,7 +52,10 @@ CHECKS = [
     ("any", "Forward field declaration (limit 5)", ["-l", "5", "field", "declaration", "re:^Forward$"]),
 
     ("section", "FIELD USAGE", None),
-    ("any", "Forward field usage (limit 5)", ["-l", "5", "field", "usage", "re:^Forward$"]),
+    # `Forward` members (MatrixD.Forward and friends) are properties; the old
+    # indexer misfiled property accesses as field usages, so this check moved
+    # from the field to the property category when that was fixed.
+    ("any", "Forward property usage (limit 5)", ["-l", "5", "property", "usage", "re:^Forward$"]),
     ("any", "AngularDamping field usage (limit 5)", ["-l", "5", "field", "usage", "AngularDamping"]),
 
     ("section", "INTERFACE DECLARATION", None),
@@ -68,6 +71,21 @@ CHECKS = [
 
     ("section", "ENUM USAGE", None),
     ("any", "MyPhysicsOption enum usage (limit 5)", ["-l", "5", "enum", "usage", "MyPhysicsOption"]),
+
+    ("section", "ENUM MEMBER DECLARATION", None),
+    ("any", "FactionShare enum member declaration", ["enum_member", "declaration", "re:^FactionShare$"]),
+    # Enum members have no usage form of their own; the search must degrade to
+    # NO-MATCHES instead of failing.
+    ("none", "Enum member usage form does not exist", ["enum_member", "usage", "FactionShare"]),
+
+    ("section", "DELEGATE DECLARATION", None),
+    ("any", "BreakLogicHandler delegate declaration", ["delegate", "declaration", "BreakLogicHandler"]),
+    ("none", "Delegate usage form does not exist", ["delegate", "usage", "BreakLogicHandler"]),
+    # A delegate nested in a class keeps its own name. Re-attributing it to the
+    # enclosing type would overwrite the very column its name lives in, leaving
+    # it findable only under the parent's name.
+    ("any", "Nested delegate keeps its own name", ["delegate", "declaration", "re:^BreakLogicHandlerDelegate$"]),
+    ("none", "Nested delegate is not filed under its enclosing type", ["delegate", "declaration", "re:^HkBreakOffPartsUtil$"]),
 
     # Usage rows carry the enclosing namespace/type/method as context columns next
     # to the symbol itself. Matching the wrong column silently hides most member
