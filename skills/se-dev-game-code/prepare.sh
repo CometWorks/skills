@@ -54,6 +54,7 @@ case "$RC" in
         # Data files are incomplete until preparation finishes for the new game version
         rm -f Prepare.DONE
         rm -rf Data/Decompiled Data/CodeIndex Data/Content Data/graphify-out
+        rm -f Data/game_files.json
         mkdir -p Data/Decompiled
         ;;
     *)
@@ -112,6 +113,16 @@ if [ ! -d Data/Content ]; then
     NEED_COMMIT=1
 fi
 
+# Hash every original game file. The digests are versioned alongside the decompiled
+# sources, so diffing Data/game_files.json between two version commits shows exactly
+# which binaries a game update changed - including the ones that are neither
+# assemblies nor copied into Data/Content.
+if [ ! -f Data/game_files.json ]; then
+    log "Hashing the original game files"
+    uv run python -u hash_game_files.py --write "$GAME_ROOT" Data
+    NEED_COMMIT=1
+fi
+
 if [ "$NEED_COMMIT" = 1 ]; then
     log "Recording game version and committing decompiled sources and content"
     uv run python -u check_version.py --write Bin64 Data
@@ -126,22 +137,38 @@ if [ "$NEED_COMMIT" = 1 ]; then
         commit -m "$GAME_VERSION_LABEL" >/dev/null || log "(No commit made: working tree clean or nothing to commit)"
 fi
 
-if [ ! -f Data/CodeIndex/class_declarations.csv ]; then
+# Build the code index. An unchanged decompilation keeps its index: indexing runs
+# only when check_index.py reports the index missing or broken. index_code.py
+# rewrites every file it owns, so a broken index needs no wiping beforehand.
+if uv run python -u check_index.py Data/CodeIndex; then
+    log "Code index is complete - keeping it"
+else
     log "Indexing decompiled code"
     mkdir -p Data/CodeIndex
     uv run python -OO -u index_code.py Data/Decompiled Data/CodeIndex
 fi
 
-if [ ! -f Data/CodeIndex/content_index.csv ]; then
+# Build the content index, under the same missing-or-broken rule.
+if uv run python -u check_index.py --content Data/CodeIndex; then
+    log "Content index is complete - keeping it"
+else
     log "Indexing content files"
     uv run python -u index_content.py Data/Content Data/Decompiled Data/CodeIndex
 fi
 
 # Only the decompiled C# code is graphed; the graph itself is written beside it
 # (Data/graphify-out) so it never pollutes the graphed tree or the repository.
+# NEED_COMMIT tells whether anything under Data was regenerated in this run. When
+# nothing was, the graphed sources are still the ones the existing graph was built
+# from, so a healthy graph is left alone instead of being rescanned and reclustered.
 GAME_CODE_GRAPH_ROOT="${SE_DEV_GAME_CODE_GRAPH_ROOT:-Data/Decompiled}"
 GAME_CODE_GRAPH_OUT="${SE_DEV_GAME_CODE_GRAPH_OUT:-Data}"
-se_dev_graphify_prepare "se-dev-game-code" "$GAME_CODE_GRAPH_ROOT" "$GAME_CODE_GRAPH_OUT"
+if [ "$NEED_COMMIT" = 1 ]; then
+    GAME_CODE_SOURCE_STATE=changed
+else
+    GAME_CODE_SOURCE_STATE=unchanged
+fi
+se_dev_graphify_prepare "se-dev-game-code" "$GAME_CODE_GRAPH_ROOT" "$GAME_CODE_GRAPH_OUT" "$GAME_CODE_SOURCE_STATE"
 
 : >Prepare.DONE
 log "DONE"

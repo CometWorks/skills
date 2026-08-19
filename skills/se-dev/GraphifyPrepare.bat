@@ -1,14 +1,20 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
 
-REM Usage: GraphifyPrepare.bat <label> <root> [out-dir]
-REM   <root>     the tree to graph
-REM   <out-dir>  where to put graphify-out\ (default: <root>). Pass a directory
-REM              outside <root> to keep the graphed tree free of build output.
+REM Usage: GraphifyPrepare.bat <label> <root> [out-dir] [source-state]
+REM   <root>          the tree to graph
+REM   <out-dir>       where to put graphify-out\ (default: <root>). Pass a directory
+REM                   outside <root> to keep the graphed tree free of build output.
+REM   <source-state>  "unchanged" when the caller knows nothing under <root> was
+REM                   regenerated in this run, so an existing healthy graph still
+REM                   matches its sources and is left untouched. Anything else
+REM                   (default "changed") builds or updates as before.
 set "GRAPHIFY_LABEL=%~1"
 set "GRAPHIFY_ROOT=%~2"
 set "GRAPHIFY_OUT_DIR=%~3"
+set "GRAPHIFY_SOURCE_STATE=%~4"
 if "%GRAPHIFY_OUT_DIR%"=="" set "GRAPHIFY_OUT_DIR=%GRAPHIFY_ROOT%"
+if "%GRAPHIFY_SOURCE_STATE%"=="" set "GRAPHIFY_SOURCE_STATE=changed"
 
 REM Clustering is the slow part of a Graphify build. The fast path is graspologic's
 REM native Rust Leiden backend (needs Python 3.12); without it Graphify drops to a
@@ -17,6 +23,11 @@ REM Graphify tool to Python 3.12 with the leiden extra. When the fast backend is
 REM available the graph is built automatically; otherwise it stays optional and only
 REM builds on opt-in (SE_DEV_GRAPHIFY=1). SE_DEV_GRAPHIFY=0 disables it entirely.
 set "GRAPHIFY_PY_VER=3.12"
+
+REM The decompiled game/server-code graph.json is well over Graphify's default 512 MB
+REM load cap, which would abort every build and update. Raise it, but let an explicitly
+REM set value win so a larger corpus can be accommodated without editing this file.
+if "%GRAPHIFY_MAX_GRAPH_BYTES%"=="" set "GRAPHIFY_MAX_GRAPH_BYTES=2GB"
 
 if "%SE_DEV_GRAPHIFY%"=="0" (
     echo Graphify: skipping %GRAPHIFY_LABEL% ^(SE_DEV_GRAPHIFY=0^)
@@ -31,6 +42,17 @@ if "%GRAPHIFY_ROOT%"=="" (
 if not exist "%GRAPHIFY_ROOT%\" (
     echo Graphify: skipping %GRAPHIFY_LABEL% ^(missing root: %GRAPHIFY_ROOT%^)
     exit /b 0
+)
+
+REM Sources unchanged and the existing graph is usable: there is nothing to do.
+REM Checked before provisioning so an up-to-date graph costs neither a tool
+REM install nor the disk pre-check scan of the whole corpus.
+if /I "%GRAPHIFY_SOURCE_STATE%"=="unchanged" (
+    call :graph_status "%GRAPHIFY_OUT_DIR%"
+    if !ERRORLEVEL! EQU 0 (
+        echo Graphify: %GRAPHIFY_LABEL% graph is up to date ^(sources unchanged^); skipping
+        exit /b 0
+    )
 )
 
 REM Provision/detect the fast Rust Leiden backend. Positive confirmation only:
@@ -73,11 +95,10 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b 0
 )
 
-if not exist "%GRAPHIFY_OUT%\graph.json" goto build
-
-REM graph.json exists; require clustering data or rebuild from scratch.
-if not exist "%GRAPHIFY_OUT%\.graphify_analysis.json" (
-    echo Graphify: %GRAPHIFY_LABEL% graph is incomplete ^(clustering missing^); rebuilding from scratch
+call :graph_status "%GRAPHIFY_ABS_OUT_DIR%"
+if %ERRORLEVEL% EQU 2 goto build
+if %ERRORLEVEL% EQU 3 (
+    echo Graphify: %GRAPHIFY_LABEL% graph is incomplete ^(clustering missing or interrupted^); rebuilding from scratch
     rmdir /S /Q "%GRAPHIFY_OUT%"
     goto build
 )
@@ -134,6 +155,19 @@ set "GRAPHIFY_TOOL_PY=%UVTOOLS%\graphifyy\Scripts\python.exe"
 if not exist "%GRAPHIFY_TOOL_PY%" exit /b 0
 "%GRAPHIFY_TOOL_PY%" -c "import graspologic.partition" >NUL 2>NUL
 if %ERRORLEVEL% EQU 0 set "GRAPHIFY_FAST=1"
+exit /b 0
+
+REM Classify the graph under <out-dir>\graphify-out. Mirrors se_dev_graphify_status
+REM in graphify-prepare.sh and the exit codes of GraphifyCheck.bat:
+REM   0 ok, 2 missing (never built), 3 incomplete (build or clustering interrupted).
+:graph_status
+set "GS_OUT=%~f1\graphify-out"
+if not exist "%GS_OUT%\graph.json" exit /b 2
+REM A truncated or empty graph.json means the build died mid-write.
+for %%F in ("%GS_OUT%\graph.json") do if %%~zF LSS 1024 exit /b 3
+REM Clustering writes .graphify_analysis.json. Without it every node has an empty
+REM community and the graph is only half-built.
+if not exist "%GS_OUT%\.graphify_analysis.json" exit /b 3
 exit /b 0
 
 REM Disk pre-check: the graph output (graph.json + clustering + cache) runs ~9x

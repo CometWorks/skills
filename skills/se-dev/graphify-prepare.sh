@@ -28,7 +28,10 @@ SE_DEV_GRAPHIFY_PYTHON="${SE_DEV_GRAPHIFY_PYTHON:-3.12}"
 # Set by se_dev_graphify_provision(): "fast" or "slow".
 SE_DEV_GRAPHIFY_SPEED="slow"
 
-export GRAPHIFY_MAX_GRAPH_BYTES=2GB
+# The decompiled game/server-code graph.json is well over Graphify's default 512 MB
+# load cap, which would abort every build and update. Raise it, but let an explicitly
+# set value win so a larger corpus can be accommodated without editing this file.
+export GRAPHIFY_MAX_GRAPH_BYTES="${GRAPHIFY_MAX_GRAPH_BYTES:-2GB}"
 
 se_dev_graphify_opt_in()  { [ "${SE_DEV_GRAPHIFY:-}" = "1" ]; }
 se_dev_graphify_opt_out() { [ "${SE_DEV_GRAPHIFY:-}" = "0" ]; }
@@ -275,6 +278,12 @@ se_dev_graphify_run_build() {
 
     # Only pass --out when it differs from the root, so the default invocation
     # stays byte-identical to what the other skills have always run.
+    #
+    # The expansion is guarded rather than plain: callers source this under
+    # `set -u`, and bash before 4.4 (RHEL/CentOS 7 ship 4.2) treats an empty
+    # array expansion as an unbound variable. se-dev-plugin and the other
+    # authoring skills pass no output directory, so the array IS empty there
+    # and the graph build would abort on those systems.
     local out_args=()
     if [ "$outdir" != "$root" ]; then
         out_args=(--out "$outdir")
@@ -283,29 +292,34 @@ se_dev_graphify_run_build() {
     case "$status" in
         ok)
             log "Graphify: updating $label graph of $root at $outdir/graphify-out"
-            graphify "$root" --update "${out_args[@]}" || log "WARNING: Graphify update failed for $label; prepare continues."
+            graphify "$root" --update ${out_args[@]+"${out_args[@]}"} || log "WARNING: Graphify update failed for $label; prepare continues."
             ;;
         incomplete)
             log "Graphify: $label graph is incomplete (clustering missing or interrupted); rebuilding from scratch"
             se_dev_graphify_clean "$root" "$outdir"
-            graphify "$root" "${out_args[@]}" || log "WARNING: Graphify build failed for $label; prepare continues."
+            graphify "$root" ${out_args[@]+"${out_args[@]}"} || log "WARNING: Graphify build failed for $label; prepare continues."
             ;;
         *)
             log "Graphify: building $label graph of $root at $outdir/graphify-out"
-            graphify "$root" "${out_args[@]}" || log "WARNING: Graphify build failed for $label; prepare continues."
+            graphify "$root" ${out_args[@]+"${out_args[@]}"} || log "WARNING: Graphify build failed for $label; prepare continues."
             ;;
     esac
 }
 
-# se_dev_graphify_prepare <label> <root> [out-dir]
+# se_dev_graphify_prepare <label> <root> [out-dir] [source-state]
 #
-# <root>     the tree to graph
-# <out-dir>  where to put graphify-out/ (default: <root>). Pass a directory
-#            outside <root> to keep the graphed tree free of build output.
+# <root>          the tree to graph
+# <out-dir>       where to put graphify-out/ (default: <root>). Pass a directory
+#                 outside <root> to keep the graphed tree free of build output.
+# <source-state>  "unchanged" when the caller knows nothing under <root> was
+#                 regenerated in this run, so an existing healthy graph still
+#                 matches its sources and is left untouched. Anything else
+#                 (default "changed") builds or updates as before.
 se_dev_graphify_prepare() {
     local label="$1"
     local root="$2"
     local outdir="${3:-$2}"
+    local source_state="${4:-changed}"
 
     if se_dev_graphify_opt_out; then
         log "Graphify: skipping $label (SE_DEV_GRAPHIFY=0)"
@@ -319,6 +333,14 @@ se_dev_graphify_prepare() {
 
     if [ ! -d "$root" ]; then
         log "Graphify: skipping $label (missing root: $root)"
+        return 0
+    fi
+
+    # Sources unchanged and the existing graph is usable: there is nothing to do.
+    # Checked before provisioning so an up-to-date graph costs neither a tool
+    # install nor the disk pre-check scan of the whole corpus.
+    if [ "$source_state" = "unchanged" ] && [ "$(se_dev_graphify_status "$root" "$outdir")" = "ok" ]; then
+        log "Graphify: $label graph is up to date (sources unchanged); skipping"
         return 0
     fi
 

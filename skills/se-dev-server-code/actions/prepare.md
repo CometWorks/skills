@@ -71,9 +71,10 @@ Preparation script:
 - Creates `Data` junction pointing to `%USERPROFILE%\.se-dev\server-code\`
 - Initialises local Git repository inside `Data/` on first run (with initial commit of `.gitignore`)
 - Detects current server version directly from binaries
-- Wipes `Data/Decompiled`, `Data/Content` and `Data/CodeIndex` whenever version differs from recorded one (older versions remain in local Git history)
+- Wipes `Data/Decompiled`, `Data/Content`, `Data/CodeIndex`, `Data/graphify-out` and `Data/server_files.json` whenever version differs from recorded one (older versions remain in local Git history)
 - Decompiles server DLLs to C# and optionally to IL code (needs uncommenting a line in `DecompileDll.sh` if required)
 - Copies server content data (indexable text files only, no binaries) into `Data/Content`, so definition changes can be reviewed in Git history
+- Hashes every original server file into `Data/server_files.json` (see [ServerFileHashes.md](../ServerFileHashes.md))
 - Records new server version in `Data/game_version.txt` and commits decompiled sources and content with version label as commit message
 - Builds code search index in `Data/CodeIndex`
 - Verifies environment is ready for use
