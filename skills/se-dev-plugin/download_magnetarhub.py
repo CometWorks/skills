@@ -28,10 +28,30 @@ def _run_git(args: list, cwd=None) -> int:
     return subprocess.run(["git", *args], cwd=cwd).returncode
 
 
+def _git_output(args: list, cwd=None) -> str:
+    proc = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True)
+    return proc.stdout.strip() if proc.returncode == 0 else ""
+
+
 def _is_recent(path) -> bool:
     if not path.exists():
         return False
     return (time.time() - path.stat().st_mtime) < REFRESH_INTERVAL_SECONDS
+
+
+def _is_up_to_date(repo) -> bool:
+    """Whether the checked out tree is current, not just recently fetched.
+
+    git pull writes FETCH_HEAD during the fetch phase even when the merge that
+    follows aborts (local modifications, diverged history), so the FETCH_HEAD
+    timestamp alone reports a stale clone as fresh. Also require HEAD to match
+    the remote-tracking branch that the last fetch updated.
+    """
+    if not _is_recent(repo / ".git" / "FETCH_HEAD"):
+        return False
+    head = _git_output(["rev-parse", "HEAD"], cwd=repo)
+    upstream = _git_output(["rev-parse", "@{u}"], cwd=repo)
+    return bool(head) and head == upstream
 
 
 def main() -> int:
@@ -44,13 +64,22 @@ def main() -> int:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     if (MAGNETARHUB_DIR / ".git").exists():
-        if _is_recent(MAGNETARHUB_DIR / ".git" / "FETCH_HEAD"):
+        if _is_up_to_date(MAGNETARHUB_DIR):
             print(f"MagnetarHub registry is up to date at {MAGNETARHUB_DIR}.")
             return 0
         print(f"Updating MagnetarHub registry in {MAGNETARHUB_DIR}...")
         rc = _run_git(["pull", "--ff-only"], cwd=MAGNETARHUB_DIR)
         if rc != 0:
             print("git pull failed", file=sys.stderr)
+            dirty = _git_output(["status", "--porcelain"], cwd=MAGNETARHUB_DIR)
+            if dirty:
+                print(
+                    f"{MAGNETARHUB_DIR} has local modifications blocking the "
+                    "fast-forward. Revert them or delete the clone "
+                    "to force a fresh download:",
+                    file=sys.stderr,
+                )
+                print(dirty, file=sys.stderr)
             return rc
         return 0
 
