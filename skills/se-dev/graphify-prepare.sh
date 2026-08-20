@@ -28,10 +28,45 @@ SE_DEV_GRAPHIFY_PYTHON="${SE_DEV_GRAPHIFY_PYTHON:-3.12}"
 # Set by se_dev_graphify_provision(): "fast" or "slow".
 SE_DEV_GRAPHIFY_SPEED="slow"
 
-export GRAPHIFY_MAX_GRAPH_BYTES=2GB
+# Environment variables Graphify auto-detects an LLM backend from. Without one of
+# these it refuses to extract doc/paper/image files and the whole build fails, even
+# though the code was already indexed locally by the AST extractor.
+SE_DEV_GRAPHIFY_API_KEY_VARS="GEMINI_API_KEY GOOGLE_API_KEY MOONSHOT_API_KEY ANTHROPIC_API_KEY OPENAI_API_KEY DEEPSEEK_API_KEY"
+
+# The decompiled game/server-code graph.json is well over Graphify's default 512 MB
+# load cap, which would abort every build and update. Raise it, but let an explicitly
+# set value win so a larger corpus can be accommodated without editing this file.
+export GRAPHIFY_MAX_GRAPH_BYTES="${GRAPHIFY_MAX_GRAPH_BYTES:-2GB}"
 
 se_dev_graphify_opt_in()  { [ "${SE_DEV_GRAPHIFY:-}" = "1" ]; }
 se_dev_graphify_opt_out() { [ "${SE_DEV_GRAPHIFY:-}" = "0" ]; }
+
+# True when no LLM API key is configured. Checked with indirect expansion so an
+# empty value counts as unset, which is how Graphify itself treats it.
+se_dev_graphify_no_api_key() {
+    local name
+    for name in $SE_DEV_GRAPHIFY_API_KEY_VARS; do
+        [ -n "${!name:-}" ] && return 1
+    done
+    return 0
+}
+
+# Echo --code-only when the semantic extraction pass cannot run, so a corpus that
+# mixes code with docs or images still produces a code graph instead of failing.
+# Graphify aborts the entire build on the first doc/paper/image file it cannot send
+# to an LLM, which killed the graph for every skill whose sources carry a README or
+# a screenshot. SE_DEV_GRAPHIFY_CODE_ONLY overrides the detection:
+#   unset -> auto: code-only when no API key is configured, full extraction otherwise
+#   1     -> always code-only (fast, deterministic, no LLM calls)
+#   0     -> never: keep semantic extraction even with no key detected, for a
+#            keyless backend such as a local ollama passed through --backend
+se_dev_graphify_code_only() {
+    case "${SE_DEV_GRAPHIFY_CODE_ONLY:-}" in
+        1) return 0 ;;
+        0) return 1 ;;
+    esac
+    se_dev_graphify_no_api_key
+}
 
 se_dev_graphify_print_install_hint() {
     log "Graphify builds a navigable map beside the regular search indexes."
@@ -273,39 +308,55 @@ se_dev_graphify_run_build() {
     local status
     status="$(se_dev_graphify_status "$root" "$outdir")"
 
-    # Only pass --out when it differs from the root, so the default invocation
-    # stays byte-identical to what the other skills have always run.
-    local out_args=()
+    # Extra flags for the graphify invocation. --out is passed only when it differs
+    # from the root, so the default invocation stays byte-identical to what the
+    # other skills have always run.
+    #
+    # The expansion is guarded rather than plain: callers source this under
+    # `set -u`, and bash before 4.4 (RHEL/CentOS 7 ship 4.2) treats an empty
+    # array expansion as an unbound variable. The array IS empty for a skill that
+    # passes no output directory and has an API key configured, so the graph build
+    # would abort on those systems.
+    local build_args=()
     if [ "$outdir" != "$root" ]; then
-        out_args=(--out "$outdir")
+        build_args=(--out "$outdir")
+    fi
+    if se_dev_graphify_code_only; then
+        log "Graphify: indexing $label code only (no LLM API key needed; docs and images are skipped)"
+        build_args+=(--code-only)
     fi
 
     case "$status" in
         ok)
             log "Graphify: updating $label graph of $root at $outdir/graphify-out"
-            graphify "$root" --update "${out_args[@]}" || log "WARNING: Graphify update failed for $label; prepare continues."
+            graphify "$root" --update ${build_args[@]+"${build_args[@]}"} || log "WARNING: Graphify update failed for $label; prepare continues."
             ;;
         incomplete)
             log "Graphify: $label graph is incomplete (clustering missing or interrupted); rebuilding from scratch"
             se_dev_graphify_clean "$root" "$outdir"
-            graphify "$root" "${out_args[@]}" || log "WARNING: Graphify build failed for $label; prepare continues."
+            graphify "$root" ${build_args[@]+"${build_args[@]}"} || log "WARNING: Graphify build failed for $label; prepare continues."
             ;;
         *)
             log "Graphify: building $label graph of $root at $outdir/graphify-out"
-            graphify "$root" "${out_args[@]}" || log "WARNING: Graphify build failed for $label; prepare continues."
+            graphify "$root" ${build_args[@]+"${build_args[@]}"} || log "WARNING: Graphify build failed for $label; prepare continues."
             ;;
     esac
 }
 
-# se_dev_graphify_prepare <label> <root> [out-dir]
+# se_dev_graphify_prepare <label> <root> [out-dir] [source-state]
 #
-# <root>     the tree to graph
-# <out-dir>  where to put graphify-out/ (default: <root>). Pass a directory
-#            outside <root> to keep the graphed tree free of build output.
+# <root>          the tree to graph
+# <out-dir>       where to put graphify-out/ (default: <root>). Pass a directory
+#                 outside <root> to keep the graphed tree free of build output.
+# <source-state>  "unchanged" when the caller knows nothing under <root> was
+#                 regenerated in this run, so an existing healthy graph still
+#                 matches its sources and is left untouched. Anything else
+#                 (default "changed") builds or updates as before.
 se_dev_graphify_prepare() {
     local label="$1"
     local root="$2"
     local outdir="${3:-$2}"
+    local source_state="${4:-changed}"
 
     if se_dev_graphify_opt_out; then
         log "Graphify: skipping $label (SE_DEV_GRAPHIFY=0)"
@@ -319,6 +370,14 @@ se_dev_graphify_prepare() {
 
     if [ ! -d "$root" ]; then
         log "Graphify: skipping $label (missing root: $root)"
+        return 0
+    fi
+
+    # Sources unchanged and the existing graph is usable: there is nothing to do.
+    # Checked before provisioning so an up-to-date graph costs neither a tool
+    # install nor the disk pre-check scan of the whole corpus.
+    if [ "$source_state" = "unchanged" ] && [ "$(se_dev_graphify_status "$root" "$outdir")" = "ok" ]; then
+        log "Graphify: $label graph is up to date (sources unchanged); skipping"
         return 0
     fi
 

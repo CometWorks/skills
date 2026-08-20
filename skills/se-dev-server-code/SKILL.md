@@ -2,7 +2,7 @@
 name: se-dev-server-code
 description: Allows reading the decompiled C# code of the Space Engineers Dedicated Server
 license: MIT
-allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*clean.sh*), Bash(*test_search_server_code*), Bash(*test_graphify_server_code*), Bash(*uv run test_search_code.py*), Bash(*uv run test_graphify_queries.py*), Bash(*graphify-check.sh*), Bash(*GraphifyCheck.bat*), Bash(*uv run search_server_code.py *), Bash(*uv run index_code.py *), Bash(command -v graphify*), Bash(graphify*), Bash(*GRAPHIFY_MAX_GRAPH_BYTES*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*clean.sh*), Bash(*VerifyServerFiles.bat*), Bash(*verify_server_files.sh*), Bash(*uv run hash_server_files.py *), Bash(*test_search_server_code*), Bash(*test_graphify_server_code*), Bash(*uv run test_search_code.py*), Bash(*uv run test_graphify_queries.py*), Bash(*graphify-check.sh*), Bash(*GraphifyCheck.bat*), Bash(*uv run search_server_code.py *), Bash(*uv run index_code.py *), Bash(*uv run check_index.py *), Bash(command -v graphify*), Bash(graphify*), Bash(*GRAPHIFY_MAX_GRAPH_BYTES*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
 # SE Dev Server Code Skill
@@ -61,6 +61,7 @@ skills/se-dev-server-code/
 │   ├── .git/             local Git repository tracking decompiled sources
 │   ├── .gitignore        ignores CodeIndex/, graphify-out/, __pycache__, *.py[cod], *.bak, *.log
 │   ├── game_version.txt  recorded SE_VERSION / CLIENT_BUILD_NUMBER / SERVER_BUILD_NUMBER
+│   ├── server_files.json SHA256 of every original server file (committed - diffable)
 │   ├── Decompiled/       decompiled C# sources only, organised per assembly (committed)
 │   ├── Content/          textual server content (committed - definition changes reviewable)
 │   ├── CodeIndex/        CSV indexes (NOT committed - regenerated)
@@ -100,10 +101,23 @@ The `Data` folder is a local Git repository. Every successful preparation create
 This means:
 
 - **All previously decompiled server versions are preserved** in local Git history. You can `git checkout` any past commit inside `Data/` to inspect or diff against older build.
-- **Server updates are detected automatically** by comparing binaries' embedded version constants with `Data/game_version.txt`. If they differ (or file is missing), `Decompiled/`, `Content/` and `CodeIndex/` are wiped and fresh decompilation runs.
+- **Server updates are detected automatically** by comparing binaries' embedded version constants with `Data/game_version.txt`. If they differ (or file is missing), `Decompiled/`, `Content/`, `CodeIndex/`, `graphify-out/` and `server_files.json` are wiped and fresh decompilation runs.
 - This makes it easy to **update plugins, mods and scripts for compatibility with new server releases**: diff the relevant source between two commits inside `Data/` to see exactly what changed.
 
 Repository uses internal author/email (`se-dev-skills@localhost`) so commits work even on machines without configured global Git identity.
+
+## Original Server File Hashes
+
+Preparation also records SHA256 of **every** file in the Space Engineers Dedicated Server install into
+`Data/server_files.json` (path relative to install root → lower-case hex digest,
+alphabetically sorted, one pair per line) and commits it under the version label.
+Diffing it between two version commits shows exactly which binaries a game update
+changed — including assets that are neither assemblies nor text, so they appear in
+neither `Data/Decompiled` nor `Data/Content`.
+
+Verify an install against the recorded digests with `./verify_server_files.sh` (Linux) or
+`.\VerifyServerFiles.bat` (Windows). Read [ServerFileHashes.md](ServerFileHashes.md) for the file format,
+the diffing recipe and the verification output.
 
 ## Essential Documentation
 
@@ -116,6 +130,7 @@ Repository uses internal author/email (`se-dev-skills@localhost`) so commits wor
 - **[HierarchySearch.md](HierarchySearch.md)** - Finding class/interface inheritance and implementations
 - **[Advanced.md](Advanced.md)** - Power user techniques for complex searches
 - **[Troubleshooting.md](Troubleshooting.md)** - What to do when searches return NO-MATCHES or too many results
+- **[ServerFileHashes.md](ServerFileHashes.md)** - SHA256 digests of the original server files: format, diffing across game versions, verifying an install
 - **[Implementation.md](Implementation.md)** - Technical details for skill contributors (optional)
 
 ## Quick Search Examples

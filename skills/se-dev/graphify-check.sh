@@ -70,9 +70,21 @@ case "$STATUS" in
 esac
 
 if [ "$DEEP" = "1" ]; then
-    PY="$(command -v python3 || command -v python || true)"
+    # Pick the first interpreter that actually runs. On Windows, `python3` on
+    # PATH is usually the Microsoft Store App Execution Alias: a stub that
+    # prints an install advert and exits non-zero, so trusting the first name
+    # found makes the deep check fail on a perfectly good graph.
+    PY=""
+    for candidate in python3 python py; do
+        cmd_path="$(command -v "$candidate" 2>/dev/null)" || continue
+        [ -n "$cmd_path" ] || continue
+        if "$cmd_path" -c "" >/dev/null 2>&1; then
+            PY="$cmd_path"
+            break
+        fi
+    done
     if [ -z "$PY" ]; then
-        log "WARNING: python3 not on PATH; skipping deep clustering check."
+        log "WARNING: no working Python on PATH; skipping deep clustering check."
         exit 0
     fi
     log "Deep check: validating clustering content in .graphify_analysis.json..."

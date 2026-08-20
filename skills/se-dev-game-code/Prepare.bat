@@ -1,21 +1,10 @@
 @echo off
 setlocal EnableDelayedExpansion
 
-REM 1. Detect game install location (env var override takes precedence)
-if defined SE_GAME_ROOT goto have_game_root
-
-REM Try the game's registry key
-for /f "tokens=2*" %%A in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 244850" /v "InstallLocation" 2^>nul') do (
-    set "SE_GAME_ROOT=%%B"
-)
-
-if defined SE_GAME_ROOT goto have_game_root
-echo ERROR: Could not detect Space Engineers install location.
-echo Please set the SE_GAME_ROOT environment variable to the game's root folder
-echo (the folder containing Bin64, Content, etc.)
-goto failed
-
-:have_game_root
+REM 1. Detect game install location (env var override takes precedence).
+REM The detection is shared with VerifyGameFiles.bat.
+call "%~dp0DetectGameRoot.bat"
+if %ERRORLEVEL% NEQ 0 goto failed
 echo Game Root: %SE_GAME_ROOT%
 
 REM 2. Verify Python is available
@@ -165,6 +154,7 @@ if %ERRORLEVEL% EQU 2 (
     if exist Data\CodeIndex  rmdir /s /q Data\CodeIndex
     if exist Data\Content    rmdir /s /q Data\Content
     if exist Data\graphify-out rmdir /s /q Data\graphify-out
+    if exist Data\game_files.json del Data\game_files.json
     mkdir Data\Decompiled 2>NUL
     goto skip_wipe
 )
@@ -233,6 +223,17 @@ if %ERRORLEVEL% NEQ 0 goto failed
 set NEED_COMMIT=1
 :skip_content
 
+REM 14b. Hash every original game file. The digests are versioned alongside the
+REM decompiled sources, so diffing Data\game_files.json between two version commits
+REM shows exactly which binaries a game update changed - including the ones that
+REM are neither assemblies nor copied into Data\Content.
+if exist Data\game_files.json goto skip_hashes
+echo Hashing the original game files
+uv run python -u hash_game_files.py --write "%SE_GAME_ROOT%" Data
+if %ERRORLEVEL% NEQ 0 goto failed
+set NEED_COMMIT=1
+:skip_hashes
+
 REM 15. Record the current game version and commit decompiled code and content
 if "!NEED_COMMIT!"=="0" goto skip_commit
 echo Recording game version and committing decompiled sources and content
@@ -258,16 +259,26 @@ popd
 REM 16. Remove the Bin64 junction
 rmdir /s /q Bin64
 
-REM 17. Build the code index
-if exist Data\CodeIndex\class_declarations.csv goto skip_code_index
+REM 17. Build the code index. An unchanged decompilation keeps its index: indexing
+REM runs only when check_index.py reports the index missing or broken. index_code.py
+REM rewrites every file it owns, so a broken index needs no wiping beforehand.
+uv run python -u check_index.py Data\CodeIndex
+if %ERRORLEVEL% EQU 0 (
+    echo Code index is complete - keeping it
+    goto skip_code_index
+)
 echo Indexing decompiled code
 mkdir Data\CodeIndex 2>NUL
 uv run python -OO -u index_code.py Data\Decompiled Data\CodeIndex
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_code_index
 
-REM 18. Build the content index
-if exist Data\CodeIndex\content_index.csv goto skip_content_index
+REM 18. Build the content index, under the same missing-or-broken rule.
+uv run python -u check_index.py --content Data\CodeIndex
+if %ERRORLEVEL% EQU 0 (
+    echo Content index is complete - keeping it
+    goto skip_content_index
+)
 echo Indexing content files
 uv run python -u index_content.py Data\Content Data\Decompiled Data\CodeIndex
 if %ERRORLEVEL% NEQ 0 goto failed
@@ -285,7 +296,12 @@ if defined SE_DEV_GAME_CODE_GRAPH_OUT (
 ) else (
     set "GAME_CODE_GRAPH_OUT=%CD%\Data"
 )
-call "%~dp0..\se-dev\GraphifyPrepare.bat" "se-dev-game-code" "%GAME_CODE_GRAPH_ROOT%" "%GAME_CODE_GRAPH_OUT%"
+REM NEED_COMMIT tells whether anything under Data was regenerated in this run. When
+REM nothing was, the graphed sources are still the ones the existing graph was built
+REM from, so a healthy graph is left alone instead of being rescanned and reclustered.
+set "GAME_CODE_SOURCE_STATE=unchanged"
+if "!NEED_COMMIT!"=="1" set "GAME_CODE_SOURCE_STATE=changed"
+call "%~dp0..\se-dev\GraphifyPrepare.bat" "se-dev-game-code" "%GAME_CODE_GRAPH_ROOT%" "%GAME_CODE_GRAPH_OUT%" "!GAME_CODE_SOURCE_STATE!"
 
 echo DONE
 del version_check.txt 2>NUL

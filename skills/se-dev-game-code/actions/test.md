@@ -107,6 +107,26 @@ As last resort, force repeating the whole preparation process by running `./clea
 (Linux), or `.\Clean.bat` then `.\Prepare.bat` (Windows).
 Notify user if you do this, because preparation may take 5-15 minutes to complete depending on hardware.
 
+## Optional: Game File Integrity Check
+
+Independent of the search tests, the installed files can be checked against the
+SHA256 digests recorded during preparation (`Data/game_files.json`):
+
+```bash
+# Linux
+./verify_game_files.sh
+```
+
+```cmd
+REM Windows
+.\VerifyGameFiles.bat
+```
+
+Exit code 0 and `VERIFICATION PASSED` means install matches the snapshot the
+decompilation was made from. Exit code 2 lists the `MISSING:`/`MODIFIED:`/`EXTRA:`
+files — usually a game update preparation has not picked up yet, so re-run
+preparation. See [GameFileHashes.md](../GameFileHashes.md).
+
 ## Optional: Graphify Graph Test
 
 If the optional Graphify graph was built (see [Optional Graphify Graph](../SKILL.md) and

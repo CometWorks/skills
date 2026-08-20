@@ -91,6 +91,35 @@ Prepare builds one graph per subskill, under that root's own `graphify-out/` dir
 Graph output goes to `<graph root>/graphify-out` unless the skill passes a separate
 output directory (third argument of `se_dev_graphify_prepare` / `GraphifyPrepare.bat`).
 
+Both entry points also raise `GRAPHIFY_MAX_GRAPH_BYTES` to `2GB` (an already-set value
+wins), because the decompiled game-code and server-code `graph.json` files are far past
+Graphify's 512 MB default and every build and update on them would otherwise abort. See
+[GraphifyUsage.md](GraphifyUsage.md) for the query-side effect of the same cap.
+
+### Code-only extraction without an LLM key
+
+Graphify extracts code with a local AST parser, but doc, paper and image files go
+through an LLM. It aborts the **whole** build on the first such file when no backend is
+configured — so a single `README.md` or screenshot in the corpus killed the graph for
+`se-dev-script`, `se-dev-mod`, `se-dev-plugin` and `se-dev-torch`, whose sources all
+carry one. Only the two code skills were unaffected, their corpora being nothing but
+decompiled C#.
+
+Prepare therefore passes `--code-only` when no LLM API key is present in the
+environment (`GEMINI_API_KEY`, `GOOGLE_API_KEY`, `MOONSHOT_API_KEY`, `ANTHROPIC_API_KEY`,
+`OPENAI_API_KEY`, `DEEPSEEK_API_KEY`), indexing the code and skipping the rest. With a
+key set, full semantic extraction runs exactly as before. `SE_DEV_GRAPHIFY_CODE_ONLY`
+overrides the detection:
+
+| Value | Effect |
+|-------|--------|
+| unset | auto: code-only when no API key is configured, full extraction otherwise |
+| `1`   | **always code-only** — fast and deterministic, no LLM calls |
+| `0`   | **never** — keep semantic extraction even with no key detected, for a keyless backend such as a local ollama reached through `--backend` |
+
+The flag costs the code skills nothing: their graphs contain no doc nodes, so a
+`--code-only` update reproduces the same node and edge counts.
+
 | Subskill | Default graph root | Graph stored in | Override |
 |----------|--------------------|-----------------|----------|
 | `se-dev-script` | local PB script folder (`IngameScripts/local`) | inside the graph root | `SE_DEV_SCRIPT_PROJECT_ROOT` |
@@ -149,8 +178,16 @@ queries return little useful structure. A build that is killed part-way leaves a
 this far less likely, since clustering the big corpora now takes only a minute or two.)
 
 Prepare guards against this automatically: it inspects an existing graph and, if it finds
-`graph.json` but no clustering, it **cleans `graphify-out/` and rebuilds from scratch**
-rather than `--update`-ing a broken graph.
+`graph.json` but no clustering (or a truncated `graph.json`), it **cleans `graphify-out/`
+and rebuilds from scratch** rather than `--update`-ing a broken graph.
+
+The same inspection decides whether to touch the graph at all. A subskill that knows
+nothing in its corpus was regenerated passes `unchanged` as the fourth argument of
+`se_dev_graphify_prepare` / `GraphifyPrepare.bat`; a healthy graph is then **left alone**,
+skipping the tool provisioning, the disk pre-check and the incremental rescan. An unhealthy
+or missing graph is still rebuilt. `se-dev-game-code` and `se-dev-server-code` pass
+`unchanged` whenever the game version is the same and nothing under `Data` was rebuilt, so
+repeated prepare runs on an up-to-date install finish in seconds.
 
 To check a graph's health independently, run the standalone checker:
 
@@ -195,5 +232,8 @@ Graphify is supplemental. Prepare logs a warning and continues if:
 - `graphify` is not on `PATH` after installation,
 - the selected graph root does not exist,
 - graph creation or update fails.
+
+A missing LLM API key is no longer one of these: prepare drops to `--code-only` instead
+of letting the build fail (see [Code-only extraction without an LLM key](#code-only-extraction-without-an-llm-key)).
 
 Core preparation still succeeds when indexing or decompilation succeeds.
