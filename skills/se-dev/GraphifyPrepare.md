@@ -96,7 +96,7 @@ wins), because the decompiled game-code and server-code `graph.json` files are f
 Graphify's 512 MB default and every build and update on them would otherwise abort. See
 [GraphifyUsage.md](GraphifyUsage.md) for the query-side effect of the same cap.
 
-### Code-only extraction without an LLM key
+### Code-only extraction, always
 
 Graphify extracts code with a local AST parser, but doc, paper and image files go
 through an LLM. It aborts the **whole** build on the first such file when no backend is
@@ -105,20 +105,13 @@ configured — so a single `README.md` or screenshot in the corpus killed the gr
 carry one. Only the two code skills were unaffected, their corpora being nothing but
 decompiled C#.
 
-Prepare therefore passes `--code-only` when no LLM API key is present in the
-environment (`GEMINI_API_KEY`, `GOOGLE_API_KEY`, `MOONSHOT_API_KEY`, `ANTHROPIC_API_KEY`,
-`OPENAI_API_KEY`, `DEEPSEEK_API_KEY`), indexing the code and skipping the rest. With a
-key set, full semantic extraction runs exactly as before. `SE_DEV_GRAPHIFY_CODE_ONLY`
-overrides the detection:
+Every build therefore excludes those file types (`SE_DEV_GRAPHIFY_EXCLUDES` in
+`graphify-prepare.sh`, `GRAPHIFY_EXCLUDES` in `GraphifyPrepare.bat`). No API key is used
+and no LLM call is ever made. Graphify has no `--code-only` flag and silently ignores
+unknown options, so `--exclude` is what actually keeps the build local.
 
-| Value | Effect |
-|-------|--------|
-| unset | auto: code-only when no API key is configured, full extraction otherwise |
-| `1`   | **always code-only** — fast and deterministic, no LLM calls |
-| `0`   | **never** — keep semantic extraction even with no key detected, for a keyless backend such as a local ollama reached through `--backend` |
-
-The flag costs the code skills nothing: their graphs contain no doc nodes, so a
-`--code-only` update reproduces the same node and edge counts.
+The exclusions cost the code skills nothing: their graphs contain no doc nodes, so an
+update reproduces the same node and edge counts.
 
 | Subskill | Default graph root | Graph stored in | Override |
 |----------|--------------------|-----------------|----------|
@@ -214,13 +207,13 @@ opted in with `SE_DEV_GRAPHIFY=1`; **confirm with the user first** in that case.
 
 ## Corpus content and API keys
 
-Graphify builds a **code-only** graph with no API key. It treats `.md`, `.txt`, `.rst`,
-`.yaml`, `.yml`, `.html` and similar files as *documents* that need LLM-based semantic
-extraction, and the build fails if any are present and no key (`ANTHROPIC_API_KEY`,
-`GEMINI_API_KEY`, …) is set. The decompiled game/server corpora are pure `.cs` and build
-keyless, but mixed corpora (e.g. a Torch checkout with `README.md`) do not. To graph only
-the code in a mixed corpus without a key, add a `.graphifyignore` (gitignore syntax) at
-the graph root excluding the doc extensions.
+Prepare always builds a **code-only** graph and never uses an API key. Graphify treats
+`.md`, `.txt`, `.rst`, `.yaml`, `.yml`, `.html` and similar files as *documents* that
+need LLM-based semantic extraction, and its build fails if any are present and no key
+(`ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, …) is set — prepare excludes them, see
+[Code-only extraction, always](#code-only-extraction-always). Outside prepare, run
+`graphify` yourself with the same `--exclude` globs, or add a `.graphifyignore`
+(gitignore syntax) at the graph root excluding the doc extensions.
 
 ## Failure behavior
 
@@ -233,7 +226,7 @@ Graphify is supplemental. Prepare logs a warning and continues if:
 - the selected graph root does not exist,
 - graph creation or update fails.
 
-A missing LLM API key is no longer one of these: prepare drops to `--code-only` instead
-of letting the build fail (see [Code-only extraction without an LLM key](#code-only-extraction-without-an-llm-key)).
+A missing LLM API key is not one of these: prepare always excludes the doc/paper/image
+files (see [Code-only extraction, always](#code-only-extraction-always)).
 
 Core preparation still succeeds when indexing or decompilation succeeds.

@@ -28,10 +28,15 @@ SE_DEV_GRAPHIFY_PYTHON="${SE_DEV_GRAPHIFY_PYTHON:-3.12}"
 # Set by se_dev_graphify_provision(): "fast" or "slow".
 SE_DEV_GRAPHIFY_SPEED="slow"
 
-# Environment variables Graphify auto-detects an LLM backend from. Without one of
-# these it refuses to extract doc/paper/image files and the whole build fails, even
-# though the code was already indexed locally by the AST extractor.
-SE_DEV_GRAPHIFY_API_KEY_VARS="GEMINI_API_KEY GOOGLE_API_KEY MOONSHOT_API_KEY ANTHROPIC_API_KEY OPENAI_API_KEY DEEPSEEK_API_KEY"
+# Code-only extraction: graphify must never call an LLM. Only doc, paper and image
+# files would take it there, so exclude those file types; the corpora are C# anyway.
+# The patterns stay quoted so they reach graphify unexpanded.
+SE_DEV_GRAPHIFY_EXCLUDES=(
+    --exclude '*.md' --exclude '*.mdx' --exclude '*.qmd' --exclude '*.txt'
+    --exclude '*.rst' --exclude '*.html' --exclude '*.yaml' --exclude '*.yml'
+    --exclude '*.pdf' --exclude '*.png' --exclude '*.jpg' --exclude '*.jpeg'
+    --exclude '*.gif' --exclude '*.webp' --exclude '*.svg'
+)
 
 # The decompiled game/server-code graph.json is well over Graphify's default 512 MB
 # load cap, which would abort every build and update. Raise it, but let an explicitly
@@ -40,33 +45,6 @@ export GRAPHIFY_MAX_GRAPH_BYTES="${GRAPHIFY_MAX_GRAPH_BYTES:-2GB}"
 
 se_dev_graphify_opt_in()  { [ "${SE_DEV_GRAPHIFY:-}" = "1" ]; }
 se_dev_graphify_opt_out() { [ "${SE_DEV_GRAPHIFY:-}" = "0" ]; }
-
-# True when no LLM API key is configured. Checked with indirect expansion so an
-# empty value counts as unset, which is how Graphify itself treats it.
-se_dev_graphify_no_api_key() {
-    local name
-    for name in $SE_DEV_GRAPHIFY_API_KEY_VARS; do
-        [ -n "${!name:-}" ] && return 1
-    done
-    return 0
-}
-
-# Echo --code-only when the semantic extraction pass cannot run, so a corpus that
-# mixes code with docs or images still produces a code graph instead of failing.
-# Graphify aborts the entire build on the first doc/paper/image file it cannot send
-# to an LLM, which killed the graph for every skill whose sources carry a README or
-# a screenshot. SE_DEV_GRAPHIFY_CODE_ONLY overrides the detection:
-#   unset -> auto: code-only when no API key is configured, full extraction otherwise
-#   1     -> always code-only (fast, deterministic, no LLM calls)
-#   0     -> never: keep semantic extraction even with no key detected, for a
-#            keyless backend such as a local ollama passed through --backend
-se_dev_graphify_code_only() {
-    case "${SE_DEV_GRAPHIFY_CODE_ONLY:-}" in
-        1) return 0 ;;
-        0) return 1 ;;
-    esac
-    se_dev_graphify_no_api_key
-}
 
 se_dev_graphify_print_install_hint() {
     log "Graphify builds a navigable map beside the regular search indexes."
@@ -314,16 +292,10 @@ se_dev_graphify_run_build() {
     #
     # The expansion is guarded rather than plain: callers source this under
     # `set -u`, and bash before 4.4 (RHEL/CentOS 7 ship 4.2) treats an empty
-    # array expansion as an unbound variable. The array IS empty for a skill that
-    # passes no output directory and has an API key configured, so the graph build
-    # would abort on those systems.
-    local build_args=()
+    # array expansion as an unbound variable.
+    local build_args=("${SE_DEV_GRAPHIFY_EXCLUDES[@]}")
     if [ "$outdir" != "$root" ]; then
-        build_args=(--out "$outdir")
-    fi
-    if se_dev_graphify_code_only; then
-        log "Graphify: indexing $label code only (no LLM API key needed; docs and images are skipped)"
-        build_args+=(--code-only)
+        build_args+=(--out "$outdir")
     fi
 
     case "$status" in

@@ -29,16 +29,9 @@ REM load cap, which would abort every build and update. Raise it, but let an exp
 REM set value win so a larger corpus can be accommodated without editing this file.
 if "%GRAPHIFY_MAX_GRAPH_BYTES%"=="" set "GRAPHIFY_MAX_GRAPH_BYTES=2GB"
 
-REM Graphify aborts the whole build on the first doc/paper/image file it cannot send
-REM to an LLM, even though the code was already indexed locally by the AST extractor.
-REM That killed the graph for every skill whose sources carry a README or a
-REM screenshot. Fall back to --code-only when no API key is configured.
-REM SE_DEV_GRAPHIFY_CODE_ONLY overrides the detection:
-REM   unset -> auto: code-only when no API key is configured, full extraction otherwise
-REM   1     -> always code-only (fast, deterministic, no LLM calls)
-REM   0     -> never: keep semantic extraction even with no key detected, for a
-REM            keyless backend such as a local ollama passed through --backend
-call :detect_code_only
+REM Code-only extraction: graphify must never call an LLM. Only doc, paper and image
+REM files would take it there, so exclude those file types; the corpora are C# anyway.
+set "GRAPHIFY_EXCLUDES=--exclude *.md --exclude *.mdx --exclude *.qmd --exclude *.txt --exclude *.rst --exclude *.html --exclude *.yaml --exclude *.yml --exclude *.pdf --exclude *.png --exclude *.jpg --exclude *.jpeg --exclude *.gif --exclude *.webp --exclude *.svg"
 
 if "%SE_DEV_GRAPHIFY%"=="0" (
     echo Graphify: skipping %GRAPHIFY_LABEL% ^(SE_DEV_GRAPHIFY=0^)
@@ -95,7 +88,7 @@ where graphify >NUL 2>NUL
 if %ERRORLEVEL% NEQ 0 exit /b 0
 
 :have_graphify
-if "%GRAPHIFY_CODE_ONLY%"=="1" echo Graphify: indexing %GRAPHIFY_LABEL% code only ^(no LLM API key needed; docs and images are skipped^)
+echo Graphify: indexing %GRAPHIFY_LABEL% code only ^(no LLM API key needed; docs and images are skipped^)
 for %%I in ("%GRAPHIFY_ROOT%") do set "GRAPHIFY_ABS_ROOT=%%~fI"
 if not exist "%GRAPHIFY_OUT_DIR%\" mkdir "%GRAPHIFY_OUT_DIR%" 2>NUL
 for %%I in ("%GRAPHIFY_OUT_DIR%") do set "GRAPHIFY_ABS_OUT_DIR=%%~fI"
@@ -119,9 +112,9 @@ echo Graphify: updating %GRAPHIFY_LABEL% graph of %GRAPHIFY_ABS_ROOT% at %GRAPHI
 REM --out is passed only when it differs from the root, so the default
 REM invocation stays identical to what the other skills have always run.
 if /I "%GRAPHIFY_ABS_OUT_DIR%"=="%GRAPHIFY_ABS_ROOT%" (
-    graphify "%GRAPHIFY_ABS_ROOT%" --update %GRAPHIFY_CODE_ONLY_ARG%
+    graphify "%GRAPHIFY_ABS_ROOT%" --update %GRAPHIFY_EXCLUDES%
 ) else (
-    graphify "%GRAPHIFY_ABS_ROOT%" --update --out "%GRAPHIFY_ABS_OUT_DIR%" %GRAPHIFY_CODE_ONLY_ARG%
+    graphify "%GRAPHIFY_ABS_ROOT%" --update --out "%GRAPHIFY_ABS_OUT_DIR%" %GRAPHIFY_EXCLUDES%
 )
 if %ERRORLEVEL% NEQ 0 echo WARNING: Graphify update failed for %GRAPHIFY_LABEL%; prepare continues.
 exit /b 0
@@ -129,9 +122,9 @@ exit /b 0
 :build
 echo Graphify: building %GRAPHIFY_LABEL% graph of %GRAPHIFY_ABS_ROOT% at %GRAPHIFY_OUT%
 if /I "%GRAPHIFY_ABS_OUT_DIR%"=="%GRAPHIFY_ABS_ROOT%" (
-    graphify "%GRAPHIFY_ABS_ROOT%" %GRAPHIFY_CODE_ONLY_ARG%
+    graphify "%GRAPHIFY_ABS_ROOT%" %GRAPHIFY_EXCLUDES%
 ) else (
-    graphify "%GRAPHIFY_ABS_ROOT%" --out "%GRAPHIFY_ABS_OUT_DIR%" %GRAPHIFY_CODE_ONLY_ARG%
+    graphify "%GRAPHIFY_ABS_ROOT%" --out "%GRAPHIFY_ABS_OUT_DIR%" %GRAPHIFY_EXCLUDES%
 )
 if %ERRORLEVEL% NEQ 0 echo WARNING: Graphify build failed for %GRAPHIFY_LABEL%; prepare continues.
 exit /b 0
@@ -167,26 +160,6 @@ set "GRAPHIFY_TOOL_PY=%UVTOOLS%\graphifyy\Scripts\python.exe"
 if not exist "%GRAPHIFY_TOOL_PY%" exit /b 0
 "%GRAPHIFY_TOOL_PY%" -c "import graspologic.partition" >NUL 2>NUL
 if %ERRORLEVEL% EQU 0 set "GRAPHIFY_FAST=1"
-exit /b 0
-
-REM Decide whether the semantic extraction pass can run. Sets GRAPHIFY_CODE_ONLY=1
-REM and GRAPHIFY_CODE_ONLY_ARG=--code-only when it cannot. Counterpart of
-REM se_dev_graphify_code_only in graphify-prepare.sh.
-:detect_code_only
-set "GRAPHIFY_CODE_ONLY="
-set "GRAPHIFY_CODE_ONLY_ARG="
-if "%SE_DEV_GRAPHIFY_CODE_ONLY%"=="0" exit /b 0
-if "%SE_DEV_GRAPHIFY_CODE_ONLY%"=="1" goto code_only
-REM Environment variables Graphify auto-detects an LLM backend from.
-if defined GEMINI_API_KEY exit /b 0
-if defined GOOGLE_API_KEY exit /b 0
-if defined MOONSHOT_API_KEY exit /b 0
-if defined ANTHROPIC_API_KEY exit /b 0
-if defined OPENAI_API_KEY exit /b 0
-if defined DEEPSEEK_API_KEY exit /b 0
-:code_only
-set "GRAPHIFY_CODE_ONLY=1"
-set "GRAPHIFY_CODE_ONLY_ARG=--code-only"
 exit /b 0
 
 REM Classify the graph under <out-dir>\graphify-out. Mirrors se_dev_graphify_status
