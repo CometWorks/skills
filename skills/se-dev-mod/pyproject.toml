@@ -1,8 +1,7 @@
 [project]
-name = "se-dev-game-code"
+name = "se-dev-mod"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
+description = "Mod development for Space Engineers version 1"
 requires-python = ">=3.11"
 dependencies = [
     "lxml",

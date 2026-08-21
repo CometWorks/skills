@@ -211,7 +211,7 @@ wheels = [
 ]
 
 [[package]]
-name = "se-dev-game-code"
+name = "se-dev-mod"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

@@ -1,7 +1,7 @@
 [project]
 name = "se-dev-game-code"
 version = "0.1.0"
-description = "Add your description here"
+description = "Decompiled C# code of Space Engineers version 1"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
