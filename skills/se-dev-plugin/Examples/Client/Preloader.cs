@@ -1,4 +1,9 @@
-﻿using System.Collections.Generic;
+﻿// Uncomment the next line to enable preloader patching
+//#define HAS_PRELOADER_PATCHES
+
+#if HAS_PRELOADER_PATCHES
+
+using System.Collections.Generic;
 using Mono.Cecil;
 
 // DO NOT USE A NAMESPACE HERE!
@@ -32,3 +37,5 @@ public class Preloader
         // TODO
     }
 }
+
+#endif

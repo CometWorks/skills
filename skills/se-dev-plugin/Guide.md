@@ -8,7 +8,9 @@ Choose one of these templates, click the green "Use this template" button on Git
 - Client only plugin template: https://github.com/CometWorks/client-plugin-template
 - Client and server plugin template: https://github.com/CometWorks/server-plugin-template
 
-**Follow the `README` after cloning your plugin project locally.**
+**Follow the `README` after cloning your plugin project locally.** It starts with running `setup.py`
+(needs Python 3.12+), which renames the project after your plugin and writes the auto-detected install
+locations into `Directory.Build.props.user`.
 
 *The server template is more complex. Has two targets — the game client (loaded by [Pulsar](https://github.com/SpaceGT/Pulsar)) and the dedicated server (loaded by [Magnetar](https://magnetar.se)) — plus a `Shared` project for code used by both. Need the server template only if your client plugin must have a server side companion plugin (like MGP) or is a server-only plugin. Server plugin's configuration is handled by Magnetar's PluginSdk (see the `se-dev-plugin-sdk` skill).*
 
@@ -23,14 +25,14 @@ Choose one of these templates, click the green "Use this template" button on Git
 ## Build, run and debug your plugin locally
 Two ways to build and debug your client plugin locally:
 
-- **Build from the IDE** and use the `Deploy.bat` which is run by the build process to **copy the DLL** into the `%AppData%\Pulsar\Legacy\Local` folder. Set up run configs to start `%AppData%\Pulsar\Legacy.exe` with debugging right from your IDE, which lets you debug your plugin code and most of the game's code. If you plan to debug, make a `Debug` build of your plugin. Recommended: pass the `-skipintro` option to Pulsar for faster startup and use the `Instant Exit` plugin for faster, cleaner shutdown.
+- **Build from the IDE** (or with `dotnet build`). The build itself **deploys the DLL**: a `DeployPlugin` MSBuild target in each project copies the output into the loader's `Local` folder, so `%AppData%\Pulsar\Legacy\Local` for the `net48` build and `%AppData%\Pulsar\Interim\Local` for the `net10.0` one. (There is no `Deploy.bat` / `Deploy.sh` script any more.) Set up run configs to start `%AppData%\Pulsar\Legacy.exe` with debugging right from your IDE, which lets you debug your plugin code and most of the game's code. If you plan to debug, make a `Debug` build of your plugin. Recommended: pass the `-skipintro` option to Pulsar for faster startup and use the `Instant Exit` plugin for faster, cleaner shutdown.
 
 - **Set up a "dev" folder in Pulsar's Sources dialog** for the plugin. Must pass the `-sources` option to Pulsar to access this dialog. This setup is essential for pre-release testing to make sure Pulsar can also build your plugin, because the IDE may build it but Pulsar fails with an error. Make Debug or Release builds inside a plugin dev folder. A Debug build should let your IDE connect the debugger to the `Legacy.exe` process (the game running in Pulsar). A Release build allows testing the exact same build players will have on their machines when they install your plugin. Once a dev folder is added in the Sources dialog, add that dev folder to the regular plugin list (and save in profiles). Assign the plugin's XML "info" file in the dialog you open by double clicking on your dev folder added to the Plugins list. *(BUG: Currently this association is not saved. There is a PR to fix this.)*
 
 ## Release your plugin
 
 ### Client plugins → PluginHub
-- Fill in the fields of the `YourPluginName.xml` file in your project's folder.  (This file came with the plugin template. If you haven't used the template, find one in the [PluginHub](https://github.com/StarCpt/PluginHub/) repository.)
+- Fill in the fields of the `YourPluginName.xml` file in your repository root.  (This file came with the plugin template, renamed by `setup.py`; the server template ships two of them, `...Client.xml` and `...Server.xml`. If you haven't used the template, find one in the [PluginHub](https://github.com/StarCpt/PluginHub/) repository.)
 - Fork the [PluginHub](https://github.com/StarCpt/PluginHub/) repository and make a PR adding your XML file to the `Plugins` folder, where all plugins are defined.
 - Wait for the PR to be merged. Involves a human reviewing your plugin's source code, so be patient.
 
@@ -70,7 +72,7 @@ Add your usual plugins made by other developers to all the saved profiles above 
 
 ## FAQ
 - *Which C# versions are supported?*
-Plugins have no C# language version limit. The templates set `LangVersion` to `latestMinor`, so you get the latest language features your compiler supports. (Mods are limited to C# 7.3, PB scripts are limited to C# 6.0, because they are compiled by the game.)
+Plugins have no C# language version limit. The templates set `LangVersion` to `14`. (Mods are limited to C# 7.3, PB scripts are limited to C# 6.0, because they are compiled by the game.)
 - *Can I use NuGet packages?*
 Yes. Must support `.net standard 2.0` or `.net framework 4.8`. (If you want your plugin usable with `Interim.exe` (.NET 10), then `.net standard 2.0` it is.)
 - *Can I use additional data files?*

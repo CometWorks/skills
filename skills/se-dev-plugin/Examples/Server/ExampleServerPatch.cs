@@ -1,6 +1,4 @@
-﻿#if DEDICATED
-
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using Sandbox.Game.Multiplayer;
 using Shared.Config;
@@ -18,7 +16,7 @@ public static class MyLcdSurfaceComponentPatch
 
     [HarmonyPrefix]
     [HarmonyPatch("UpdateVisibility")]
-    [EnsureCode("3e177a11")]
+    [EnsureCode("83495656")]
     private static bool UpdateVisibilityPrefix()
     {
         if (!Sync.IsDedicated)
@@ -28,5 +26,3 @@ public static class MyLcdSurfaceComponentPatch
         return false;
     }
 }
-
-#endif
