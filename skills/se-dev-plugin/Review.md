@@ -41,10 +41,18 @@ Conventions and optional fields:
 
 ```bash
 git clone <repo> && cd <repo>
-git rev-parse HEAD          # must equal <Commit> in the manifest
+git rev-parse HEAD          # must equal <Commit> in the REGISTRY manifest
 ```
 
 Do this at the start **and** after any pin bump in the PR conversation. A mismatch means you'd be approving code you haven't seen.
+
+**Only the registry's `Plugins/<Name>.xml` is authoritative.** Many plugin repos keep
+their own copy of the manifest. That copy is a backup/reference — the loader never reads
+it — so **do not validate its `<Commit>` and never report it as stale**.
+A real hash in it is meaningless and stale by construction: it can only
+ever name a commit that precedes the one adding it. That field should read `TODO` (or be
+omitted) rather than carry a hash. Diff the two files for *other* drift (SourceDirectories,
+NuGetReferences, DependencyIds) if you like, but the commit line is not a finding.
 
 ## Step 3 — Security review of the source (the real work)
 
@@ -77,13 +85,13 @@ The registry compiles from source on the **end machine**, not from the author's 
 ## Step 5 — Process / conversation
 
 - Read the PR thread: confirm the author addressed prior review comments and **bumped the pin** to include the fixes.
-- Surface residual items even when non-blocking (e.g. a stale in-repo manifest commit, docs describing removed behavior).
+- Surface residual items even when non-blocking (e.g. docs describing removed behavior, comments naming renamed members).
 - Merge only when the mechanical gate, the security review, and the from-source build/load all pass — or defer with specific asks.
 
 ## Quick checklist
 
 - [ ] `test.py` passes; manifest fields + Id/RepoId convention correct
-- [ ] `<Commit>` == reviewed `git rev-parse HEAD` (re-check after pin bumps)
+- [ ] Registry `<Commit>` == reviewed `git rev-parse HEAD` (re-check after pin bumps; the plugin repo's own manifest copy is NOT checked)
 - [ ] No dynamic / decrypted / obfuscated code execution
 - [ ] No unexpected network hosts; no token/credential/machine-info exfiltration
 - [ ] `Process.Start` arguments are fixed/safe
