@@ -38,6 +38,23 @@ class PostReviewTests(unittest.TestCase):
             with self.assertRaises(ReviewError):
                 post_review(review, body)
 
+    def test_rejects_human_only_verification_material(self):
+        temporary, review, body = self.files()
+        self.addCleanup(temporary.cleanup)
+        body.write_text(
+            "Review body\n\n## Verification gaps\n\nManual test pending.\n",
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(ReviewError, "human-only verification material"):
+            post_review(review, body)
+
+        body.write_text(
+            "Review body\n\nHuman manual security review and approval still required.\n",
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(ReviewError, "human-only verification material"):
+            post_review(review, body)
+
     def test_identical_own_comment_is_not_duplicated(self):
         temporary, review, body = self.files()
         self.addCleanup(temporary.cleanup)

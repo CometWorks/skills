@@ -10,7 +10,7 @@ Run:
 python3 scripts/prepare_quasar_review.py <PR-URL>
 ```
 
-Use `--output <directory>` only when the default `~/.se-dev/reviews/CometWorks-quasar-hub-pr-<number>` location is unsuitable. The script rejects other hubs, fetches and parses exact base/head manifests, resolves `<RepoId>` and old/new `<Commit>` pins, checks out pinned target source, and writes the direct bump diff or new-plugin tree inventory plus `review.json`.
+Use `--output <directory>` only when the default `~/.se-dev/reviews/CometWorks-quasar-hub-pr-<number>` location is unsuitable. The script rejects other hubs, fetches and parses exact base/head manifests, resolves `<RepoId>` and old/new `<Commit>` pins, and checks out pinned target source. A first registration or changed `<RepoId>` gets the complete tracked repository inventory in `source-tree.txt`; only a real `<Commit>` bump gets the direct `old_source_sha..new_source_sha` programmatic diff. Require `source.audit_scope` to match `review_type` before review.
 
 It also requires `<PluginKind>QuasarUiPlugin</PluginKind>`, `<ProjectPath>`, and `<PackageManifest>` before source review. Inspect optional `<QuasarVersion>`, `<CompanionPluginIds>`, `<DependencyIds>`, `<Platforms>`, `<Recommended>`, and `<ImplicitLoading>` manually.
 

@@ -10,7 +10,8 @@ Capture and retain:
 - Current PR head SHA.
 - Exact Markdown under **PR comment preview**, saved as `comment.preview.md` beside root `review.json`.
 
-Show the preview before any post. Keep the human-only checklist outside the preview unless an item is useful to the author.
+Show the preview before any post. Always keep the human-only checklist, general verification-gap section, and human-manual-review/approval boilerplate outside the preview. Material uncertainty that requires author action belongs in its relevant finding.
+The preview body follows [ReviewStyle.md](ReviewStyle.md). Post it under the authenticated reviewer's identity; never attribute it to an exemplar reviewer or imply their participation.
 
 `confirm` authorizes one comment only when one PR and one preview are active in the conversation. Editing the preview cancels earlier confirmation state. Never treat general agreement, `looks good`, or a confirmation for another action as authorization.
 

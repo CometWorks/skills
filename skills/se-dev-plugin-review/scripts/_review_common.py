@@ -26,6 +26,15 @@ PACKAGE_FILES = {
 BINARY_SUFFIXES = {".dll", ".exe", ".nupkg", ".wasm", ".zip", ".7z", ".rar", ".gz"}
 NATIVE_SUFFIXES = {".so", ".dylib", ".a", ".lib", ".node"}
 BUILD_SUFFIXES = {".csproj", ".fsproj", ".vbproj", ".sln", ".props", ".targets", ".sh", ".bat", ".cmd", ".ps1"}
+MSBUILD_REFERENCE_SUFFIXES = {".csproj", ".fsproj", ".vbproj", ".props", ".targets"}
+MSBUILD_REFERENCE_KINDS = {
+    "Reference",
+    "ProjectReference",
+    "PackageReference",
+    "FrameworkReference",
+    "COMReference",
+    "Analyzer",
+}
 
 
 class ReviewError(RuntimeError):
@@ -170,6 +179,51 @@ def classify(paths: list[str]) -> dict[str, list[str]]:
     }
 
 
+def inventory_msbuild_references(source: Path, paths: list[str]) -> dict[str, object]:
+    files = sorted(
+        item for item in paths if Path(item).suffix.lower() in MSBUILD_REFERENCE_SUFFIXES
+    )
+    references: list[dict[str, str | None]] = []
+    errors: list[dict[str, str]] = []
+
+    for item in files:
+        path = source / item
+        if not path.is_file():
+            continue
+        try:
+            root = ET.parse(path).getroot()
+        except (OSError, ET.ParseError) as error:
+            errors.append({"file": item, "error": str(error)})
+            continue
+
+        for element in root.iter():
+            kind = element.tag.rsplit("}", 1)[-1]
+            if kind not in MSBUILD_REFERENCE_KINDS:
+                continue
+
+            metadata = {
+                child.tag.rsplit("}", 1)[-1]: (child.text or "").strip() or None
+                for child in element
+            }
+            references.append({
+                "file": item,
+                "kind": kind,
+                "include": element.get("Include"),
+                "update": element.get("Update"),
+                "remove": element.get("Remove"),
+                "version": element.get("Version") or metadata.get("Version"),
+                "hint_path": metadata.get("HintPath"),
+                "private": metadata.get("Private"),
+                "condition": element.get("Condition"),
+            })
+
+    return {
+        "msbuild_reference_files": files,
+        "msbuild_references": references,
+        "msbuild_reference_parse_errors": errors,
+    }
+
+
 def write(path: Path, data: str | bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if isinstance(data, bytes):
@@ -185,6 +239,11 @@ def prepare_source(
     new_sha: str,
     review_type: str,
 ) -> dict[str, object]:
+    if review_type not in {"new_registration", "version_bump"}:
+        raise ReviewError(f"Unsupported source review type: {review_type}")
+    if review_type == "version_bump" and not old_sha:
+        raise ReviewError("A version bump requires an old source SHA")
+
     source = directory / "source"
     expected_url = f"https://github.com/{repo}.git"
     created = not source.exists()
@@ -219,7 +278,7 @@ def prepare_source(
         if mode == "120000":
             symlinks.append(path)
 
-    if review_type == "version_bump" and old_sha:
+    if review_type == "version_bump":
         diff = run(["git", "diff", "--binary", "--find-renames", f"{old_sha}..{new_sha}"], source)
         name_status = run(["git", "diff", "--name-status", "--find-renames", f"{old_sha}..{new_sha}"], source)
         changed_paths = []
@@ -228,20 +287,31 @@ def prepare_source(
             changed_paths.append(columns[-1])
         write(directory / "source.diff", diff)
         write(directory / "changed-files.txt", name_status)
+        (directory / "source-tree.txt").unlink(missing_ok=True)
         scope_paths = changed_paths
+        audit_scope = "direct_commit_diff"
+        scope_artifact = "source.diff"
     else:
         write(directory / "source-tree.txt", "\n".join(tree_paths) + "\n")
+        (directory / "source.diff").unlink(missing_ok=True)
+        (directory / "changed-files.txt").unlink(missing_ok=True)
         scope_paths = tree_paths
+        audit_scope = "full_repository_tree"
+        scope_artifact = "source-tree.txt"
 
     return {
         "checkout": str(source.resolve()),
         "review_type": review_type,
+        "audit_scope": audit_scope,
+        "scope_artifact": scope_artifact,
         "old_source_sha": old_sha,
         "new_source_sha": new_sha,
+        "repository_file_count": len(tree_paths),
         "scope_file_count": len(scope_paths),
         "submodules": submodules,
         "symlinks": symlinks,
         **classify(scope_paths),
+        **inventory_msbuild_references(source, scope_paths),
     }
 
 

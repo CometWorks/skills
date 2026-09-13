@@ -10,6 +10,10 @@ from pathlib import Path
 from _review_common import ReviewError, gh_json, run
 
 SUPPORTED_HUBS = {"StarCpt/PluginHub", "CometWorks/magnetar-hub", "CometWorks/quasar-hub"}
+FORBIDDEN_PR_BODY_MARKERS = (
+    "## verification gaps",
+    "human manual security review and approval still required.",
+)
 
 
 def get_comments(repo: str, number: int) -> list[dict[str, object]]:
@@ -33,6 +37,12 @@ def post_review(review_json: Path, body_file: Path) -> str:
     body = body_file.read_text(encoding="utf-8")
     if not body.strip():
         raise ReviewError("Comment preview is empty")
+    normalized_body = body.casefold()
+    for marker in FORBIDDEN_PR_BODY_MARKERS:
+        if marker in normalized_body:
+            raise ReviewError(
+                "Comment preview contains human-only verification material; keep it outside the PR body"
+            )
 
     repo = str(review["hub_repo"])
     number = int(review["pr_number"])
