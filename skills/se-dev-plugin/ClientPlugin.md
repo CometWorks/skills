@@ -13,6 +13,7 @@ Building the project:
 - The plugin version lives in `Version.Build.props` (committed, imported by `Directory.Build.props`).
 - Any additional NuGet dependencies added by the plugin must also be listed in the `<NuGetReferences>` element of plugin's XML descriptor (see the `<PackageReference>` example in `ClientPluginTemplate.xml`), so Pulsar pulls them for plugin compilation.
 - See `ClientPluginTemplate.xml` (or `PluginHub/SamplePlugin.xml`) for example syntax of plugin's XML definition.
+- The `<Description>` element is shown in Pulsar's Plugin Details panel, which wraps the text to the panel's width. Indent it along with the surrounding XML: Pulsar left-shifts the text, so the common leading whitespace of the block is not shown. Keep each paragraph on a single line with blank lines between paragraphs, because hard wrapped lines get re-wrapped and render ragged.
 
 Targeting both .NET Framework and .NET 10:
 - On Windows the project builds for both `net48` (the `Legacy` runtime) and `net10.0` (the `Interim` runtime). On Linux it builds only for `net10.0`.
