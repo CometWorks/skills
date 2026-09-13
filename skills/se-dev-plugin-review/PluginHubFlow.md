@@ -27,8 +27,6 @@ Treat `msbuild_references` as an audit index, not proof of the evaluated build g
 
 ## Registry checks
 
-Read [the existing registry mechanics](../se-dev-plugin/Review.md) completely. It is the baseline checklist; this skill's deterministic scope, full-repository, provenance, and multiplayer-authority rules take precedence where they are newer or stricter.
-
 Run the validator from the hub PR head, then inspect the manifest yourself. Verify its location and plugin type (including `Plugins/Mods` and `ModPlugin` where applicable), required identity fields, current `Id`/`RepoId` convention, commit syntax, source selection, dependencies, alternate versions, runtime/platform restrictions, and hidden/dependency-only behavior against the hub's current schema. Do not hard-code a historical identity convention when the checked-out validator/schema says otherwise.
 
 Trace loader semantics, not just XML presence:
