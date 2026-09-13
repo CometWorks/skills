@@ -55,6 +55,7 @@ To use BusyBox in your other projects, also available as separate skill:
 * [se-dev-script](skills/se-dev-script/SKILL.md) – In-game script development
 * [se-dev-mod](skills/se-dev-mod/SKILL.md) – Mod development
 * [se-dev-plugin](skills/se-dev-plugin/SKILL.md) – Plugin development (client via Pulsar, server via Magnetar)
+* [se-dev-plugin-review](skills/se-dev-plugin-review/SKILL.md) – Concise security and quality review for PluginHub, MagnetarHub, and QuasarHub PRs
 * [se-dev-game-code](skills/se-dev-game-code/SKILL.md) – Searchable decompiled C# game code (recommended companion for all other skills)
 * [se-dev-server-code](skills/se-dev-server-code/SKILL.md) – Searchable decompiled C# Dedicated Server code (for server side mod and plugin development)
 * [se-dev-torch](skills/se-dev-torch/SKILL.md) – Torch plugin development and Torch source search (legacy; Torch-only)
