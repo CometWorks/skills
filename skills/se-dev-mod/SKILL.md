@@ -52,10 +52,11 @@ Mods released on Steam Workshop or Mod.IO, mostly the former.
 Game compiles mods on world loading with Mod API whitelist enforced,
 supposed to guarantee safety and security. Mods may still crash game with an exception.
 
-Use `se-dev-game-book` (if installed) to learn how a game system works and
-which types take part, and `se-dev-game-code` to read the exact code you call.
-Server-side mod logic uses `se-dev-server-book` / `se-dev-server-code` the same way.
-Stick to game code searches corresponding to names on Mod API whitelist for efficiency.
+Use `se-dev-game-code` to read the exact code you call. If the `se-dev-game-book`
+handbook is installed, read it first to learn how a game system works and which types
+take part; without it, search the game code for that too. Server-side mod logic uses
+`se-dev-server-code` and `se-dev-server-book` the same way. Stick to game code searches
+corresponding to names on Mod API whitelist for efficiency.
 
 ## Graphify Graph
 

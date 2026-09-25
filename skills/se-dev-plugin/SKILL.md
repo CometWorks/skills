@@ -79,9 +79,10 @@ player's machine from GitHub source revision identified by its PluginHub registr
 reviewed for safety and security on submission, but only on best effort basis, without any legal guarantees.
 Plugins run native code and can do anything.
 
-Use `se-dev-game-book` (if installed) to learn how a game system works and
-which types take part, and `se-dev-game-code` to read the exact code you call or
-patch. Server plugins use `se-dev-server-book` / `se-dev-server-code` the same way.
+Use `se-dev-game-code` to read the exact code you call or patch. If the
+`se-dev-game-book` handbook is installed, read it first to learn how a game system
+works and which types take part; without it, search the game code for that too.
+Server plugins use `se-dev-server-code` and `se-dev-server-book` the same way.
 
 ## Graphify Graph
 

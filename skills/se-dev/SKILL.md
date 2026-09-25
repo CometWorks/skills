@@ -57,26 +57,26 @@ A plugin targets the **game client**, the **dedicated server**, or both (sharing
 These two docs are fetched **on demand**: skip them entirely unless the user specifically wants the Graphify graph, so the extra tooling never pollutes context during normal work.
 
 ### Reference skills (read/search the game internals)
-- **se-dev-game-book** — Handbook on how the game **client** works inside, by subsystem with a page per type. Read it first for questions about how the game does something or which types take part.
-- **[se-dev-game-code](../se-dev-game-code/SKILL.md)** — Search decompiled C# of game **client** for the exact code you call or patch. Recommended companion for client mod/plugin work.
-- **se-dev-server-book** — Handbook on how the **dedicated server** works inside, with the server-only parts called out. Read it first for questions about how the server does something.
-- **[se-dev-server-code](../se-dev-server-code/SKILL.md)** — Search decompiled C# of **dedicated server** for the exact code you call or patch. Companion for server-side mod/plugin work.
+- **[se-dev-game-code](../se-dev-game-code/SKILL.md)** — Search decompiled C# of game **client**: how it works inside and the exact code you call or patch. Recommended companion for client mod/plugin work.
+- **se-dev-game-book** (private, if installed) — Handbook on how the game **client** works inside, by subsystem with a page per type. Read it before searching the code for questions about how the game does something or which types take part.
+- **[se-dev-server-code](../se-dev-server-code/SKILL.md)** — Search decompiled C# of **dedicated server**: how it works inside and the exact code you call or patch. Companion for server-side mod/plugin work.
+- **se-dev-server-book** (private, if installed) — Handbook on how the **dedicated server** works inside, with the server-only parts called out. Read it before searching the code for questions about how the server does something.
 
 The `*-book` handbooks (`se-dev-game-book`, `se-dev-server-book`, `se-dev-torch-book`) are
 **private/internal** and distributed separately, not part of this public repository. When installed,
 read them before searching code for any question about how the game works; without them, the
-`*-code` skills are the only reference. The books are not authoritative: the decompiled source wins
-when the two disagree.
+`*-code` skills answer those questions too and are the only reference. The books are not
+authoritative: the decompiled source wins when the two disagree.
 
 ## How to pick
 
-- **Programmable Block script?** → `se-dev-script` (+ `se-dev-game-book` / `se-dev-game-code` for API details).
-- **Steam Workshop mod?** → `se-dev-mod` (+ `se-dev-game-book` / `se-dev-game-code`, or the server pair, as needed).
-- **Client plugin?** → `se-dev-plugin` + `se-dev-game-book` + `se-dev-game-code`.
-- **Server plugin (Magnetar)?** → `se-dev-plugin` + `se-dev-plugin-sdk` + `se-dev-server-book` + `se-dev-server-code`.
+- **Programmable Block script?** → `se-dev-script` + `se-dev-game-code` for API details (`se-dev-game-book` first, if installed).
+- **Steam Workshop mod?** → `se-dev-mod` + `se-dev-game-code` / `se-dev-server-code` as needed (the matching `*-book` first, if installed).
+- **Client plugin?** → `se-dev-plugin` + `se-dev-game-code` (`se-dev-game-book` first, if installed).
+- **Server plugin (Magnetar)?** → `se-dev-plugin` + `se-dev-plugin-sdk` + `se-dev-server-code` (`se-dev-server-book` first, if installed).
 - **PluginHub / MagnetarHub / QuasarHub review?** → `se-dev-plugin-review` + the applicable host/code reference.
 - **Maintaining a Torch plugin?** → `se-dev-torch` + `se-dev-torch-book` (and `se-dev-server-code`).
-- **Need to understand how the game does X?** → `*-book` first, then `*-code` to confirm the specifics.
+- **Need to understand how the game does X?** → `*-book` first if installed, then `*-code` to confirm the specifics; `*-code` alone otherwise.
 
 Most non-trivial tasks pair an **authoring** skill with a **reference** skill: write with one, look up game's
 internals with the other.

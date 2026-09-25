@@ -58,9 +58,10 @@ Script's source code size limited to 100,000 bytes when player loads it. ScriptD
 more from local file into offline (local) games for testing, so scripts can be tested without
 source code compression, useful to get fully detailed exception tracebacks.
 
-Use `se-dev-game-book` (if installed) to learn how a game system works and
-which types take part, and `se-dev-game-code` to read the exact code you call. Stick to
-game code searches corresponding to names on PB API whitelist for efficiency.
+Use `se-dev-game-code` to read the exact code you call. If the `se-dev-game-book`
+handbook is installed, read it first to learn how a game system works and which types
+take part; without it, search the game code for that too. Stick to game code searches
+corresponding to names on PB API whitelist for efficiency.
 
 ## Graphify Graph
 
