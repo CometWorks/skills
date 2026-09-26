@@ -1,6 +1,6 @@
 ---
 name: se-dev-game-code
-description: Allows reading the decompiled C# code of Space Engineers version 1
+description: Search and read the decompiled C# code of Space Engineers 1 to learn how the game works inside and to get exact signatures, method bodies, IL and content files. If the se-dev-game-book handbook is installed, read it first for how a system works overall and come here for the exact code.
 license: MIT
 allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*clean.sh*), Bash(*VerifyGameFiles.bat*), Bash(*verify_game_files.sh*), Bash(*uv run hash_game_files.py *), Bash(*test_search_game_code*), Bash(*test_graphify_game_code*), Bash(*uv run test_search_code.py*), Bash(*uv run test_graphify_queries.py*), Bash(*graphify-check.sh*), Bash(*GraphifyCheck.bat*), Bash(*uv run search_game_code.py *), Bash(*uv run index_code.py *), Bash(*uv run check_index.py *), Bash(command -v graphify*), Bash(graphify*), Bash(*GRAPHIFY_MAX_GRAPH_BYTES*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
@@ -154,9 +154,10 @@ uv run search_game_code.py class usage MyEntity --limit 10 --offset 0
 uv run search_game_code.py class usage MyEntity --limit 10 --offset 20
 ```
 
-Always check game code when:
-- You're unsure about game's internal APIs and how to interface with them.
-- Inner workings of Space Engineers is unclear.
+Check the game code when you need exact APIs, method bodies or IL: the code
+you are about to call or patch. For how a system works overall, read the
+`se-dev-game-book` handbook first if it is installed; it is faster than
+searching. Without the handbook, this skill is the reference for that too.
 
 ## Custom Scripting
 

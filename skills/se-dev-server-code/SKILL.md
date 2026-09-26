@@ -1,6 +1,6 @@
 ---
 name: se-dev-server-code
-description: Allows reading the decompiled C# code of the Space Engineers Dedicated Server
+description: Search and read the decompiled C# code of the Space Engineers 1 Dedicated Server to learn how the server works inside and to get exact signatures, method bodies, IL and content files. If the se-dev-server-book handbook is installed, read it first for how a system works overall and come here for the exact code.
 license: MIT
 allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*clean.sh*), Bash(*VerifyServerFiles.bat*), Bash(*verify_server_files.sh*), Bash(*uv run hash_server_files.py *), Bash(*test_search_server_code*), Bash(*test_graphify_server_code*), Bash(*uv run test_search_code.py*), Bash(*uv run test_graphify_queries.py*), Bash(*graphify-check.sh*), Bash(*GraphifyCheck.bat*), Bash(*uv run search_server_code.py *), Bash(*uv run index_code.py *), Bash(*uv run check_index.py *), Bash(command -v graphify*), Bash(graphify*), Bash(*GRAPHIFY_MAX_GRAPH_BYTES*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
@@ -156,9 +156,10 @@ uv run search_server_code.py class usage MyEntity --limit 10 --offset 0
 uv run search_server_code.py class usage MyEntity --limit 10 --offset 20
 ```
 
-Always check the server code when:
-- You're unsure about server's internal APIs and how to interface with them.
-- Inner workings of the Space Engineers Dedicated Server is unclear.
+Check the server code when you need exact APIs, method bodies or IL: the code
+you are about to call or patch. For how a system works overall, read the
+`se-dev-server-book` handbook first if it is installed; it is faster than
+searching. Without the handbook, this skill is the reference for that too.
 
 ## Custom Scripting
 
