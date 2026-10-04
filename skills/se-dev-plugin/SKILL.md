@@ -125,7 +125,7 @@ Search source code of plugins from either registry for examples and patterns:
 uv run list_plugins.py
 uv run list_plugins.py --search "camera"
 
-# Download a plugin's source (use the EXACT name, GUID/Id, or Owner/Repo from the list)
+# Download a plugin's source (use the EXACT name, GUID/Id, or Owner/Repo from the list); skip the ones listed as [LOCAL]
 uv run download_plugin_source.py "Tool Switcher"
 uv run download_plugin_source.py CometWorks/essentials
 

@@ -4,7 +4,9 @@ Clone Plugin Source Code from GitHub
 
 Clones the source code of a plugin from its GitHub repository into the skill's
 profile folder at Data/Sources/<RepoName>/. Cloning (rather than zip download)
-keeps each plugin source updatable via git pull.
+keeps each plugin source updatable via git pull. A clone already at the commit
+the registry pins is left as it is: the script says where it is and exits
+without fetching or reindexing.
 
 Usage:
     python download_plugin_source.py <plugin_id_or_name>
@@ -115,6 +117,11 @@ def _run_git(args: list, cwd=None) -> int:
     return subprocess.run(["git", *args], cwd=cwd).returncode
 
 
+def _head(repo_dir: Path) -> str:
+    result = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repo_dir, capture_output=True, text=True)
+    return result.stdout.strip() if result.returncode == 0 else ""
+
+
 def clone_plugin(plugin: dict) -> bool:
     repo_ref = plugin.get("repo") or plugin.get("id", "")
     if "/" not in repo_ref:
@@ -131,6 +138,12 @@ def clone_plugin(plugin: dict) -> bool:
     commit = plugin.get("commit", "").strip()
     repo_url = f"https://github.com/{owner}/{repo}.git"
     dest_dir = PLUGIN_SOURCES_DIR / repo
+
+    if commit and (dest_dir / ".git").exists() and _head(dest_dir) == commit:
+        # Already what a download would produce, and the clone may be read-only
+        print(f"Already downloaded at the registered commit {commit[:12]}: {dest_dir}")
+        print("Search it with search_plugins.py or read the files there.")
+        return True
 
     if (dest_dir / ".git").exists():
         print(f"Updating existing clone at {dest_dir}")

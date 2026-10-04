@@ -123,7 +123,7 @@ After indexing, `Data/plugins.json` contains:
 ## Workflow
 
 1. **Find relevant plugins**: Use `list_plugins.py --search` to find plugins with features to learn from
-2. **Download sources**: Use `download_plugin_source.py` to get source code
+2. **Download sources**: Use `download_plugin_source.py` to get source code of plugins that `list_plugins.py` doesn't show as [LOCAL]
 3. **Index**: Run `index_plugins.py` to build search index
 4. **Search**: Use `search_plugins.py` to find code patterns
 
