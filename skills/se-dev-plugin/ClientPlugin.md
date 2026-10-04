@@ -1,14 +1,14 @@
 Building the project:
 - In production the plugin is built by the Pulsar plugin loader directly on player's machine.
 - In development the plugin is built either of these ways:
-  - By the `dotnet` command line tool or by an IDE like VSCode, JetBrains Rider or Visual Studio. Deployment is automatic: the `DeployPlugin` MSBuild target in `ClientPlugin/ClientPlugin.csproj` runs after every successful build and copies the output into Pulsar's `Local` plugin folder. There are no `Deploy.bat` / `Deploy.sh` scripts.
+  - By the `dotnet` command line tool or by an IDE like VSCode, JetBrains Rider or Visual Studio. Deployment is opt-in: a plain build deploys nothing. Only if `Pulsar` is set (in `Directory.Build.props.user` or with `-p:Pulsar=...`), the `DeployPlugin` MSBuild target in `ClientPlugin/ClientPlugin.csproj` copies the output into Pulsar's `Local` plugin folder after each successful build. There are no `Deploy.bat` / `Deploy.sh` scripts. Prefer the development folder below: a deployed DLL shows up as a separate local plugin and can shadow the published one when the dev folder is disabled.
     - `net48` build goes to `<Pulsar>/Legacy/Local/<PluginName>/`
     - `net10.0` build goes to `<Pulsar>/Interim/Local/<PluginName>/`, falling back to `Legacy` when `<Pulsar>/Interim` does not exist. (`<Pulsar>/Modern` belongs to SE2 and is never a target.)
     - Files are copied as `plugin.dll`, `plugin.pdb` and the registration XML from the repository root as `plugin.xml`, so Pulsar picks up the friendly name and the runtime/platform restrictions.
-  - By Pulsar using local development folder feature (needs configuring in Pulsar's Sources dialog, which requires the `-sources` option). Requires plugin's XML definition file to have right content.
-- Folder paths are declared empty in `Directory.Build.props` and auto-detected (Steam registry keys on Windows, usual Steam locations plus `libraryfolders.vdf` on Linux):
-  - `Bin64`: folder containing `SpaceEngineers.exe`
-  - `Pulsar`: Pulsar folder the plugin is deployed into (`%AppData%\Pulsar` on Windows, `$XDG_CONFIG_HOME/Pulsar` or `~/.config/Pulsar` on Linux)
+  - By Pulsar using local development folder feature (the preferred way to load a working copy) (needs configuring in Pulsar's Sources dialog, which requires the `-sources` option). Requires plugin's XML definition file to have right content.
+- Folder paths are declared empty in `Directory.Build.props`:
+  - `Bin64`: folder containing `SpaceEngineers.exe`, auto-detected (Steam registry keys on Windows, usual Steam locations plus `libraryfolders.vdf` on Linux)
+  - `Pulsar`: Pulsar folder the plugin is deployed into, never auto-detected; empty means no deployment (set it to `$(APPDATA)\Pulsar` on Windows or `$(HOME)/.config/Pulsar` on Linux to deploy)
   - Override them in `Directory.Build.props.user` at the repository root, which is **not** committed. `setup.py` writes that file with the auto-detected locations when the project is first set up.
 - The plugin version lives in `Version.Build.props` (committed, imported by `Directory.Build.props`).
 - Any additional NuGet dependencies added by the plugin must also be listed in the `<NuGetReferences>` element of plugin's XML descriptor (see the `<PackageReference>` example in `ClientPluginTemplate.xml`), so Pulsar pulls them for plugin compilation.

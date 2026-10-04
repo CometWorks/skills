@@ -11,16 +11,16 @@ Targets:
 Building the project:
 - In development project is built by `dotnet` command line tool or by IDE like VSCode, JetBrains Rider or Visual Studio.
 - On Windows both targets build for `net48` and `net10.0`; on Linux only for `net10.0`. `LangVersion` is `14`.
-- Deployment is automatic: each project has a `DeployPlugin` MSBuild target that runs after a successful build. There are no `Deploy.bat` / `Deploy.sh` scripts.
+- Deployment is opt-in: a plain build deploys nothing. Each project has a `DeployPlugin` MSBuild target that runs after a successful build only if its loader folder (`Pulsar` for the client, `MagnetarData` for the server) is set in `Directory.Build.props.user` or passed with `-p:`. There are no `Deploy.bat` / `Deploy.sh` scripts. Prefer loading the working copy through a loader development folder (Sources button, `-sources` option): a deployed DLL shows up as a separate local plugin and can shadow the published one.
   - Client: into Pulsar's `Local` plugin folder — `<Pulsar>/Legacy/Local/<PluginName>/` for the `net48` build, `<Pulsar>/Interim/Local/<PluginName>/` for the `net10.0` build (falling back to `Legacy` when `Interim` does not exist). Copied as `plugin.dll`, `plugin.pdb` and `plugin.xml`.
-  - Server: into Magnetar's `Local` folder inside Magnetar's **config** folder — `<Magnetar>\MagnetarLegacy\Local` or `<Magnetar>\MagnetarInterim\Local` on Windows (named after the launcher), `$XDG_CONFIG_HOME/Magnetar/Local` (`~/.config/Magnetar/Local`) on Linux. Magnetar scans `Local` recursively and identifies a plugin by its DLL file name, so the files are deployed flat: `<AssemblyName>.dll`, `<AssemblyName>.pdb` and the MagnetarHub registration XML as `<AssemblyName>.dll.xml`.
-- Folder paths are declared empty in `Directory.Build.props` and auto-detected, overridable in the uncommitted `Directory.Build.props.user` at the repository root (written by `setup.py`):
+  - Server: into `<MagnetarData>/Local`, Magnetar's `Local` folder inside its **config** folder, which is `<Magnetar>/Magnetar` (shared by both launchers) unless the launcher runs with `-useHome` or `-config`. Only the `net10.0` build is deployed. Magnetar scans `Local` recursively and identifies a plugin by its DLL file name, so the files are deployed flat: `<AssemblyName>.dll`, `<AssemblyName>.pdb` and the MagnetarHub registration XML as `<AssemblyName>.dll.xml`.
+- Folder paths are declared empty in `Directory.Build.props`, overridable in the uncommitted `Directory.Build.props.user` at the repository root (written by `setup.py`). `Bin64`, `Dedicated64` and `Magnetar` are auto-detected, `Pulsar` and `MagnetarData` never are:
   - `Bin64`: folder containing `SpaceEngineers.exe`
   - `Dedicated64`: folder containing `SpaceEngineersDedicated.exe`
-  - `Pulsar`: Pulsar folder the client plugin is deployed into
+  - `Pulsar`: Pulsar folder the client plugin is deployed into (empty = no deployment)
   - `Magnetar`: Magnetar installation folder holding the launchers and their `Libraries`, which is where `PluginSdk.dll` is referenced from
-  - `MagnetarData`: Magnetar config folder the server plugin is deployed into (the one holding `Local`, `Sources`, `Profiles`)
-  - The build fails with a clear message if `Bin64`, `Dedicated64` or `PluginSdk.dll` cannot be resolved, and only warns if a loader folder is missing.
+  - `MagnetarData`: Magnetar config folder the server plugin is deployed into (the one holding `Local`, `Sources`, `Profiles`, usually `<Magnetar>/Magnetar`; empty = no deployment)
+  - The build fails with a clear message if `Bin64`, `Dedicated64` or `PluginSdk.dll` cannot be resolved, and only warns if a loader folder is set but missing.
 - The plugin version lives in `Version.Build.props` (committed, imported by `Directory.Build.props`).
 - In production server plugins distributed as pre-built `Release` DLLs. Registered into [MagnetarHub](https://github.com/CometWorks/magnetar-hub) so Magnetar can list and load them. See [Guide.md](Guide.md) for publishing workflow.
 
