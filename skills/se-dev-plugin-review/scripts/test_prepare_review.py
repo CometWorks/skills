@@ -15,6 +15,10 @@ from _review_common import (
     validate_manifest,
 )
 
+XSI_PLUGIN = (
+    b'<PluginData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="%s">'
+)
+
 
 class PrepareReviewTests(unittest.TestCase):
     def test_supported_pr(self):
@@ -54,12 +58,35 @@ class PrepareReviewTests(unittest.TestCase):
 
     def test_quasar_requires_quasar_fields(self):
         manifest = parse_manifest(
-            b"<PluginData><RepoId>owner/repo</RepoId><Commit>abc1234</Commit></PluginData>",
+            XSI_PLUGIN % b"GitHubPlugin"
+            + b"<RepoId>owner/repo</RepoId><Commit>abc1234</Commit></PluginData>",
             "test",
         )
         with self.assertRaises(ReviewError):
             validate_manifest(manifest, "quasar", "Plugins/Test.xml")
         validate_manifest(manifest, "pulsar_magnetar", "Plugins/Test.xml")
+
+    def test_mod_plugin_fields_and_location(self):
+        manifest = parse_manifest(
+            XSI_PLUGIN % b"ModPlugin"
+            + b"""<Id>1843839106</Id><Author>a</Author><Hidden>true</Hidden>
+            <DependencyIds><Id>758597413</Id></DependencyIds></PluginData>""",
+            "test",
+        )
+        self.assertEqual(manifest["plugin_type"], "ModPlugin")
+        self.assertEqual(manifest["hidden"], "true")
+        self.assertEqual(manifest["dependencies"], ["758597413"])
+        validate_manifest(manifest, "pulsar_magnetar", "Plugins/Mods/Test.xml")
+        with self.assertRaisesRegex(ReviewError, "Plugins/Mods/"):
+            validate_manifest(manifest, "pulsar_magnetar", "Plugins/Test.xml")
+        with self.assertRaisesRegex(ReviewError, "numeric"):
+            validate_manifest(
+                {**manifest, "id": "not-a-number"}, "pulsar_magnetar", "Plugins/Mods/Test.xml"
+            )
+
+    def test_rejects_unknown_plugin_type(self):
+        with self.assertRaisesRegex(ReviewError, "xsi:type"):
+            validate_manifest({"plugin_type": None}, "pulsar_magnetar", "Plugins/Test.xml")
 
     def test_classifies_supply_chain_files(self):
         result = classify(["Directory.Packages.props", "native/a.so", "lib/X.dll", "src/A.csproj"])

@@ -14,7 +14,7 @@ Use `--output <directory>` only when the default `~/.se-dev/reviews/<hub>-pr-<nu
 
 1. Validates the PR belongs to one of these two exact hubs.
 2. Fetches PR base/head SHAs and changed `Plugins/*.xml` files through GitHub.
-3. Parses complete base/head XML manifests.
+3. Parses complete base/head XML manifests and checks the `xsi:type`: `GitHubPlugin`, or `ModPlugin` beneath `Plugins/Mods/` with a numeric Workshop `<Id>`. A `ModPlugin` gets `review_type: workshop_mod` with its `workshop_id`, `hidden` and `dependencies`, and no source checkout; the remaining steps apply to `GitHubPlugin` manifests only.
 4. Reads `<RepoId>` and authoritative old/new `<Commit>` pins.
 5. Resolves pins to full target-repository SHAs.
 6. Checks out the exact new source SHA.
@@ -28,6 +28,8 @@ Treat `msbuild_references` as an audit index, not proof of the evaluated build g
 ## Registry checks
 
 Run the validator from the hub PR head, then inspect the manifest yourself. Verify its location and plugin type (including `Plugins/Mods` and `ModPlugin` where applicable), required identity fields, current `Id`/`RepoId` convention, commit syntax, source selection, dependencies, alternate versions, runtime/platform restrictions, and hidden/dependency-only behavior against the hub's current schema. Do not hard-code a historical identity convention when the checked-out validator/schema says otherwise.
+
+A `ModPlugin` names a Steam Workshop item, not a GitHub revision, so there is nothing to pin, compile or diff. Review it with the `workshop_mod` checks in [ReviewPaths.md](ReviewPaths.md).
 
 Trace loader semantics, not just XML presence:
 

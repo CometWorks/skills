@@ -38,3 +38,18 @@ The manual-review block should name only changed high-risk code and decisions, p
 - `metadata_only`: review only hub metadata; do not invent a source diff.
 - `removal`: review removal/dependency impact; there is no target source audit.
 - Changed `<RepoId>`: treat head repository as `new_registration` and highlight the identity change.
+- `workshop_mod`: a `ModPlugin` entry naming Steam Workshop item `workshop_id`. There is no source checkout or diff. Look the item up with Steam's public API:
+
+  ```bash
+  curl -s -X POST https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/ -d itemcount=1 -d 'publishedfileids[0]=<workshop_id>'
+  ```
+
+  Check that:
+
+  1. The item exists (`result` 1) for Space Engineers (`consumer_app_id` 244850), is public (`visibility` 0) and is not banned (`banned` 0).
+  2. Its `creator` Steam account is the manifest `<Author>` or the person the PR says maintains it. Open the creator's Steam profile when the name alone does not settle it.
+  3. It is tagged `NoScripts`, or its contents are known. A mod with scripts runs code in the game that this review does not audit; say so as a manual-review item unless the item is already a known, trusted mod.
+  4. No other manifest in the hub at the PR head uses the same `<Id>`, and every `DependencyIds` entry resolves to a hub entry.
+  5. `<Hidden>true</Hidden>` is set when the mod exists only as a dependency of a plugin, so it does not show up as a separate choice.
+
+  In **Post control**, name the Workshop item instead of a target repository and source SHA.
