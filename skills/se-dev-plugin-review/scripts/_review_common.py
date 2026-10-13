@@ -14,6 +14,7 @@ from urllib.parse import quote, urlparse
 
 
 REPO_ID = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+XSI_TYPE = "{http://www.w3.org/2001/XMLSchema-instance}type"
 PACKAGE_FILES = {
     "directory.packages.props",
     "packages.lock.json",
@@ -115,10 +116,13 @@ def parse_manifest(data: bytes, label: str) -> dict[str, object]:
         return [element.text.strip() for element in root.findall(path) if element.text and element.text.strip()]
 
     return {
+        "plugin_type": root.get(XSI_TYPE),
         "id": text("Id"),
         "repo_id": text("RepoId"),
         "commit": text("Commit"),
         "friendly_name": text("FriendlyName"),
+        "author": text("Author"),
+        "hidden": text("Hidden"),
         "source_directories": values("SourceDirectories/Directory"),
         "asset_folder": text("AssetFolder"),
         "project_path": text("ProjectPath"),
@@ -150,6 +154,14 @@ def resolve_commit(repo: str, pin: str) -> str:
 
 def validate_manifest(manifest: dict[str, object], review_family: str, path: str) -> None:
     if review_family != "quasar":
+        plugin_type = manifest.get("plugin_type")
+        if plugin_type == "ModPlugin":
+            if not path.startswith("Plugins/Mods/"):
+                raise ReviewError(f"ModPlugin manifest {path} must be beneath Plugins/Mods/")
+            if not str(manifest.get("id") or "").isdigit():
+                raise ReviewError(f"ModPlugin manifest {path} needs a numeric Workshop <Id>")
+        elif plugin_type != "GitHubPlugin":
+            raise ReviewError(f"Invalid xsi:type in {path}: {plugin_type!r}")
         return
     if manifest.get("plugin_kind") != "QuasarUiPlugin":
         raise ReviewError(f"Invalid PluginKind in {path}; expected QuasarUiPlugin")
@@ -371,10 +383,18 @@ def prepare(pr_url: str, output_arg: Path | None, supported_hubs: set[str], revi
                 "head_manifest": head_manifest,
             }
 
+            if head_manifest is not None:
+                validate_manifest(head_manifest, review_family, head_path)
             if head_manifest is None:
                 review["review_type"] = "removal"
+            elif head_manifest["plugin_type"] == "ModPlugin":
+                review.update({
+                    "review_type": "workshop_mod",
+                    "workshop_id": head_manifest["id"],
+                    "hidden": head_manifest["hidden"],
+                    "dependencies": head_manifest["dependencies"],
+                })
             else:
-                validate_manifest(head_manifest, review_family, head_path)
                 repo_id = str(head_manifest.get("repo_id") or "")
                 new_pin = str(head_manifest.get("commit") or "")
                 if not REPO_ID.fullmatch(repo_id):
@@ -426,6 +446,9 @@ def prepare(pr_url: str, output_arg: Path | None, supported_hubs: set[str], revi
 
         print(f"Prepared {len(reviews)} review(s) for {hub_repo}#{number} at {output}")
         for review in reviews:
+            if review["review_type"] == "workshop_mod":
+                print(f"{review['manifest_path']}: workshop_mod {review['workshop_id']}")
+                continue
             target = review.get("target_repo", "-")
             old_sha = review.get("old_source_sha") or "-"
             new_sha = review.get("new_source_sha") or "-"
