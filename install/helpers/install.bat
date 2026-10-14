@@ -13,9 +13,14 @@ if "%~1"=="" (
 
 set "TARGET=%~1"
 
-REM Get the absolute path to the skills folder (relative to this script's location)
+REM The skills folder is two levels up from this script: install\helpers -> repo root
 set "SCRIPT_DIR=%~dp0"
-set "SKILLS_DIR=%SCRIPT_DIR%\..\skills"
+set "SKILLS_DIR=%SCRIPT_DIR%..\..\skills"
+
+if not exist "%SKILLS_DIR%\" (
+    echo ERROR: Skills folder not found: %SKILLS_DIR%
+    exit /b 1
+)
 
 REM Convert to absolute path
 pushd "%SKILLS_DIR%"
@@ -47,7 +52,10 @@ for %%S in (%SKILLS%) do (
     set "LINK=%TARGET%\%%S"
     set "SOURCE=%SKILLS_DIR%\%%S"
 
-    if exist "!LINK!" (
+    if not exist "!SOURCE!\" (
+        echo [FAIL] %%S - source folder missing
+        set /a FAILED+=1
+    ) else if exist "!LINK!" (
         echo [SKIP] %%S - already exists
     ) else (
         echo [INSTALL] %%S
@@ -66,7 +74,7 @@ echo.
 echo Installation complete: %SUCCESS% installed, %FAILED% failed
 if %FAILED% gtr 0 (
     echo.
-    echo Some installations failed. Try running as Administrator.
+    echo Some installations failed, see the errors above.
     exit /b 1
 )
 
