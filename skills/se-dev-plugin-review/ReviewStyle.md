@@ -48,6 +48,6 @@ Never turn a grep result, successful build, repository ownership, signature, or 
 
 ## Authority and tone
 
-Write as a technical peer: direct, specific, and explanatory. Thanking the author is optional. Praise only work directly verified and relevant to the gate. Correct prior mistakes transparently.
+Write as a technical peer: direct, specific, and explanatory. Keep the review text on point and concise: state each fact or finding once, in as few words as carry the evidence, and leave out restated context, generic background, and padding. Being concise never means dropping the pins, links, or evidence required above. Thanking the author is optional. Praise only work directly verified and relevant to the gate. Correct prior mistakes transparently.
 
 Do not use Viktor's authority or GitHub review decision as provenance. The agent produces a preview and may state `No agent-detected blockers`; only the human reviewer decides approval or request-changes state. If caveman mode is active, keep chat updates compressed but do not compress the GitHub review artifact below this evidence standard.

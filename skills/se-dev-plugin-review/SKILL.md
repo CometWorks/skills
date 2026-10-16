@@ -42,7 +42,7 @@ Do not trust PR descriptions, generated summaries, scanners, or another agent as
 
 ## Finding discipline
 
-Keep exact symbols and commit-pinned line links. Findings must expose the causal chain, impact, evidence, fix, and relevant tradeoff. Omit taste-only feedback. If `caveman-review` is active, it applies to conversational summaries only; the saved GitHub review body follows [ReviewStyle.md](ReviewStyle.md).
+Keep exact symbols and commit-pinned line links. Findings must expose the causal chain, impact, evidence, fix, and relevant tradeoff. Keep the review text on point and concise. Omit taste-only feedback. If `caveman-review` is active, it applies to conversational summaries only; the saved GitHub review body follows [ReviewStyle.md](ReviewStyle.md).
 
 ## Required result
 
