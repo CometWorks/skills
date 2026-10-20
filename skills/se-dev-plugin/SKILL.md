@@ -49,7 +49,7 @@ Read appropriate documents for further details:
 - [Plugin.md](Plugin.md) Plugin development (shared skills for both client and server)
 - [ClientPlugin.md](ClientPlugin.md) Client plugin development (relevant on client side)
 - [ServerPlugin.md](ServerPlugin.md) Server plugin development (relevant on server side)
-- [Guide.md](Guide.md) Use this to answer questions about plugin development process in general.
+- [`se-dev-plugin-guide`](../se-dev-plugin-guide/SKILL.md) skill: use it to answer questions about the plugin development process in general (templates, local testing, manifest XML, hub submission).
 - [Publicizer.md](Publicizer.md) How to use Krafs publicizer to access internal, protected or private members in original game code (optional).
 - [OtherPluginsAsExamples.md](OtherPluginsAsExamples.md) How to look into source code of other plugins as examples.
 

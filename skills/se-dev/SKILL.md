@@ -46,6 +46,7 @@ A plugin targets the **game client**, the **dedicated server**, or both (sharing
 - **[se-dev-script](../se-dev-script/SKILL.md)** — In-game (Programmable Block) script development. Search example PB scripts.
 - **[se-dev-mod](../se-dev-mod/SKILL.md)** — Mod development. Search example mod code; Mod API whitelist.
 - **[se-dev-plugin](../se-dev-plugin/SKILL.md)** — Client and server plugin development (Harmony patching, transpilers, preloader). Search plugin source from PluginHub.
+- **[se-dev-plugin-guide](../se-dev-plugin-guide/SKILL.md)** — Developer guide around the code: which template, where to learn the game, local testing with Pulsar/Magnetar, how players' PCs differ, the hub manifest XML, submitting to the hubs, working with coding agents.
 - **[se-dev-plugin-review](../se-dev-plugin-review/SKILL.md)** — Review PluginHub, MagnetarHub, and QuasarHub PRs from their manifest pins; produces concise paste-ready findings while reserving approval for a human maintainer.
 - **[se-dev-plugin-sdk](https://github.com/CometWorks/magnetar/tree/main/skills/se-dev-plugin-sdk)** — Handbook for Magnetar's PluginSdk: declaring server config variables, UI layout Quasar renders, server-side chat commands, server lifecycle (save/reload/quit/restart), path resolution and environment-agnostic logging. Use together with `se-dev-plugin` for server plugins. *(Lives in [Magnetar](https://github.com/CometWorks/magnetar) repo.)*
 - **[se-dev-torch](../se-dev-torch/SKILL.md)** — Torch plugin development (legacy server host). Torch-only; not Magnetar-compatible.
@@ -74,6 +75,7 @@ authoritative: the decompiled source wins when the two disagree.
 - **Steam Workshop mod?** → `se-dev-mod` + `se-dev-game-code` / `se-dev-server-code` as needed (the matching `*-book` first, if installed).
 - **Client plugin?** → `se-dev-plugin` + `se-dev-game-code` (`se-dev-game-book` first, if installed).
 - **Server plugin (Magnetar)?** → `se-dev-plugin` + `se-dev-plugin-sdk` + `se-dev-server-code` (`se-dev-server-book` first, if installed).
+- **Starting, testing or publishing a plugin, or a developer's process question?** → `se-dev-plugin-guide`.
 - **PluginHub / MagnetarHub / QuasarHub review?** → `se-dev-plugin-review` + the applicable host/code reference.
 - **Maintaining a Torch plugin?** → `se-dev-torch` + `se-dev-torch-book` (and `se-dev-server-code`).
 - **Need to understand how the game does X?** → `*-book` first if installed, then `*-code` to confirm the specifics; `*-code` alone otherwise.
