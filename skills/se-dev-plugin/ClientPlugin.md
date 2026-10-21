@@ -18,7 +18,7 @@ Building the project:
 Targeting both .NET Framework and .NET 10:
 - On Windows the project builds for both `net48` (the `Legacy` runtime) and `net10.0` (the `Interim` runtime). On Linux it builds only for `net10.0`.
 - `LangVersion` is set to `14` in the project file.
-- Use the `<Runtimes>` tag in plugin XML descriptor to restrict which runtimes the plugin loads on, if needed (`NETFramework`, `NETCoreApp`, case sensitive, comma separated).
+- Use the `<Runtimes>` tag in plugin XML descriptor to restrict which runtimes the plugin loads on, if needed (`CLR` for .NET Framework, `Mono` for Proton, `CoreCLR` for .NET 10; case insensitive, comma separated).
 
 Example patches (copies kept in this skill, mirroring `ClientPlugin/Patches/` in the template):
 - `Examples/Client/ExamplePrefixPostfixPatch.cs` Prefix and Postfix patches
