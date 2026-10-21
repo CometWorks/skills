@@ -33,7 +33,7 @@ uv run search_mods.py <category> <symbol_type> <pattern> [options]
 - `interface` - Interfaces
 - `struct` - Structs
 - `enum` - Enums
-- `method` - Methods
+- `method` - Methods (excluding constructors)
 - `field` - Fields (member variables)
 - `property` - Properties
 - `event` - Events
@@ -85,7 +85,6 @@ uv run search_mods.py class children MyGameLogicComponent
 ### Find implementations of an interface
 ```cmd
 uv run search_mods.py interface implementors IMyTerminalBlock
-
 ```
 
 ### Filter by namespace

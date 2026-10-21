@@ -7,7 +7,6 @@ and how CSV output is written) lives in index_torch.py.
 """
 
 import re
-import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple

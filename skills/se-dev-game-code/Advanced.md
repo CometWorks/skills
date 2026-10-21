@@ -33,10 +33,10 @@ uv run search_game_code.py class declaration "re:^My.*Block$"
 
 ```bash
 # All properties (typically PascalCase, no underscores)
-uv run search_game_code.py field declaration "re:^[A-Z][a-zA-Z0-9]*$"
+uv run search_game_code.py property declaration "re:^[A-Z][a-zA-Z0-9]*$"
 
 # Private fields (typically start with m_ or _)
-uv run search_game_code.py field declaration "re:^[m_]"
+uv run search_game_code.py field declaration "re:^(m_|_)"
 
 # Interface names (start with I)
 uv run search_game_code.py interface declaration "re:^I[A-Z]"

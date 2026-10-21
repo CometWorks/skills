@@ -49,7 +49,7 @@ Host system must have the following on `PATH`:
 
 If `Prepare.DONE` file is missing in this folder, you MUST run one-time preparation steps first. See the [prepare action](./actions/prepare.md).
 
-If server auto-detection fails, set `SE_SERVER_ROOT` before running preparation script. May point to either dedicated server root or directly to `DedicatedServer64` directory.
+If server auto-detection fails, set `SE_SERVER_ROOT` before running preparation script. Point it to the dedicated server root (on Linux it may also point directly to the `DedicatedServer64` directory).
 
 ## Folder Layout
 
@@ -219,7 +219,7 @@ you need to script such a task.
 
 ## General Rules
 
-- In `Data/Decompiled` folder search only inside C# source files (*.cs) in general. If you work on transpiler or preloader patches, then also search IL code (*.il) files.
+- In `Data/Decompiled` folder search only inside C# source files (*.cs) in general. If you work on transpiler or preloader patches, then also search IL code (*.il) files, if preparation produced them (off by default, see `DecompileDll.sh`).
 - In `Data/Content` folder search files appropriate for the task. See [ContentTypes.md](ContentTypes.md) for list of types.
 - Do not search for decompiled server code outside `Data/Decompiled` folder. Decompiled server source tree must be there if preparation succeeded.
 - Do not search for server content data outside `Data/Content` folder. Copied server content must be there if preparation succeeded.

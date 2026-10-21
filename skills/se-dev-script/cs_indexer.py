@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-Tree-sitter based C# parser used by index_mods.py.
+Tree-sitter based C# parser used by index_scripts.py.
 
 This module is the per-file parser only. Orchestration (which files to parse,
-incremental hashing, output CSV layout) lives in index_mods.py.
+incremental hashing, output CSV layout) lives in index_scripts.py.
 """
 
 import re
-import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple

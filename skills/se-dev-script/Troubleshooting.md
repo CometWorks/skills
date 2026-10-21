@@ -75,8 +75,8 @@ uv run search_scripts.py class usage GridTerminalSystem --limit 30
 # Too broad
 uv run search_scripts.py method usage Main --count
 
-# More specific - use regex
-uv run search_scripts.py method usage "Main.*void" --limit 20
+# More specific - use regex (re: prefix), exact name only
+uv run search_scripts.py method usage "re:^Main$" --limit 20
 ```
 
 ### 4. Paginate Through Results

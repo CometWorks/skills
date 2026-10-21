@@ -52,10 +52,12 @@ if [ "$RC" -ne 0 ]; then
 fi
 
 # Second ilspycmd execution to decompile to IL code
-# Uncomment the next line to produce IL code. These files are big and useful only for transpiler and preloader patch development.
-#ilspycmd --ilcode --il-sequence-points -o "$OUT" "$2"
+# Uncomment the next block to produce IL code. These files are big and useful only for transpiler and preloader patch development.
+#set +e
+#"$ILSPY_CMD" --ilcode --il-sequence-points --disable-updatecheck -o "$OUT" "$2"
 #RC=$?
-#if [ $RC -ne 0 ]; then
+#set -e
+#if [ "$RC" -ne 0 ]; then
 #    echo "Failed during IL code generation (ilspycmd exit $RC)."
 #    rm -rf "$OUT"
 #    exit 1

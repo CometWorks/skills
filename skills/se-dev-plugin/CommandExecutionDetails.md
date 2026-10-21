@@ -124,18 +124,18 @@ Ensures correct Python virtual environment is used.
 ### ❌ Mistake 1: Using && in CMD
 
 ```cmd
-cd C:\skills\se-dev-game-code && Prepare.bat
+cd C:\skills\se-dev-plugin && Prepare.bat
 ```
 **Error:** `&&` not recognized in CMD
 
 ✅ **Solution 1:** Use `&` instead:
 ```cmd
-cd C:\skills\se-dev-game-code & Prepare.bat
+cd C:\skills\se-dev-plugin & Prepare.bat
 ```
 
 ✅ **Solution 2:** Use separate commands:
 ```cmd
-cd C:\skills\se-dev-game-code
+cd C:\skills\se-dev-plugin
 Prepare.bat
 ```
 
@@ -205,7 +205,7 @@ uv run search_plugins.py --help (with workdir set to skill folder)
 
 **Step 5:** For UNIX commands, use busybox with forward slashes:
 ```bash
-busybox.exe grep -r "MyCubeGrid" C:/path/to/Decompiled
+busybox.exe grep -r "MyCubeGrid" C:/path/to/skill/Data/Sources
 ```
 
 ## Troubleshooting Checklist

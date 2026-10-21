@@ -2,7 +2,7 @@
 # clean.sh - removes everything that prepare.sh creates inside the skill
 # folder. The Data folder (a symlink to ~/.se-dev/plugin) is preserved:
 # only the symlink itself is removed so the actual contents
-# (Sources, PluginHub, CodeIndex) survive across runs.
+# (Sources, PluginHub, MagnetarHub, CodeIndex) survive across runs.
 set -u
 cd "$(dirname "$(readlink -f "$0")")"
 

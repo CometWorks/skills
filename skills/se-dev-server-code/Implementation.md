@@ -44,6 +44,7 @@ namespace,declaring_type,method,symbol_name,type,file_path,start_line,end_line,d
 | `enum_declarations.csv` | Enum declarations |
 | `enum_usages.csv` | Enum references |
 | `enum_member_declarations.csv` | Enum member declarations (declarations only, no usage form) |
+| `delegate_declarations.csv` | Delegate declarations (declarations only, no usage form) |
 | `method_declarations.csv` | Method declarations |
 | `method_usages.csv` | Method call sites |
 | `field_declarations.csv` | Field declarations |
@@ -79,7 +80,7 @@ namespace,declaring_type,method_name,signature,file_path,start_line,end_line,des
 
 **Includes:** Abstract methods, inline `=>` methods, block `{...}` methods.
 
-**Excludes:** Property getters/setters (indexed in field declarations).
+**Excludes:** Property getters/setters (indexed in property declarations).
 
 ### Class Hierarchy CSV
 
@@ -98,7 +99,7 @@ child_namespace,child_class,parent_namespace,parent_class,file_path,start_line,e
 - `file_path` - Source file containing child class declaration
 - `start_line`, `end_line` - Location of child class declaration
 
-**Note:** Only classes are indexed (not structs, since structs cannot inherit from classes).
+**Note:** Only classes are indexed (not structs, since structs cannot inherit from classes). Every class has a row: one with no explicit base class gets parent `System.Object`.
 
 ### Interface Hierarchy CSV
 
@@ -260,26 +261,26 @@ class InterfaceImplementationEntry:
 
 **Pass 1:** Collect all declarations
 - Builds sets of declared types for each category
-- Extracts hierarchy relationships from base lists
 - No usage detection yet
 
 **Pass 2:** Collect usages
 - Uses shared declaration sets from Pass 1
 - Identifies identifier usages by checking against known declarations
 - Skips declaration contexts
+- Extracts hierarchy relationships from base lists (needs `declared_interfaces` from all files)
 
 ### Hierarchy Extraction Logic
 
-**In `_process_class()` and `_process_struct()`:**
+**In `_process_type_hierarchy()`, for classes and structs:**
 1. Look for `base_list` child node
 2. Extract all type names from base list
 3. Check first item against `declared_interfaces` (from pass 1)
 4. If first item is not an interface → it's a base class (classes only)
-5. Create `ClassHierarchyEntry` for base class relationship
+5. Create `ClassHierarchyEntry` for base class relationship (classes only; `System.Object` when no base class is written)
 6. Remaining items (or all if first was interface) are interfaces
 7. Collect interfaces into `InterfaceImplementationEntry`
 
-**In `_process_interface()`:**
+**In `_process_type_hierarchy()`, for interfaces:**
 1. Look for `base_list` child node
 2. All items in the list are parent interfaces
 3. Create `InterfaceHierarchyEntry` for each parent
@@ -289,12 +290,12 @@ class InterfaceImplementationEntry:
 - Uses `declared_interfaces` and `declared_classes` sets from pass 1
 - Checks if type name exists in `declared_interfaces` to identify it
 - Uses namespace context to resolve unqualified names
-- Falls back to naming convention (I-prefix) as heuristic if needed
+- Types not declared in the indexed tree (BCL, third-party) keep their bare name
 
 ### Generic Type Handling
 
-- Strips generic parameters: `List<T>` becomes `List`
-- Stores only base type name in hierarchy entries
+- Strips generic arguments only for lookups in the declared sets
+- Keeps generic arguments in hierarchy and implementation entries: `IEnumerable<T>` stays `IEnumerable<T>`
 
 ### Tree Generation
 
@@ -347,6 +348,7 @@ CATEGORY_FILES = {
     "method": ("method_declarations.csv", "method_usages.csv"),
     "enum": ("enum_declarations.csv", "enum_usages.csv"),
     "enum_member": ("enum_member_declarations.csv", None),
+    "delegate": ("delegate_declarations.csv", None),
     "struct": ("struct_declarations.csv", "struct_usages.csv"),
     "interface": ("interface_declarations.csv", "interface_usages.csv"),
     "field": ("field_declarations.csv", "field_usages.csv"),
@@ -367,16 +369,16 @@ CATEGORY_FILES = {
 1. Search parent/interface column
 2. Group all matches by parent/interface
 3. Aggregate children/implementors into compressed format
-4. Output one line per group
+4. Output one line per namespace group
 
 ### Namespace Compression
 
 `compress_namespace_hierarchy()` function:
 - Parses FQNs into namespace paths + type names
-- Builds tree structure grouping by shared prefixes
-- Flattens single-child chains: `A.B.C.Class`
-- Groups multiple children: `A.B.(Class1,Class2)`
-- Nested grouping: `A.(B.(C1,C2),D.E)`
+- Groups types by their full namespace path, one result per namespace
+- Single type: `A.B.C.Class`
+- Multiple types in one namespace: `A.B.(Class1,Class2)`
+- Only one level of parentheses, to keep lines short
 
 ### Output Formatting
 
@@ -385,8 +387,8 @@ CATEGORY_FILES = {
 print(f"{child_namespace}.{child_name}:{parent_namespace}.{parent_name}")
 
 # One-to-many (children, implementors)
-compressed = compress_namespace_hierarchy(children)
-print(f"{parent_namespace}.{parent_name}|{compressed}")
+for compressed in compress_namespace_hierarchy(children):
+    print(f"{parent_namespace}.{parent_name}|{compressed}")
 ```
 
 ## Backward Compatibility

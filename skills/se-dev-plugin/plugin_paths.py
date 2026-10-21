@@ -9,8 +9,9 @@ Two plugin registries are supported and searched together:
   - PluginHub   (client plugins, loaded by Pulsar)   -> Data/PluginHub/Plugins
   - MagnetarHub (server plugins, loaded by Magnetar)  -> Data/MagnetarHub/Plugins
 
-Both use the same GitHubPlugin XML schema. PluginHub puts "Owner/Repo" in <Id>;
-MagnetarHub puts a GUID in <Id> and the "Owner/Repo" in <RepoId>. Use
+Both use the same GitHubPlugin XML schema. Older PluginHub entries put
+"Owner/Repo" in <Id>; MagnetarHub and newer PluginHub entries put a GUID in <Id>
+and the "Owner/Repo" in <RepoId>. Use
 plugin_repo_ref() to get the clone reference regardless of which registry an
 entry came from.
 """

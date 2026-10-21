@@ -52,7 +52,7 @@ Options:
 - Deploy debug merge: `IngameScriptMergeTool -d "Name Of My Script"`
 - Deploy release merge: `IngameScriptMergeTool -maur -d "Name Of My Script"` 
 
-Deployment target is SE's script folder: `%AppData%\SpaceEngineers\IngameScript\local\Name Of My Script`
+Deployment target is SE's script folder: `%AppData%\SpaceEngineers\IngameScripts\local\Name Of My Script`
 
 ## Hints
 
@@ -111,7 +111,7 @@ Directives themselves are removed, only their body preserved during merging.
 You can develop multiple scripts in same solution. You can also split code into any number of projects.
 All that matters while merging script is the namespaces the tool takes code from. 
 
-Put shared code into separate namespace, then use the `--namespaces` (`-n`) option to select namespaces
+Put shared code into separate namespace, then use the `--namespace` (`-n`) option to select namespaces
 to build script from. 
 
 For example to develop two scripts in same solution use these namespaces:

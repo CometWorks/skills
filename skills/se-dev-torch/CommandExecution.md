@@ -11,7 +11,7 @@ For most use cases, follow these steps:
 1. **Check if prepared:** Look for `Prepare.DONE` file in skill folder
 2. **If not prepared, run preparation:**
    ```bash
-   TORCH_ROOT=/path/to/Torch ./Prepare.sh
+   TORCH_ROOT=/path/to/Torch ./prepare.sh
    ```
    If `TORCH_ROOT` not set, preparation clones `TorchAPI/Torch` automatically.
 3. **Inspect plugin entry points:**

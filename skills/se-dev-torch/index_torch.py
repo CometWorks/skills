@@ -12,7 +12,7 @@ import sys
 from collections import defaultdict
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from cs_indexer import (
     CLASS_HIERARCHY_FILE,

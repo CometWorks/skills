@@ -103,13 +103,6 @@ def parse_plugin_xml(xml_file: Path) -> dict:
         return None
 
 
-def get_local_plugin_id(plugin_dir: Path) -> str:
-    """Get plugin ID from a local plugin source directory."""
-    # The directory name is typically the repo name (e.g., "ToolSwitcherPlugin")
-    # We need to match it with the PluginHub ID format (e.g., "austinvaness/ToolSwitcherPlugin")
-    return plugin_dir.name
-
-
 def load_all_plugins() -> list:
     """Load all plugins from every configured registry (PluginHub, MagnetarHub)."""
     registry_dirs = registry_plugin_dirs()
@@ -147,7 +140,7 @@ def load_all_plugins() -> list:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="List plugins from PluginHub")
+    parser = argparse.ArgumentParser(description="List plugins from PluginHub and MagnetarHub")
     parser.add_argument("--local", action="store_true", help="Show only locally available plugins")
     parser.add_argument("--remote", action="store_true", help="Show only plugins not downloaded locally")
     parser.add_argument("--search", "-s", type=str, help="Search plugins by name or description")

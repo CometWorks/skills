@@ -11,7 +11,6 @@ blueprints, scenarios) stay out of the way.
 """
 
 import os
-import subprocess
 import sys
 from pathlib import Path
 

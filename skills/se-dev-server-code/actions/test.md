@@ -47,11 +47,14 @@ Test suite exercises all server code search capabilities:
 | Method usage | Activate, ClampToByte |
 | Method signature | Activate, Build, Abs, GetPosition |
 | Field declaration | AngularDamping, AllowScaling, Forward |
-| Field usage | Forward, AngularDamping |
+| Field usage | AngularDamping |
+| Property usage | Forward |
 | Interface declaration | IMyPhysics, IPhysicsMesh |
 | Interface usage | IMyEntity |
 | Enum declaration | MyPhysicsOption, GridEffectType |
 | Enum usage | MyPhysicsOption |
+| Enum member declaration | FactionShare (no usage form) |
+| Delegate declaration | BreakLogicHandler, nested BreakLogicHandlerDelegate (no usage form) |
 | Namespace filtering | Sandbox.Engine.Physics, VRageMath |
 | Pagination | limit and offset options |
 | Count mode | count results instead of listing |
@@ -128,7 +131,7 @@ preparation. See [ServerFileHashes.md](../ServerFileHashes.md).
 
 ## Optional: Graphify Graph Test
 
-If the optional Graphify graph was built (see [Optional Graphify Graph](../SKILL.md) and
+If the optional Graphify graph was built (see [Graphify Graph](../SKILL.md#graphify-graph) and
 [GraphifyPrepare.md](../../se-dev/GraphifyPrepare.md)), verify it separately with the graph
 query smoke test — analogous to the code-search test but exercising the Graphify graph:
 

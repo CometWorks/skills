@@ -6,11 +6,11 @@
 5. Preparation succeeds if last line of `Prepare.log` is `DONE`. If it fails, inform user and stop here.
 
 Notes:
-- If auto-detection fails, set `SE_SERVER_ROOT` before running preparation. May point either to dedicated server root or directly to `DedicatedServer64` directory.
+- If auto-detection fails, set `SE_SERVER_ROOT` before running preparation. Point it to the dedicated server root (on Linux it may also point directly to the `DedicatedServer64` directory).
 - Actual data (decompiled sources, content files and indexes) stored under `%USERPROFILE%\.se-dev\server-code\` on Windows and `~/.se-dev/server-code/` on Linux, exposed via `Data` junction/symlink in this skill folder.
 - Local Git repository inside `Data` folder records every successful decompilation (decompiled sources plus the copied content files) as commit whose message is server version label (e.g. `1.208.015 b4`).
 - Preparation is incremental. When server version unchanged the existing decompilation is kept, code and content indexes rebuilt only if `check_index.py` finds them missing or broken, and an existing healthy Graphify graph left untouched. Re-running prepare on an up-to-date install therefore takes seconds.
 - Subsequent runs detect server updates automatically: if server version changes, previous `Decompiled/`, `Content/`, `CodeIndex/` and `graphify-out/` directories plus `server_files.json` are wiped and rebuilt; previous version stays available in Git history.
 - Preparation records SHA256 of every original server file into `Data/server_files.json` and commits it under the version label, so diffing it across versions shows which binaries a game update changed. See [ServerFileHashes.md](ServerFileHashes.md).
 - The Graphify graph builds automatically with the fast Rust backend, or on opt-in (`SE_DEV_GRAPHIFY=1`) using the slow single-core fallback; `SE_DEV_GRAPHIFY=0` disables it. Preparation builds or updates a separate graph for `Data/Decompiled`; on the slow path, if `graphify` is missing it offers to install it. An interrupted/unclustered graph is detected and rebuilt from scratch. Verify a graph with `bash ../se-dev/graphify-check.sh Data --deep` or run `./test_graphify_server_code.sh`. See [Prepare-time Graphify graphs](../se-dev/GraphifyPrepare.md).
-- Set `SE_DEV_SERVER_CODE_GRAPH_ROOT` to graph a different server-code root.
+- Set `SE_DEV_SERVER_CODE_GRAPH_ROOT` to graph a different server-code root, `SE_DEV_SERVER_CODE_GRAPH_OUT` to put `graphify-out` under a different folder (default `Data`).

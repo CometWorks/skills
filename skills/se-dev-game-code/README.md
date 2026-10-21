@@ -4,8 +4,8 @@ This skill provides access to decompiled C# source code from Space Engineers ver
 
 ## Overview
 
-Skill maintains the following data under the `Data` junction (which points
-to `%USERPROFILE%\.se-dev\game-code\`):
+Skill maintains the following data under the `Data` junction/symlink (which points
+to `%USERPROFILE%\.se-dev\game-code\` on Windows, `~/.se-dev/game-code/` on Linux):
 
 - **Data/Decompiled/** - Full decompiled C# source organized by assembly
 - **Data/Content/** - Game content files (definitions, translations, blueprints)
@@ -26,8 +26,8 @@ Preparation will:
 1. Create `Data` junction and local Git repository inside it (with
    initial commit of `.gitignore`)
 2. Detect current game version by inspecting binaries
-3. Wipe `Decompiled/`, `Content/` and `CodeIndex/` if version differs from
-   recorded one
+3. Wipe `Decompiled/`, `Content/`, `CodeIndex/`, `graphify-out/` and
+   `game_files.json` if version differs from recorded one
 4. Decompile game assemblies
 5. Copy game content into `Content/`
 6. Commit decompiled sources and content with version label
@@ -52,6 +52,7 @@ Located in `Data/CodeIndex/` after preparation:
 | `enum_declarations.csv` | Enum declarations |
 | `enum_usages.csv` | Enum usages |
 | `enum_member_declarations.csv` | Enum member declarations (name, value, doc comment) |
+| `delegate_declarations.csv` | Delegate declarations |
 | `method_declarations.csv` | Method declarations |
 | `method_usages.csv` | Method usages |
 | `method_signatures.csv` | Method signatures (different columns, see below) |
@@ -107,7 +108,7 @@ namespace,declaring_type,method_name,signature,file_path,start_line,end_line,des
 | `end_line` | Ending line of signature (not whole method body) |
 | `description` | XML doc comment before the method |
 
-Signature index includes all method types: abstract methods (no body), inline `=>` methods, and block `{...}` methods. Property getters/setters are NOT indexed as signatures; they appear in field index.
+Signature index includes all method types: abstract methods (no body), inline `=>` methods, and block `{...}` methods. Property getters/setters are NOT indexed as signatures; they appear in property index.
 
 ### Indexer: index_code.py
 
@@ -135,7 +136,7 @@ uv run search_game_code.py [options] <category> <symbol_type> <patterns...>
 
 | Argument | Values | Description |
 |----------|--------|-------------|
-| `category` | `class`, `method`, `enum`, `struct`, `interface`, `field`, `property`, `event`, `constructor`, `namespace` | Symbol category to search |
+| `category` | `class`, `method`, `enum`, `enum_member`, `delegate`, `struct`, `interface`, `field`, `property`, `event`, `constructor`, `namespace` | Symbol category to search |
 | `symbol_type` | `declaration`, `usage`, `signature` (method only), `parent`, `children`, `implements`, `implementors` (hierarchy) | What to search for |
 | `patterns` | One or more patterns | Search expressions (see below) |
 
@@ -150,6 +151,7 @@ uv run search_game_code.py [options] <category> <symbol_type> <patterns...>
 | `-l N`, `--limit N` | Limit output to N results |
 | `-o N`, `--offset N` | Skip first N results (pagination) |
 | `-n NS`, `--namespace NS` | Filter to namespace and its sub-namespaces |
+| `-i`, `--case-insensitive` | Case-insensitive pattern matching |
 
 #### Pattern Syntax
 
@@ -252,7 +254,7 @@ First folder in the path indicates the assembly (DLL) containing the code.
 
 ## Windows Command Line
 
-All commands run on Windows. Use `busybox.exe` for UNIX-like commands with forward slashes in paths:
+On Windows use `busybox.exe` for UNIX-like commands with forward slashes in paths. On Linux use native shell tools:
 
 ```
 busybox.exe grep "pattern" Data/CodeIndex/class_declarations.csv

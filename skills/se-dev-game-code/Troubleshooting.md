@@ -31,7 +31,7 @@ This guide helps resolve common issues when searching game code.
 4. **Index not built yet**:
    - Check if `Data/CodeIndex/` exists (`Data` junction must be present in skill folder)
    - If missing, preparation didn't complete successfully
-   - Re-run `./Prepare.bat` from skill directory
+   - Re-run `./prepare.sh` (Linux) or `.\Prepare.bat` (Windows) from skill directory
 
 ### Debugging Strategy
 
@@ -39,7 +39,7 @@ This guide helps resolve common issues when searching game code.
 # Step 1: Count first to see if anything matches
 uv run search_game_code.py class usage Entity --count
 
-# Step 2: If 0, try broader search with regex
+# Step 2: If NO-MATCHES, try broader search with regex
 uv run search_game_code.py class usage "re:.*Entity.*" --count
 
 # Step 3: Check what files available
@@ -78,7 +78,7 @@ uv run search_game_code.py struct usage Vector3D --count
 # More specific - only in Sandbox.Game namespace
 uv run search_game_code.py struct usage Vector3D -n Sandbox.Game --count
 
-# Even more specific - use regex for exact context
+# Even more specific - narrower namespace
 uv run search_game_code.py struct usage "Vector3D" -n Sandbox.Game.Entities
 ```
 
@@ -86,13 +86,13 @@ uv run search_game_code.py struct usage "Vector3D" -n Sandbox.Game.Entities
 Use offset to view results in batches:
 
 ```bash
-# First 100
+# First 10
 uv run search_game_code.py class usage MyEntity --limit 10 --offset 0
 
-# Next 100
-uv run search_game_code.py class usage MyEntity --limit 10 --offset 20
+# Next 10
+uv run search_game_code.py class usage MyEntity --limit 10 --offset 10
 
-# Third 100
+# Third 10
 uv run search_game_code.py class usage MyEntity --limit 10 --offset 20
 ```
 
@@ -107,13 +107,14 @@ If searches return unexpected results or after game updates:
 rm -rf Data/CodeIndex/
 
 # Re-run preparation (rebuilds index)
-./Prepare.bat
+./prepare.sh        # Linux
+.\Prepare.bat       # Windows
 ```
 
-`Prepare.bat` also detects game updates automatically: if binaries' version
-differs from `Data/game_version.txt`, the `Decompiled/`, `Content/` and
-`CodeIndex/` folders are wiped and rebuilt. Earlier decompiled versions remain
-available in local Git history under `Data/.git/`.
+Preparation also detects game updates automatically: if binaries' version
+differs from `Data/game_version.txt`, the `Decompiled/`, `Content/`,
+`CodeIndex/` and `graphify-out/` folders plus `game_files.json` are wiped and
+rebuilt. Earlier decompiled versions remain available in local Git history under `Data/.git/`.
 
 ### Checking Index Status
 

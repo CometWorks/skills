@@ -211,7 +211,7 @@ class InterfaceImplementationEntry:
 
     implementing_namespace: str
     implementing_type: str
-    interfaces: str  # Comma-separated list of fully-qualified interface names
+    interfaces: str  # Semicolon-separated (INTERFACE_SEPARATOR) fully-qualified interface names
     file_path: str
     start_line: int
     end_line: int
@@ -2353,9 +2353,9 @@ class CSharpIndexer:
                 for entry in sorted_usages:
                     writer.writerow(entry.to_csv_row())
 
-        # Enum members. Written by a dedicated block rather than added to
-        # `categories` above, because enum members have no usage form and an
-        # empty enum_member_usages.csv would only mislead.
+        # Delegates and enum members. Written by dedicated blocks rather than
+        # added to `categories` above, because they have no usage form and an
+        # empty *_usages.csv would only mislead.
         def member_sort_key(e):
             return (e.namespace, e.declaring_type, e.file_path, e.start_line)
 

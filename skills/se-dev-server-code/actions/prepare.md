@@ -34,7 +34,7 @@ If `Prepare.DONE` is missing:
 ./prepare.sh (Linux)
 ```
 
-If auto-detection fails, set `SE_SERVER_ROOT` first. May point either to dedicated server root or directly to `DedicatedServer64` directory.
+If auto-detection fails, set `SE_SERVER_ROOT` first. Point it to the dedicated server root (on Linux it may also point directly to the `DedicatedServer64` directory).
 
 **Alternative approaches:**
 
@@ -68,13 +68,14 @@ Preparation script:
 - Sets up Python virtual environment
 - On Windows downloads `busybox.exe`. On Linux uses native shell tools.
 - Installs `ilspycmd` for decompilation.
-- Creates `Data` junction pointing to `%USERPROFILE%\.se-dev\server-code\`
+- Creates `Data` junction/symlink pointing to `%USERPROFILE%\.se-dev\server-code\` on Windows, `~/.se-dev/server-code/` on Linux
 - Initialises local Git repository inside `Data/` on first run (with initial commit of `.gitignore`)
 - Detects current server version directly from binaries
 - Wipes `Data/Decompiled`, `Data/Content`, `Data/CodeIndex`, `Data/graphify-out` and `Data/server_files.json` whenever version differs from recorded one (older versions remain in local Git history)
-- Decompiles server DLLs to C# and optionally to IL code (needs uncommenting a line in `DecompileDll.sh` if required)
+- Decompiles server DLLs to C# and optionally to IL code (needs uncommenting a block in `DecompileDll.sh` if required)
 - Copies server content data (indexable text files only, no binaries) into `Data/Content`, so definition changes can be reviewed in Git history
 - Hashes every original server file into `Data/server_files.json` (see [ServerFileHashes.md](../ServerFileHashes.md))
 - Records new server version in `Data/game_version.txt` and commits decompiled sources and content with version label as commit message
-- Builds code search index in `Data/CodeIndex`
+- Builds code and content search indexes in `Data/CodeIndex`
+- Builds Graphify graph in `Data/graphify-out` when fast backend available or opted in (see [Graphify Graph](../SKILL.md#graphify-graph))
 - Verifies environment is ready for use

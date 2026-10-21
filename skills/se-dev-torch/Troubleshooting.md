@@ -25,7 +25,7 @@ Broad symbols like `Manager`, `Plugin`, and `Command` usually need namespace fil
 Re-run:
 
 ```bash
-./Prepare.sh
+./prepare.sh
 ```
 
 or:

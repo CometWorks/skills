@@ -2,7 +2,7 @@
 name: se-dev-torch
 description: Torch plugin development for Space Engineers version 1. Search TorchAPI/Torch source code, plugin API, managers, commands, and server UI patterns.
 license: MIT
-allowed-tools: Read, Bash(*Prepare.bat*), Bash(*Prepare.sh*), Bash(*Clean.bat*), Bash(*run_prepare.sh*), Bash(*uv run search_torch.py *), Bash(*uv run index_torch.py *), Bash(command -v graphify*), Bash(graphify*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
+allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*clean.sh*), Bash(*uv run search_torch.py *), Bash(*uv run index_torch.py*), Bash(command -v graphify*), Bash(graphify*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 
 # SE Dev Torch Skill
@@ -17,12 +17,12 @@ This skill is for Torch framework itself: plugin lifecycle, manifests, commands,
 
 Examples:
 - `test -f Prepare.DONE && echo ready`
-- `TORCH_ROOT=/path/to/Torch ./Prepare.sh`
-- `if exist Prepare.DONE echo ready`
+- `TORCH_ROOT=/path/to/Torch ./prepare.sh`
+- Not `if exist Prepare.DONE echo ready` - CMD syntax, does NOT work
 
 **Actions:**
 
-- **prepare**: Run one-time preparation (`Prepare.bat` on Windows, `Prepare.sh` on Linux/macOS, or `run_prepare.sh` as wrapper)
+- **prepare**: Run one-time preparation (`Prepare.bat` on Windows, `prepare.sh` on Linux/macOS)
 - **bash**: Run UNIX shell commands via busybox
 - **search**: Search indexed Torch source using `search_torch.py`
 

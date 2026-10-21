@@ -8,7 +8,7 @@ This file covers Torch-specific authoring model. Read [Architecture.md](Architec
 >
 > ```bash
 > git clone https://github.com/CometWorks/server-plugin-template
-> cd se-server-plugin-template
+> cd server-plugin-template
 > git checkout last-torch-compatible
 > ```
 
