@@ -37,7 +37,7 @@ def main():
     copy_content(oc, 'Fonts', {'xml'})
     copy_content(oc, 'Particles', {'mwl'})
     copy_content(oc, 'Scenarios', {'scf', 'sbl', 'resx', 'vs'})
-    copy_content(oc, 'Shaders', {'hlsl'})
+    copy_content(oc, 'Shaders', {'hlsl', 'hlsli'})
     copy_content(oc, 'VisualScripts', {'vs', 'vsc', 'sbl', 'resx'})
 
 
