@@ -6,7 +6,7 @@
 5. Preparation succeeds if last line of `Prepare.log` is `DONE`. If it fails, inform user and stop here.
 
 Notes:
-- If auto-detection fails, set `SE_SERVER_ROOT` before running preparation. Point it to the dedicated server root (on Linux it may also point directly to the `DedicatedServer64` directory).
+- If auto-detection fails, set `SE_SERVER_ROOT` before running preparation. Point it to the dedicated server root (it may also point directly to the `DedicatedServer64` directory).
 - Actual data (decompiled sources, content files and indexes) stored under `%USERPROFILE%\.se-dev\server-code\` on Windows and `~/.se-dev/server-code/` on Linux, exposed via `Data` junction/symlink in this skill folder.
 - Local Git repository inside `Data` folder records every successful decompilation (decompiled sources plus the copied content files) as commit whose message is server version label (e.g. `1.208.015 b4`).
 - Preparation is incremental. When server version unchanged the existing decompilation is kept, code and content indexes rebuilt only if `check_index.py` finds them missing or broken, and an existing healthy Graphify graph left untouched. Re-running prepare on an up-to-date install therefore takes seconds.

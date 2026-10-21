@@ -34,7 +34,7 @@ If `Prepare.DONE` is missing:
 ./prepare.sh (Linux)
 ```
 
-If auto-detection fails, set `SE_SERVER_ROOT` first. Point it to the dedicated server root (on Linux it may also point directly to the `DedicatedServer64` directory).
+If auto-detection fails, set `SE_SERVER_ROOT` first. Point it to the dedicated server root (it may also point directly to the `DedicatedServer64` directory).
 
 **Alternative approaches:**
 
