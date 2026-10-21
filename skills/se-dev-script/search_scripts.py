@@ -159,12 +159,10 @@ def search_hierarchy_parent(category, patterns, ns_filter):
         parent_ns_col = "parent_namespace"
         parent_name_col = "parent_interface"
     else:
-        print("NO-MATCHES")
-        return
+        return []
 
     if not index_file.exists():
-        print("NO-MATCHES")
-        return
+        return []
 
     matches = []
     with open(index_file, "r", encoding="utf-8", newline="") as f:
@@ -198,12 +196,10 @@ def search_hierarchy_children(category, patterns, ns_filter):
         parent_ns_col = "parent_namespace"
         parent_name_col = "parent_interface"
     else:
-        print("NO-MATCHES")
-        return
+        return []
 
     if not index_file.exists():
-        print("NO-MATCHES")
-        return
+        return []
 
     parent_children = defaultdict(list)
     with open(index_file, "r", encoding="utf-8", newline="") as f:
@@ -231,8 +227,7 @@ def search_class_implements(patterns, ns_filter):
     index_file = INDEX_DIR / "interface_implementation.csv"
 
     if not index_file.exists():
-        print("NO-MATCHES")
-        return
+        return []
 
     matches = []
     with open(index_file, "r", encoding="utf-8", newline="") as f:
@@ -288,8 +283,7 @@ def search_interface_implementors(patterns, ns_filter):
     index_file = INDEX_DIR / "interface_implementation.csv"
 
     if not index_file.exists():
-        print("NO-MATCHES")
-        return
+        return []
 
     interface_implementors = defaultdict(list)
     with open(index_file, "r", encoding="utf-8", newline="") as f:
