@@ -65,7 +65,8 @@ Preparation script:
 - Verifies Python ≥ 3.11 and installs `uv` if needed.
 - Sets up Python virtual environment via `uv sync`.
 - On Windows downloads `busybox.exe` for UNIX-style shell commands. On Linux uses native shell tools.
-- Creates `Data/` as junction to `%USERPROFILE%\.se-dev\script` so persistent
+- Creates `Data/` as junction to `%USERPROFILE%\.se-dev\script` (`~/.se-dev/script` on Linux;
+  `SE_DEV_DATA_ROOT` replaces the `.se-dev` folder) so persistent
   data (script inventory, hashes, code index) lives outside skill folder.
 - Creates `LocalScripts/` as junction to `%AppData%\SpaceEngineers\IngameScripts\local`.
 - Runs `list_scripts.py` to refresh `Data/scripts.json` (cheap; safe to rerun).

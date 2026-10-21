@@ -10,10 +10,15 @@ echo Server Root: %SE_SERVER_ROOT%
 REM 2. Verify Python is available
 echo Verifying Python
 python --version
-if %ERRORLEVEL% EQU 0 goto has_python
+if %ERRORLEVEL% EQU 0 goto check_python_version
 echo ERROR: Missing Python
 echo Please install Python 3.11 or newer.
 echo Make sure python.exe is on PATH.
+goto failed
+:check_python_version
+python -c "import sys; sys.exit(sys.version_info < (3, 11))"
+if %ERRORLEVEL% EQU 0 goto has_python
+echo ERROR: Python 3.11 or newer required.
 goto failed
 :has_python
 
@@ -40,6 +45,7 @@ REM 5. Set up Python venv
 if exist .venv goto skip_venv
 echo Setting up Python .venv (uv sync)
 uv sync
+if %ERRORLEVEL% NEQ 0 goto failed
 :skip_venv
 
 REM 6. Download busybox if missing
@@ -50,7 +56,7 @@ if %ERRORLEVEL% NEQ 0 goto failed
 :skip_busybox
 
 REM 7. Install ILSpy if missing
-set ILSPY_VERSION=10.0.1.8346
+if not defined ILSPY_VERSION set ILSPY_VERSION=10.0.1.8346
 for /f "delims=" %%V in ('ilspycmd -v 2^>NUL') do set ILSPY_INSTALLED=%%V
 if defined ILSPY_INSTALLED (
     echo ilspycmd version %ILSPY_INSTALLED% has already been installed
@@ -63,12 +69,13 @@ ilspycmd -v
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_ilspycmd
 
-REM 8. Set up the Data folder under %USERPROFILE% and create a Data junction.
+REM 8. Set up the Data folder under %USERPROFILE%\.se-dev (or SE_DEV_DATA_ROOT) and create a Data junction.
 REM Using %USERPROFILE% rather than %LOCALAPPDATA% keeps the data outside the
 REM UWP filesystem virtualization layer (Claude Code is a packaged app whose
 REM writes under %LOCALAPPDATA% would be silently redirected into its
 REM per-package LocalCache, hiding the data from regular tools).
-set "DATA_ROOT=%USERPROFILE%\.se-dev\server-code"
+if not defined SE_DEV_DATA_ROOT set "SE_DEV_DATA_ROOT=%USERPROFILE%\.se-dev"
+set "DATA_ROOT=%SE_DEV_DATA_ROOT%\server-code"
 echo Data Root: %DATA_ROOT%
 if not exist "%DATA_ROOT%" (
     echo Creating Data Root folder

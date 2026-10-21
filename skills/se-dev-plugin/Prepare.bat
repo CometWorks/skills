@@ -4,10 +4,15 @@ setlocal EnableDelayedExpansion
 REM 1. Verify Python is available
 echo Verifying Python
 python --version
-if %ERRORLEVEL% EQU 0 goto has_python
+if %ERRORLEVEL% EQU 0 goto check_python_version
 echo ERROR: Missing Python
 echo Please install Python 3.11 or newer.
 echo Make sure python.exe is on PATH.
+goto failed
+:check_python_version
+python -c "import sys; sys.exit(sys.version_info < (3, 11))"
+if %ERRORLEVEL% EQU 0 goto has_python
+echo ERROR: Python 3.11 or newer required.
 goto failed
 :has_python
 
@@ -34,6 +39,7 @@ REM 4. Set up Python venv
 if exist .venv goto skip_venv
 echo Setting up Python .venv (uv sync)
 uv sync
+if %ERRORLEVEL% NEQ 0 goto failed
 :skip_venv
 
 REM 5. Download busybox if missing
@@ -43,12 +49,13 @@ powershell -Command "$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_busybox
 
-REM 6. Set up the Data folder under %USERPROFILE% and create a Data junction.
+REM 6. Set up the Data folder under %USERPROFILE%\.se-dev (or SE_DEV_DATA_ROOT) and create a Data junction.
 REM Using %USERPROFILE% rather than %LOCALAPPDATA% keeps the data outside the
 REM UWP filesystem virtualization layer (Claude Code is a packaged app whose
 REM writes under %LOCALAPPDATA% would be silently redirected into its
 REM per-package LocalCache, hiding the data from regular tools).
-set "DATA_ROOT=%USERPROFILE%\.se-dev\plugin"
+if not defined SE_DEV_DATA_ROOT set "SE_DEV_DATA_ROOT=%USERPROFILE%\.se-dev"
+set "DATA_ROOT=%SE_DEV_DATA_ROOT%\plugin"
 echo Data Root: %DATA_ROOT%
 if not exist "%DATA_ROOT%" (
     echo Creating Data Root folder

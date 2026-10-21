@@ -45,7 +45,8 @@ def _resolve_ilspycmd() -> str:
     if from_path:
         return from_path
 
-    local_tool = Path.home() / ".se-dev" / "tools" / "ilspycmd" / "ilspycmd"
+    tools_root = os.environ.get("SE_TOOLS_ROOT") or Path.home() / ".se-dev" / "tools"
+    local_tool = Path(tools_root) / "ilspycmd" / "ilspycmd"
     if local_tool.is_file():
         return str(local_tool)
 

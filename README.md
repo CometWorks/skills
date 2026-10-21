@@ -49,6 +49,23 @@ dotnet tool frontend, so PowerShell not required to prepare and run skills.
 To use BusyBox in your other projects, also available as separate skill:
 `npx skills add https://github.com/viktor-ferenczi/skills --skill busybox-on-windows`
 
+### Overrides
+
+Preparation reads these environment variables. Set them only when auto-detection or defaults don't fit.
+
+| Variable | Platform | Effect |
+|----------|----------|--------|
+| `SE_GAME_ROOT` | Both | Game install folder (holding `Bin64`, `Content`) |
+| `SE_SERVER_ROOT` | Both | Dedicated Server install folder, or its `DedicatedServer64` folder |
+| `SE_DEV_DATA_ROOT` | Both | Folder holding per-skill `Data` (default `%USERPROFILE%\.se-dev`, `~/.se-dev`) |
+| `ILSPY_VERSION` | Both | `ilspycmd` version installed when missing (default `10.0.1.8346`) |
+| `SE_DEV_GRAPHIFY`, `SE_DEV_GRAPHIFY_PYTHON` | Both | Graphify build, see [GraphifyPrepare.md](skills/se-dev/GraphifyPrepare.md) |
+| `ILSPYCMD` | Linux | Existing `ilspycmd` to use instead of installing one |
+| `SE_TOOLS_ROOT` | Linux | Where `ilspycmd` is installed (default `~/.se-dev/tools`); Windows installs it as global dotnet tool |
+| `STEAMAPPS_DIR` | Linux | Extra `steamapps` folder searched first; Windows reads Steam registry entry |
+| `SE_APPDATA_DIR` | Linux | Game's `AppData/Roaming/SpaceEngineers` in Proton prefix; Windows uses `%AppData%\SpaceEngineers` |
+| `PYTHON_BIN` | Linux | Python checked for version 3.11+; Windows checks `python` on `PATH` |
+
 ## Skills
 
 * [se-dev](skills/se-dev/SKILL.md) – Big-picture overview and table of contents for all skills below (start here)
