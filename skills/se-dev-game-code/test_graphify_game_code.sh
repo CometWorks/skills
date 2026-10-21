@@ -14,7 +14,6 @@ set -u
 cd "$(dirname "$(readlink -f "$0")")"
 
 SKILL_DIR="$(pwd)"
-GRAPH_ROOT="${SE_DEV_GAME_CODE_GRAPH_ROOT:-Data/Decompiled}"
 # graphify-out sits beside Decompiled, not inside it.
 GRAPH_OUT="${SE_DEV_GAME_CODE_GRAPH_OUT:-Data}"
 export GRAPHIFY_MAX_GRAPH_BYTES="${GRAPHIFY_MAX_GRAPH_BYTES:-2GB}"
