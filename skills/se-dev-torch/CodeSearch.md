@@ -84,9 +84,11 @@ Hierarchy files also written as text trees:
 
 ## Output interpretation
 
+- `declaration` and `usage` print `file_path:start_line-end_line` (`file_path:line` for one line).
+- `method signature` prints `location|signature`.
+- `parent` and `implements` print `type:parent` / `type:interfaces`; `children` and `implementors` print `parent|children`, children grouped by namespace as `Namespace.(A,B)`.
 - `file_path` is relative to Torch repository root chosen during preparation.
-- `namespace`, `declaring_type`, and `method` columns let you reconstruct full context.
-- `start_line` and `end_line` point to source location in indexed checkout.
+- No match prints `NO-MATCHES`.
 
 ## Search strategy
 

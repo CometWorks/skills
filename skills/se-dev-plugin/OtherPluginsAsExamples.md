@@ -18,17 +18,17 @@ uv run list_plugins.py --search "tool"
 
 ### Step 2: Download Plugin Source
 
-**IMPORTANT**: Must use the EXACT plugin name as shown in the list output.
+**IMPORTANT**: Use the EXACT plugin name, ID or `Owner/Repo` as shown in the list output.
 
 ```bash
-# ✅ CORRECT - exact name with proper capitalization and spacing
+# ✅ CORRECT - exact name, ID or Owner/Repo (matching ignores case)
 uv run download_plugin_source.py "Paint Replacer"
 uv run download_plugin_source.py "Tool Switcher"
+uv run download_plugin_source.py viktor-ferenczi/se-paint-replacer
 
-# ❌ WRONG - these will fail
-uv run download_plugin_source.py "paint replacer"  # wrong case
-uv run download_plugin_source.py "Paint-Replacer"  # wrong format
-uv run download_plugin_source.py "PaintReplacer"   # wrong spacing
+# ❌ WRONG - a term that is not an exact match falls back to a substring match
+uv run download_plugin_source.py "PaintReplacer"   # no match: fails
+uv run download_plugin_source.py "Paint"           # several matches: lists them and fails
 ```
 
 **Tip**: Copy-paste the name directly from `list_plugins.py` output to avoid typos.
@@ -45,10 +45,10 @@ uv run search_plugins.py method signature Patch
 
 ## Manual Plugin Discovery (Alternative Method)
 
-Look into the `PluginHub` folder at the same directory level as this skill file. Should have a `Plugins` 
+Look into the `Data/PluginHub` (client) and `Data/MagnetarHub` (server) folders next to this skill file. Each has a `Plugins`
 subdirectory with XML files in it.
 
-Find the right plugins to look into by searching in the XML files in the `PluginHub\Plugins` folder.
+Find the right plugins to look into by searching in the XML files in the `Data/PluginHub/Plugins` and `Data/MagnetarHub/Plugins` folders.
 They have `FriendlyName` and `Description` which should be enough to identify what they are about in most cases.
 The `DotNetCompat` plugin is special (internal plugin), only use it if you want good examples for preloader patches.
 
@@ -57,28 +57,22 @@ then the `Id`) field tells you the GitHub repository ID of the plugin.
 
 ## Plugin Storage
 
-Plugin sources are downloaded to an OS-specific temp folder by default:
-- **Windows**: `%TEMP%/se-dev-plugin/plugins/`
-- **Linux**: `/tmp/se-dev-plugin/plugins/`
-
-Override this by:
-1. Setting the `SE_PLUGIN_DOWNLOAD_FOLDER` environment variable
-2. Adding `plugin_download_folder: /path/to/folder` to `CLAUDE.md` or `AGENTS.md` in your project
-
-The `download_plugin_source.py` script handles this automatically.
+`download_plugin_source.py` clones plugin sources into `Data/Sources/<RepoName>/` and checks out the
+commit the registry pins. `Data` links to the per-user skill data folder (`~/.se-dev/plugin` on Linux,
+`%USERPROFILE%\.se-dev\plugin` on Windows), created by preparation.
 
 ## Examples of Finding Plugins
 
 ### Example 1: Find Camera-Related Plugins
 ```bash
 $ uv run list_plugins.py --search "camera"
-Found 116 plugins (2 matching search 'camera')
+Found 2 plugins (0 available locally)
 
-[REMOTE] Camera Panning
+[REMOTE] [PluginHub] Camera Panning
   ID: avaness/CameraPanning
   Author: avaness
 
-[REMOTE] Free Camera
+[REMOTE] [PluginHub] Free Camera
   ID: carlosmaid/FreeCameraPlus
   Author: carlosmaid
 
@@ -89,13 +83,13 @@ $ uv run download_plugin_source.py "Camera Panning"
 ### Example 2: Find All Tool-Related Plugins
 ```bash
 $ uv run list_plugins.py --search "tool"
-Found 116 plugins (3 matching search 'tool')
+Found 3 plugins (0 available locally)
 
-[REMOTE] Tool Switcher
+[REMOTE] [PluginHub] Tool Switcher
   ID: austinvaness/ToolSwitcherPlugin
   Author: austinvaness
 
-[REMOTE] Server Tools  
+[REMOTE] [PluginHub] Server Tools
   ID: rexxar-tc/ServerTools
   Author: Rexxar
 

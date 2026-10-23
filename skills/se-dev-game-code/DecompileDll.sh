@@ -6,10 +6,13 @@ set -euo pipefail
 # $2 is the second argument (path to DLL)
 
 # Some XmlSerializers assemblies have very deep generic type graphs that blow
-# the default 1 MB managed thread stack inside ilspycmd ("Recursion too deep;
-# the stack overflowed", 0xC00000FD). Bump the .NET default stack size to 16 MB
-# (16x the default) for every thread the runtime creates. The variable is read
-# by the CoreCLR host in hex bytes; 0x1000000 = 16777216 = 16 MB.
+# the default 1 MB managed thread stack inside ilspycmd ("Stack overflow."
+# crash, exit 127 / 0xC00000FD). Bump the .NET default stack size to 16 MB
+# (16x the default) for every thread the runtime creates - including thread
+# pool workers, where ilspycmd runs the recursive AST transforms in parallel.
+# The variable is read by the CoreCLR host in hex bytes; 0x1000000 = 16 MB.
+# Note the precise env var name (Thread_DefaultStackSize, NOT DefaultStackSize):
+# the latter is silently ignored by recent CoreCLR builds.
 export DOTNET_Thread_DefaultStackSize=1000000
 export COMPlus_Thread_DefaultStackSize=1000000
 
@@ -49,10 +52,12 @@ if [ "$RC" -ne 0 ]; then
 fi
 
 # Second ilspycmd execution to decompile to IL code
-# Uncomment the next line to produce IL code. These files are big and useful only for transpiler and preloader patch development.
-#ilspycmd --ilcode --il-sequence-points -o "$OUT" "$2"
+# Uncomment the next block to produce IL code. These files are big and useful only for transpiler and preloader patch development.
+#set +e
+#"$ILSPY_CMD" --ilcode --il-sequence-points --disable-updatecheck -o "$OUT" "$2"
 #RC=$?
-#if [ $RC -ne 0 ]; then
+#set -e
+#if [ "$RC" -ne 0 ]; then
 #    echo "Failed during IL code generation (ilspycmd exit $RC)."
 #    rm -rf "$OUT"
 #    exit 1

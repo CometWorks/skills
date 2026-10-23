@@ -31,7 +31,6 @@ from plugin_paths import (
     CODE_INDEX_DIR,
     PLUGIN_LIST_FILE,
     PLUGIN_SOURCES_DIR,
-    SCRIPT_DIR,
     iter_registry_xml,
     plugin_repo_ref,
 )

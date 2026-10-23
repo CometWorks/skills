@@ -39,7 +39,7 @@ uv run search_server_code.py class parent MyGrid
 
 Output: `Sandbox.Game.MyGrid:VRage.Game.Entity.MyEntity`
 
-Shows direct base class. Classes with no explicit parent (inherit from `System.Object`) won't appear.
+Shows direct base class. Classes with no explicit parent show `System.Object`.
 
 #### Find Child Classes
 
@@ -47,9 +47,13 @@ Shows direct base class. Classes with no explicit parent (inherit from `System.O
 uv run search_server_code.py class children MyEntity
 ```
 
-Output: `VRage.Game.Entity.MyEntity|Sandbox.Game.(Entities.(MyGrid,MyCharacter),MyProjectile)`
+Output:
+```
+VRage.Game.Entity.MyEntity|Sandbox.Game.Entities.(MyCharacter,MyGrid)
+VRage.Game.Entity.MyEntity|Sandbox.Game.MyProjectile
+```
 
-Shows all direct children in compressed namespace format.
+Shows all direct children in compressed namespace format, one line per namespace.
 
 #### Find Implemented Interfaces
 
@@ -57,9 +61,9 @@ Shows all direct children in compressed namespace format.
 uv run search_server_code.py class implements MyGrid
 ```
 
-Output: `Sandbox.Game.MyGrid:VRage.ModAPI.IMyEntity,Sandbox.ModAPI.IMyGrid`
+Output: `Sandbox.Game.MyGrid:VRage.ModAPI.IMyEntity;Sandbox.ModAPI.IMyGrid`
 
-Shows all interfaces implemented by class.
+Shows all interfaces implemented by class, separated by `;` (generic arguments contain commas).
 
 ### Interface Hierarchy
 
@@ -79,7 +83,7 @@ Shows which interface this one extends.
 uv run search_server_code.py interface children IMyEntity
 ```
 
-Output: `VRage.ModAPI.IMyEntity|VRage.Game.ModAPI.(IMyTerminalBlock,IMyCubeGrid)`
+Output: `VRage.ModAPI.IMyEntity|VRage.Game.ModAPI.(IMyCubeGrid,IMyTerminalBlock)`
 
 Shows all interfaces that extend this one.
 
@@ -89,28 +93,25 @@ Shows all interfaces that extend this one.
 uv run search_server_code.py interface implementors IMyTerminalBlock
 ```
 
-Output: `VRage.Game.ModAPI.IMyTerminalBlock|Sandbox.Game.(MyTerminalBlock,MyDoor,MyBatteryBlock)`
+Output: `VRage.Game.ModAPI.IMyTerminalBlock|Sandbox.Game.(MyBatteryBlock,MyDoor,MyTerminalBlock)`
 
 Shows all classes/structs implementing the interface.
 
 ## Compressed Output Format
 
-For queries returning multiple children/implementors, output uses hierarchical namespace compression:
+For queries returning multiple children/implementors, output groups types by their full namespace:
 
-- Groups by shared namespace prefixes
-- Uses nested parentheses: `Namespace.(Child1,Child2)`
-- Flattens single-child chains: `Namespace.SubNamespace.SingleChild`
+- One output line per namespace, prefixed with `Parent|`
+- Types in same namespace share one level of parentheses: `Namespace.(Child1,Child2)`
+- Single type in a namespace has no parentheses: `Namespace.SubNamespace.SingleChild`
+- Types sorted alphabetically
 
-Example:
+Example children `A.B.C.Class1`, `A.B.C.Class2`, `A.B.D.Class3`, `X.Y.Class4` of `P.Parent` print as:
 ```
-A.B.(C.(Class1,Class2),D.Class3),X.Y.Class4
+P.Parent|A.B.C.(Class1,Class2)
+P.Parent|A.B.D.Class3
+P.Parent|X.Y.Class4
 ```
-
-Means:
-- `A.B.C.Class1`
-- `A.B.C.Class2`
-- `A.B.D.Class3`
-- `X.Y.Class4`
 
 ## Common Options
 
@@ -121,6 +122,7 @@ All hierarchy commands support standard options:
 -l N, --limit N          Limit to N results
 -o N, --offset N         Skip first N results
 -n NS, --namespace NS    Filter by namespace prefix
+-i, --case-insensitive   Case-insensitive pattern matching
 ```
 
 ### Count Matches
@@ -196,7 +198,7 @@ uv run search_server_code.py class parent MyEntityBase
 ```bash
 # Find direct children
 uv run search_server_code.py class children MyEntity
-# Output: VRage.Game.Entity.MyEntity|Sandbox.Game.MyGrid,Sandbox.Game.MyCharacter
+# Output: VRage.Game.Entity.MyEntity|Sandbox.Game.(MyCharacter,MyGrid)
 
 # Then query each child for their children
 uv run search_server_code.py class children MyGrid

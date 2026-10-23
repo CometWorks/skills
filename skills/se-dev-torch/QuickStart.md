@@ -7,13 +7,13 @@ Use this file when you need to get moving inside Torch quickly.
 If you already have local checkout:
 
 ```bash
-TORCH_ROOT=/path/to/Torch ./Prepare.sh
+TORCH_ROOT=/path/to/Torch ./prepare.sh
 ```
 
 If not, run:
 
 ```bash
-./Prepare.sh
+./prepare.sh
 ```
 
 Preparation writes chosen source root to `Data/torch_root.txt` and builds code index under `Data/CodeIndex`.

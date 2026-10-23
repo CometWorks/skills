@@ -64,5 +64,6 @@ Prepare.bat
 The preparation script:
 - Sets up Python virtual environment
 - On Windows downloads `busybox.exe`. On Linux uses native shell tools.
-- Downloads plugin sources for examples (to OS temp folder or configured location)
+- Links `Data` to the per-user skill data folder and clones the PluginHub and MagnetarHub registries into it
+- Indexes plugin sources already cloned into `Data/Sources` (download more with `download_plugin_source.py`)
 - Verifies environment ready for use

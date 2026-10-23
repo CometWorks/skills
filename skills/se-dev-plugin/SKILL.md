@@ -106,7 +106,7 @@ via [GraphifyUsage.md](../se-dev/GraphifyUsage.md).
 
 Two registries are searched together, both using the same GitHub-plugin XML schema:
 
-- **PluginHub** — client plugins (Pulsar). `<Id>` is `Owner/Repo`.
+- **PluginHub** — client plugins (Pulsar). Older entries put `Owner/Repo` in `<Id>`; newer ones use a GUID `<Id>` and put the GitHub repo in `<RepoId>`.
 - **MagnetarHub** — server plugins (Magnetar). `<Id>` is a GUID; the GitHub repo is in `<RepoId>`.
 
 Preparation clones both into `Data/PluginHub` and `Data/MagnetarHub`. Refresh them with

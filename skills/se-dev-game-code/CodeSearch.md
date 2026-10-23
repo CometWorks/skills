@@ -101,6 +101,7 @@ the declaration files for those instead.
 | `-l N`, `--limit N` | Limit to N results |
 | `-o N`, `--offset N` | Skip first N results |
 | `-n NS`, `--namespace NS` | Filter by namespace prefix |
+| `-i`, `--case-insensitive` | Case-insensitive pattern matching |
 
 ### Count Before Fetching
 

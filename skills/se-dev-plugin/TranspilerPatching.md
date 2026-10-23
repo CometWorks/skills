@@ -14,5 +14,5 @@ Use it wisely, ask developer for assistance running game to get original IL code
 to verify your changes. Writing transpiler patches requires systematic iteration. 
 
 Never extend plugin's `Init` method with explicit `harmony.Patch` calls. 
-Enough to decorate static patch classes with `[HarmonyPatch]` or `[HarmonyPatch(type(ClassToPatch))]`, 
+Enough to decorate static patch classes with `[HarmonyPatch]` or `[HarmonyPatch(typeof(ClassToPatch))]`, 
 then properly write its members.

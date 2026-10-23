@@ -45,7 +45,7 @@ A plugin targets the **game client**, the **dedicated server**, or both (sharing
 ### Authoring skills (write scripts, mods, plugins)
 - **[se-dev-script](../se-dev-script/SKILL.md)** — In-game (Programmable Block) script development. Search example PB scripts.
 - **[se-dev-mod](../se-dev-mod/SKILL.md)** — Mod development. Search example mod code; Mod API whitelist.
-- **[se-dev-plugin](../se-dev-plugin/SKILL.md)** — Client and server plugin development (Harmony patching, transpilers, preloader). Search plugin source from PluginHub.
+- **[se-dev-plugin](../se-dev-plugin/SKILL.md)** — Client and server plugin development (Harmony patching, transpilers, preloader). Search plugin source from PluginHub (client) and MagnetarHub (server).
 - **[se-dev-plugin-guide](../se-dev-plugin-guide/SKILL.md)** — Developer guide around the code: which template, where to learn the game, local testing with Pulsar/Magnetar, how players' PCs differ, the hub manifest XML, submitting to the hubs, working with coding agents.
 - **[se-dev-plugin-review](../se-dev-plugin-review/SKILL.md)** — Review PluginHub, MagnetarHub, and QuasarHub PRs from their manifest pins; produces concise paste-ready findings while reserving approval for a human maintainer.
 - **[se-dev-plugin-sdk](https://github.com/CometWorks/magnetar/tree/main/skills/se-dev-plugin-sdk)** — Handbook for Magnetar's PluginSdk: declaring server config variables, UI layout Quasar renders, server-side chat commands, server lifecycle (save/reload/quit/restart), path resolution and environment-agnostic logging. Use together with `se-dev-plugin` for server plugins. *(Lives in [Magnetar](https://github.com/CometWorks/magnetar) repo.)*

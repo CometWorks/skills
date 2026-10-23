@@ -8,5 +8,5 @@ File types under the `Data/Content` folder:
 - `*.json` JavaScript Object Notation: Used for platform-specific configurations or data interchange for external tools.
 - `*.xml` Extensible Markup Language: General configuration, particularly defining font textures and UI layouts.
 - `*.mwl` Particle Library: Legacy format storing definitions for particle effects like smoke, fire, and sparks.
-- `*.hlsi` Shader Interface: "Include" files for game's shaders, containing common math or lighting functions used by .hlsl files.
+- `*.hlsl` Shader Source: HLSL source of game's shaders. Shader "include" files (`*.hlsli`) not copied.
 - `*.vsc` Visual Script Component: Compiled or auxiliary component file that works in tandem with .vs files to handle script logic. 

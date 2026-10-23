@@ -7,7 +7,6 @@ incremental hashing, output CSV layout) lives in index_mods.py.
 """
 
 import re
-import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple

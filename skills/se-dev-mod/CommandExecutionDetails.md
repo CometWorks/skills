@@ -124,18 +124,18 @@ Ensures correct Python virtual environment used.
 ### ❌ Mistake 1: Using && in CMD
 
 ```cmd
-cd C:\skills\se-dev-game-code && Prepare.bat
+cd C:\skills\se-dev-mod && Prepare.bat
 ```
 **Error:** `&&` not recognized in CMD
 
 ✅ **Solution 1:** Use `&` instead:
 ```cmd
-cd C:\skills\se-dev-game-code & Prepare.bat
+cd C:\skills\se-dev-mod & Prepare.bat
 ```
 
 ✅ **Solution 2:** Use separate commands:
 ```cmd
-cd C:\skills\se-dev-game-code
+cd C:\skills\se-dev-mod
 Prepare.bat
 ```
 

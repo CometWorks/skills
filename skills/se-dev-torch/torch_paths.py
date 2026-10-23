@@ -20,13 +20,13 @@ def get_torch_root() -> Path:
     """Return the configured Torch source root."""
     if not TORCH_ROOT_FILE.exists():
         raise FileNotFoundError(
-            f"{TORCH_ROOT_FILE} not found. Run Prepare.bat / Prepare.sh first."
+            f"{TORCH_ROOT_FILE} not found. Run Prepare.bat / prepare.sh first."
         )
 
     root_text = TORCH_ROOT_FILE.read_text(encoding="utf-8").strip()
     if not root_text:
         raise RuntimeError(
-            f"{TORCH_ROOT_FILE} is empty. Run Prepare.bat / Prepare.sh again."
+            f"{TORCH_ROOT_FILE} is empty. Run Prepare.bat / prepare.sh again."
         )
 
     root = Path(root_text).expanduser()

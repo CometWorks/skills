@@ -184,7 +184,7 @@ have a single row with empty `usage` column.
 
 ## General Rules
 
-- In `Data/Decompiled` folder search only inside C# source files (*.cs) in general. If you work on transpiler or preloader patches, then also search in IL code (*.il) files.
+- In `Data/Decompiled` folder search only inside C# source files (*.cs) in general. If you work on transpiler or preloader patches, then also search in IL code (*.il) files, if preparation produced them (off by default, see `DecompileDll.sh`).
 - In `Data/Content` folder search files appropriate for the task. See [ContentTypes.md](ContentTypes.md) for list of types.
 - Do not search for decompiled game code outside `Data/Decompiled` folder. Decompiled game source tree must be there if preparation succeeded.
 - Do not search for game content data outside `Data/Content` folder. Copied game content must be there if preparation succeeded.

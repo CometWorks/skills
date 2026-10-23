@@ -28,5 +28,5 @@ Always check game code when:
 
 ## Search Targets
 
-- **Data/Decompiled folder** - Search C# source files (*.cs) in general. For transpiler or preloader patches, also search IL code (*.il) files.
+- **Data/Decompiled folder** - Search C# source files (*.cs) in general. For transpiler or preloader patches, also search IL code (*.il) files, if preparation produced them (off by default, see `DecompileDll.sh`).
 - **Data/Content folder** - Search game content data files. See [ContentTypes.md](../ContentTypes.md) for list of types.

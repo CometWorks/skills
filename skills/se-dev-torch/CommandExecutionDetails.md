@@ -8,7 +8,7 @@ This document provides more detailed command execution guidance for `se-dev-torc
 
 ```bash
 # RECOMMENDED: use workdir parameter to run commands in skill folder
-TORCH_ROOT=/path/to/Torch ./Prepare.sh (with workdir set to the skill folder)
+TORCH_ROOT=/path/to/Torch ./prepare.sh (with workdir set to the skill folder)
 uv run search_torch.py --help (with workdir set to the skill folder)
 ```
 
@@ -124,18 +124,18 @@ Ensures correct Python virtual environment used.
 ### Mistake 1: Using && in CMD
 
 ```cmd
-cd C:\skills\se-dev-game-code && Prepare.bat
+cd C:\skills\se-dev-torch && Prepare.bat
 ```
 **Error:** `&&` not recognized in CMD
 
 **Solution 1:** Use `&` instead:
 ```cmd
-cd C:\skills\se-dev-game-code & Prepare.bat
+cd C:\skills\se-dev-torch & Prepare.bat
 ```
 
 **Solution 2:** Use separate commands:
 ```cmd
-cd C:\skills\se-dev-game-code
+cd C:\skills\se-dev-torch
 Prepare.bat
 ```
 
@@ -195,7 +195,7 @@ test -f "Prepare.DONE" && echo "READY" || echo "NOT_READY"
 
 **Step 3:** If not prepared, run `Prepare.bat` using workdir parameter:
 ```bash
-TORCH_ROOT=/path/to/Torch ./Prepare.sh (with workdir set to skill folder)
+TORCH_ROOT=/path/to/Torch ./prepare.sh (with workdir set to skill folder)
 ```
 
 **Step 4:** Once prepared, run commands using workdir parameter:
@@ -205,7 +205,7 @@ uv run search_torch.py --help (with workdir set to skill folder)
 
 **Step 5:** For UNIX commands, use busybox with forward slashes:
 ```bash
-busybox.exe grep -r "MyCubeGrid" C:/path/to/Decompiled
+busybox.exe grep -r "MyCubeGrid" C:/path/to/skill/Data/Sources/Torch
 ```
 
 ## Troubleshooting Checklist
@@ -241,7 +241,7 @@ busybox.exe grep -r "MyCubeGrid" C:/path/to/Decompiled
 **Option A:** Use workdir parameter for each command (recommended):
 ```bash
 # Command 1
-TORCH_ROOT=/path/to/Torch ./Prepare.sh (workdir: skill_folder)
+TORCH_ROOT=/path/to/Torch ./prepare.sh (workdir: skill_folder)
 # Command 2
 uv run search_torch.py --help (workdir: skill_folder)
 ```
@@ -251,17 +251,15 @@ uv run search_torch.py --help (workdir: skill_folder)
 cd C:\path\to\skill; $env:TORCH_ROOT='C:\path\to\Torch'; .\Prepare.bat; uv run search_torch.py --help
 ```
 
-**Option C:** Use bash script wrapper (see `run_prepare.sh` if available)
-
 ## Summary
 
 **Key takeaways:**
 1. Use workdir parameter when running commands - most reliable
 2. If using BusyBox, always use forward slashes in paths
 3. Set `TORCH_ROOT` when you want to use existing local Torch checkout
-3. Don't use `&&` in CMD - use `&` or PowerShell instead
-4. Always run from skill folder as CWD
-5. Check for `Prepare.DONE` before using skill features
-6. Use `uv run` for all Python scripts
+4. Don't use `&&` in CMD - use `&` or PowerShell instead
+5. Always run from skill folder as CWD
+6. Check for `Prepare.DONE` before using skill features
+7. Use `uv run` for all Python scripts
 
 Following these rules eliminates command execution errors and makes agent interactions smooth and reliable.

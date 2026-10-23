@@ -79,8 +79,7 @@ search work: build via [GraphifyPrepare.md](../se-dev/GraphifyPrepare.md), query
   - `Data/scripts.json` — quick inventory of all installed PB scripts.
   - `Data/script_hashes.json` — per-script aggregate sha1 used by indexer for change detection.
   - `Data/CodeIndex/` — full Tree-sitter C# index (one CSV per category, plus hierarchy trees).
-- `LocalScripts/` — junction/symlink to game's local-script folder (`%AppData%\SpaceEngineers\IngameScripts\local` on Windows, Proton appdata equivalent on Linux),
-  game's local-PB-script folder.
+- `LocalScripts/` — junction/symlink to game's local-script folder (`%AppData%\SpaceEngineers\IngameScripts\local` on Windows, Proton appdata equivalent on Linux).
 - Steam Workshop content read in-place from Steam folder; **it is not copied or symlinked**
   into skill. PB scripts detected by presence of top-level `Script.cs` file
   inside each numeric workshop folder. Workshop folder resolved from `SE_GAME_ROOT`
