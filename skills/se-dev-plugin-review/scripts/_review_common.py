@@ -115,10 +115,14 @@ def parse_manifest(data: bytes, label: str) -> dict[str, object]:
     def values(path: str) -> list[str]:
         return [element.text.strip() for element in root.findall(path) if element.text and element.text.strip()]
 
+    # Legacy PluginHub manifests have no <RepoId>; their <Id> is Owner/Repo (same rule as plugin_repo_ref).
+    plugin_id = text("Id")
+    repo_id = text("RepoId") or (plugin_id if plugin_id and REPO_ID.fullmatch(plugin_id) else None)
+
     return {
         "plugin_type": root.get(XSI_TYPE),
-        "id": text("Id"),
-        "repo_id": text("RepoId"),
+        "id": plugin_id,
+        "repo_id": repo_id,
         "commit": text("Commit"),
         "friendly_name": text("FriendlyName"),
         "author": text("Author"),

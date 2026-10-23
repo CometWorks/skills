@@ -15,10 +15,10 @@ Use `--output <directory>` only when the default `~/.se-dev/reviews/<hub>-pr-<nu
 1. Validates the PR belongs to one of these two exact hubs.
 2. Fetches PR base/head SHAs and changed `Plugins/*.xml` files through GitHub.
 3. Parses complete base/head XML manifests and checks the `xsi:type`: `GitHubPlugin`, or `ModPlugin` beneath `Plugins/Mods/` with a numeric Workshop `<Id>`. A `ModPlugin` gets `review_type: workshop_mod` with its `workshop_id`, `hidden` and `dependencies`, and no source checkout; the remaining steps apply to `GitHubPlugin` manifests only.
-4. Reads `<RepoId>` and authoritative old/new `<Commit>` pins.
+4. Reads the target repository from `<RepoId>`, or from `<Id>` when `<RepoId>` is missing and `<Id>` has `Owner/Repo` form (legacy PluginHub manifests), and the authoritative old/new `<Commit>` pins.
 5. Resolves pins to full target-repository SHAs.
 6. Checks out the exact new source SHA.
-7. Selects the audit gate from the manifest change in the hub PR. A first registration or changed `<RepoId>` writes `source-tree.txt` for the complete tracked repository at `new_source_sha`; only a real `<Commit>` bump writes `source.diff` from the direct `old-source-SHA..new-source-SHA` comparison.
+7. Selects the audit gate from the manifest change in the hub PR. A first registration or a changed target repository (`<RepoId>`, or the `<Id>` fallback) writes `source-tree.txt` for the complete tracked repository at `new_source_sha`; only a real `<Commit>` bump writes `source.diff` from the direct `old-source-SHA..new-source-SHA` comparison.
 8. Records package, build, binary, native-file, submodule, and static MSBuild-reference inventory in `review.json`.
 
 Read the generated root and per-plugin `review.json` files before reviewing. Do not substitute the target repository's default branch or hub PR SHAs for manifest pins.

@@ -56,6 +56,20 @@ class PrepareReviewTests(unittest.TestCase):
         self.assertEqual(manifest["commit"], "abc1234")
         self.assertEqual(manifest["source_directories"], ["ClientPlugin"])
 
+    def test_repo_id_falls_back_to_owner_repo_id(self):
+        legacy = parse_manifest(
+            b"<PluginData><Id>owner/repo</Id><Commit>abc1234</Commit></PluginData>", "test"
+        )
+        self.assertEqual(legacy["repo_id"], "owner/repo")
+        explicit = parse_manifest(
+            b"<PluginData><Id>owner/old</Id><RepoId>owner/new</RepoId></PluginData>", "test"
+        )
+        self.assertEqual(explicit["repo_id"], "owner/new")
+        guid = parse_manifest(
+            b"<PluginData><Id>0f8c3b6e-1d2a-4c5b-9e7f-123456789abc</Id></PluginData>", "test"
+        )
+        self.assertIsNone(guid["repo_id"])
+
     def test_quasar_requires_quasar_fields(self):
         manifest = parse_manifest(
             XSI_PLUGIN % b"GitHubPlugin"
