@@ -43,7 +43,7 @@ if not exist "%TARGET%" (
 )
 
 REM List of skills to install
-set "SKILLS=se-dev se-dev-game-code se-dev-mod se-dev-plugin se-dev-plugin-review se-dev-script se-dev-server-code se-dev-torch"
+set "SKILLS=se-dev se-dev-game-code se-dev-mod se-dev-plugin se-dev-plugin-guide se-dev-plugin-review se-dev-script se-dev-server-code se-dev-torch"
 
 set "SUCCESS=0"
 set "FAILED=0"

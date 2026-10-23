@@ -22,7 +22,7 @@ Building the project:
   - `MagnetarData`: Magnetar config folder the server plugin is deployed into (the one holding `Local`, `Sources`, `Profiles`, usually `<Magnetar>/Magnetar`; empty = no deployment)
   - The build fails with a clear message if `Bin64`, `Dedicated64` or `PluginSdk.dll` cannot be resolved, and only warns if a loader folder is set but missing.
 - The plugin version lives in `Version.Build.props` (committed, imported by `Directory.Build.props`).
-- In production server plugins distributed as pre-built `Release` DLLs. Registered into [MagnetarHub](https://github.com/CometWorks/magnetar-hub) so Magnetar can list and load them. See [Guide.md](Guide.md) for publishing workflow.
+- In production Magnetar compiles server plugins from source at the commit their [MagnetarHub](https://github.com/CometWorks/magnetar-hub) registration pins, the same way Pulsar compiles client plugins. See the [`se-dev-plugin-guide`](../se-dev-plugin-guide/SKILL.md) skill for the publishing workflow.
 
 Runtime patching:
 - Use Harmony for all patches. Client and server code can be patched same way, most classes and methods available on both. Some methods run (used) only on client, some only on server, but most used on both server and client.
