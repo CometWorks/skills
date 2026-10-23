@@ -3,10 +3,15 @@ setlocal EnableExtensions
 
 echo Verifying Python
 python --version
-if %ERRORLEVEL% EQU 0 goto has_python
+if %ERRORLEVEL% EQU 0 goto check_python_version
 echo ERROR: Missing Python
 echo Please install Python 3.11 or newer.
 echo Make sure python.exe is on PATH.
+goto failed
+:check_python_version
+python -c "import sys; sys.exit(sys.version_info < (3, 11))"
+if %ERRORLEVEL% EQU 0 goto has_python
+echo ERROR: Python 3.11 or newer required.
 goto failed
 :has_python
 
@@ -39,7 +44,8 @@ powershell -Command "$ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest
 if %ERRORLEVEL% NEQ 0 goto failed
 :skip_busybox
 
-set "DATA_ROOT=%USERPROFILE%\.se-dev\torch"
+if not defined SE_DEV_DATA_ROOT set "SE_DEV_DATA_ROOT=%USERPROFILE%\.se-dev"
+set "DATA_ROOT=%SE_DEV_DATA_ROOT%\torch"
 echo Data Root: %DATA_ROOT%
 if not exist "%DATA_ROOT%" (
     echo Creating Data Root folder

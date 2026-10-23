@@ -22,7 +22,9 @@ REM single-core Python fallback (~10-30 min for game/server code). We default th
 REM Graphify tool to Python 3.12 with the leiden extra. When the fast backend is
 REM available the graph is built automatically; otherwise it stays optional and only
 REM builds on opt-in (SE_DEV_GRAPHIFY=1). SE_DEV_GRAPHIFY=0 disables it entirely.
-set "GRAPHIFY_PY_VER=3.12"
+REM SE_DEV_GRAPHIFY_PYTHON pins a different interpreter (it must be < 3.13 for the fast backend).
+if not defined SE_DEV_GRAPHIFY_PYTHON set "SE_DEV_GRAPHIFY_PYTHON=3.12"
+set "GRAPHIFY_PY_VER=%SE_DEV_GRAPHIFY_PYTHON%"
 
 REM The decompiled game/server-code graph.json is well over Graphify's default 512 MB
 REM load cap, which would abort every build and update. Raise it, but let an explicitly

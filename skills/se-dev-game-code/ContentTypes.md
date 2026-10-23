@@ -8,5 +8,5 @@ File types under the `Data/Content` folder:
 - `*.json` JavaScript Object Notation: Used for platform-specific configurations or data interchange for external tools.
 - `*.xml` Extensible Markup Language: Used for general configuration, particularly defining font textures and UI layouts.
 - `*.mwl` Particle Library: Legacy format (shared with Medieval Engineers) used to store definitions for particle effects like smoke, fire, and sparks.
-- `*.hlsl` Shader Source: HLSL source of game's shaders. Shader "include" files (`*.hlsli`) not copied.
+- `*.hlsl` Shader Source: HLSL source of game's shaders, with the shader include files (`*.hlsli`) they `#include`.
 - `*.vsc` Visual Script Component: Compiled or auxiliary component file that works in tandem with .vs files to handle script logic. 

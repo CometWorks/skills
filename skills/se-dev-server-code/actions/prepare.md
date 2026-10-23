@@ -34,7 +34,7 @@ If `Prepare.DONE` is missing:
 ./prepare.sh (Linux)
 ```
 
-If auto-detection fails, set `SE_SERVER_ROOT` first. Point it to the dedicated server root (on Linux it may also point directly to the `DedicatedServer64` directory).
+If auto-detection fails, set `SE_SERVER_ROOT` first. Point it to the dedicated server root (it may also point directly to the `DedicatedServer64` directory).
 
 **Alternative approaches:**
 
@@ -68,7 +68,7 @@ Preparation script:
 - Sets up Python virtual environment
 - On Windows downloads `busybox.exe`. On Linux uses native shell tools.
 - Installs `ilspycmd` for decompilation.
-- Creates `Data` junction/symlink pointing to `%USERPROFILE%\.se-dev\server-code\` on Windows, `~/.se-dev/server-code/` on Linux
+- Creates `Data` junction/symlink pointing to `%USERPROFILE%\.se-dev\server-code\` on Windows, `~/.se-dev/server-code/` on Linux (`SE_DEV_DATA_ROOT` replaces the `.se-dev` folder)
 - Initialises local Git repository inside `Data/` on first run (with initial commit of `.gitignore`)
 - Detects current server version directly from binaries
 - Wipes `Data/Decompiled`, `Data/Content`, `Data/CodeIndex`, `Data/graphify-out` and `Data/server_files.json` whenever version differs from recorded one (older versions remain in local Git history)

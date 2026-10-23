@@ -7,8 +7,6 @@ REM Mirrors test_search_server_code.bat but exercises the optional Graphify grap
 REM The asserted checks live in test_graphify_queries.py, shared with the Linux
 REM wrapper. Exits non-zero if any check failed.
 
-set "GRAPH_ROOT=%SE_DEV_SERVER_CODE_GRAPH_ROOT%"
-if "%GRAPH_ROOT%"=="" set "GRAPH_ROOT=Data\Decompiled"
 REM graphify-out sits beside Decompiled, not inside it.
 set "GRAPH_OUT=%SE_DEV_SERVER_CODE_GRAPH_OUT%"
 if "%GRAPH_OUT%"=="" set "GRAPH_OUT=Data"

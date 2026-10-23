@@ -49,7 +49,7 @@ Host system must have the following on `PATH`:
 
 If `Prepare.DONE` file is missing in this folder, you MUST run one-time preparation steps first. See the [prepare action](./actions/prepare.md).
 
-If server auto-detection fails, set `SE_SERVER_ROOT` before running preparation script. Point it to the dedicated server root (on Linux it may also point directly to the `DedicatedServer64` directory).
+If server auto-detection fails, set `SE_SERVER_ROOT` before running preparation script. Point it to the dedicated server root (it may also point directly to the `DedicatedServer64` directory).
 
 ## Folder Layout
 

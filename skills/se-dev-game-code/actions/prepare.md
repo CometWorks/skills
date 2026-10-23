@@ -66,7 +66,7 @@ Preparation script:
 - Sets up Python virtual environment
 - On Windows downloads `busybox.exe`. On Linux uses native shell tools.
 - Installs `ilspycmd` for decompilation.
-- Creates `Data` junction/symlink pointing to `%USERPROFILE%\.se-dev\game-code\` on Windows, `~/.se-dev/game-code/` on Linux
+- Creates `Data` junction/symlink pointing to `%USERPROFILE%\.se-dev\game-code\` on Windows, `~/.se-dev/game-code/` on Linux (`SE_DEV_DATA_ROOT` replaces the `.se-dev` folder)
 - Initialises local Git repository inside `Data/` on first run (with initial commit of `.gitignore`)
 - Detects current game version directly from binaries
 - Wipes `Data/Decompiled`, `Data/Content`, `Data/CodeIndex`, `Data/graphify-out` and `Data/game_files.json` whenever version differs from recorded one (older versions remain in local Git history)

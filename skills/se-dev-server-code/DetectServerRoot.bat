@@ -6,9 +6,10 @@ REM does NOT use setlocal, otherwise the variable would not survive the return.
 REM
 REM Windows counterpart of detect_server_root() in common-posix.sh. An already
 REM defined SE_SERVER_ROOT always wins, so a custom install location can be
-REM pointed at manually. Exits with 1 when the install cannot be located.
+REM pointed at manually; like normalize_server_root(), it may also point at the
+REM DedicatedServer64 folder itself. Exits with 1 when the install cannot be located.
 
-if defined SE_SERVER_ROOT exit /b 0
+if defined SE_SERVER_ROOT goto normalize
 
 REM The game's Steam uninstall key records the game install location; the server
 REM sits next to it in the same steamapps folder, under the same name plus the
@@ -23,3 +24,8 @@ echo ERROR: Could not detect Space Engineers Dedicated Server install location.
 echo Please set the SE_SERVER_ROOT environment variable to the server's root folder
 echo (the folder containing DedicatedServer64, Content, etc.)
 exit /b 1
+
+:normalize
+REM Accept the DedicatedServer64 folder itself and step up to the server root.
+for %%D in ("%SE_SERVER_ROOT%\.") do if /i "%%~nxD"=="DedicatedServer64" for %%P in ("%%~dpD.") do set "SE_SERVER_ROOT=%%~fP"
+exit /b 0
