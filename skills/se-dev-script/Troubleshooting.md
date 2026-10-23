@@ -27,17 +27,41 @@ This guide helps resolve common issues when searching script code.
    uv run index_scripts.py
    ```
 
-4. **Searching for base game classes**:
-   - Scripts don't declare game classes
-   - They use them through the PB API
-   - Search for usages, not declarations:
+4. **Searching for PB API names (game types, `Echo`, `GridTerminalSystem`, ...)**:
+   - Scripts don't declare them, they use them through the PB API
+   - Search for usages, not declarations, under the `field` category (see [How usages are indexed](#how-usages-are-indexed)):
    ```bash
    # Won't find anything (scripts don't declare it)
    uv run search_scripts.py class declaration IMyTerminalBlock
 
    # Find how scripts use it
-   uv run search_scripts.py class usage IMyTerminalBlock
+   uv run search_scripts.py field usage IMyTerminalBlock
    ```
+
+5. **Name used only after a dot** (`GridTerminalSystem.GetBlocksOfType(...)`, `UpdateFrequency.Update10`):
+   not in the index, grep the script sources (see [How usages are indexed](#how-usages-are-indexed)).
+
+### How usages are indexed
+
+- A `usage` row in `class`, `interface`, `struct`, `enum`, `method`, `property`, `event` or `constructor`
+  is recorded only for names the indexed scripts declare themselves (for example `class usage Program`).
+- Every other identifier, including all PB API names, is recorded as a `field` usage.
+  Search `IMyThrust`, `IMyTextSurface`, `Echo`, `Storage`, `argument` with `field usage`.
+- Identifiers in a member access (`GridTerminalSystem.GetBlocksOfType`, `Runtime.UpdateFrequency`,
+  `UpdateFrequency.Update10`) are not indexed at all.
+- Usage search (except `method` and `constructor`) currently finds only uses outside method bodies:
+  for a use inside a method it compares the method's name, not the used name.
+  A count of 0 or 1 does not mean a name is unused.
+- Steam Workshop `Script.cs` files hold only the body of the `Program` class. The indexer sees
+  their members as top-level statements, so `class declaration Program` and `method declaration Main`
+  find only scripts kept as C# projects (with `class Program : MyGridProgram`), mostly local ones.
+
+For a complete list of uses, grep the script sources. Local scripts are under `LocalScripts/`,
+each script's folder is the `path` field in `Data/scripts.json`:
+```bash
+grep -rnw GetBlocksOfType LocalScripts/ | head -20
+grep -rlw UpdateFrequency LocalScripts/ "<workshop path from Data/scripts.json>"
+```
 
 ### Debugging Strategy
 
@@ -48,8 +72,8 @@ cat Data/scripts.json 2>/dev/null || echo "No inventory - run: uv run list_scrip
 # Step 2: Count files indexed
 wc -l Data/CodeIndex/*.csv 2>/dev/null
 
-# Step 3: Try searching for "Program" (every script has this)
-uv run search_scripts.py class declaration Program --count
+# Step 3: Count all indexed identifier uses (any script has some)
+uv run search_scripts.py field usage re:. --count
 
 # Step 4: If still nothing, verify scripts exist
 uv run list_scripts.py
@@ -61,28 +85,31 @@ When searches return hundreds or thousands of matches:
 
 ### 1. Count First
 ```bash
-uv run search_scripts.py class usage GridTerminalSystem --count
+uv run search_scripts.py field usage IMyTerminalBlock --count
 ```
 
 ### 2. Use Limit to Preview
 ```bash
 # Show first 30 matches
-uv run search_scripts.py class usage GridTerminalSystem --limit 30
+uv run search_scripts.py field usage IMyTerminalBlock --limit 30
 ```
 
 ### 3. Refine Your Search
 ```bash
-# Too broad
-uv run search_scripts.py method usage Main --count
+# Too broad: substring match, also IMyTerminalAction, IMyTerminalBlockGroup, ...
+uv run search_scripts.py field usage IMyTerminal --count
 
 # More specific - use regex (re: prefix), exact name only
-uv run search_scripts.py method usage "re:^Main$" --limit 20
+uv run search_scripts.py field usage "re:^IMyTerminalBlock$" --limit 20
+
+# Only one script's code: filter by namespace prefix
+uv run search_scripts.py field usage "re:^IMyTerminalBlock$" -n IngameScript --limit 20
 ```
 
 ### 4. Paginate Through Results
 ```bash
-uv run search_scripts.py class usage Program --limit 10 --offset 0
-uv run search_scripts.py class usage Program --limit 10 --offset 20
+uv run search_scripts.py field usage IMyTerminalBlock --limit 10 --offset 0
+uv run search_scripts.py field usage IMyTerminalBlock --limit 10 --offset 10
 ```
 
 ## Index Issues
@@ -127,9 +154,12 @@ uv run index_scripts.py
 ### 1. Script Structure
 
 PB scripts typically have:
-- `Program` class (main entry point)
-- `Main()` method (called each tick)
-- `Save()` and `Load()` methods (persistence)
+- `Program` class (main entry point), implicit in Workshop `Script.cs` files
+- `Program()` constructor (runs on compile and world load, restores state from `Storage`)
+- `Main()` method (runs on each trigger or update)
+- `Save()` method (persistence into `Storage`)
+
+These declarations are found only in scripts kept as C# projects, see [How usages are indexed](#how-usages-are-indexed).
 
 ```bash
 # Find Program classes
@@ -142,15 +172,15 @@ uv run search_scripts.py method declaration Main --limit 20
 ### 2. Common API Usage
 
 ```bash
-# Terminal system usage
-uv run search_scripts.py class usage GridTerminalSystem --limit 15
+# Terminal system usage (only after a dot, not indexed: grep)
+grep -rnw GridTerminalSystem LocalScripts/ | head -15
 
 # Block interface usage
-uv run search_scripts.py class usage IMyThrust --limit 10
-uv run search_scripts.py class usage IMyDoor --limit 10
+uv run search_scripts.py field usage IMyThrust --limit 10
+uv run search_scripts.py field usage IMyDoor --limit 10
 
 # Display/LCD usage
-uv run search_scripts.py class usage IMyTextPanel --limit 15
+uv run search_scripts.py field usage IMyTextPanel --limit 15
 ```
 
 ## Search Tips
@@ -158,14 +188,14 @@ uv run search_scripts.py class usage IMyTextPanel --limit 15
 ### 1. Search for Common PB Patterns
 
 ```bash
-# Find echo output usage
-uv run search_scripts.py method usage Echo --limit 20
+# Find echo output usage (Echo is a PB API property, so field usage)
+uv run search_scripts.py field usage "re:^Echo$" --limit 20
 
-# Find GetBlocksOfType usage
-uv run search_scripts.py method usage GetBlocksOfType --limit 15
+# Find GetBlocksOfType usage (called after a dot, not indexed: grep)
+grep -rnw GetBlocksOfType LocalScripts/ | head -15
 
 # Find argument parsing
-uv run search_scripts.py field usage argument --limit 20
+uv run search_scripts.py field usage "re:^argument$" --limit 20
 ```
 
 ### 2. Remember the PB API Whitelist
@@ -191,9 +221,11 @@ uv run search_game_code.py interface declaration IMyTerminalBlock
 
 ### 4. Look for Merged Scripts
 
-Many scripts merged from multiple files. Look for comments like:
+Many Workshop scripts were merged from multiple source files by a merge tool (MDK, ScriptMerge),
+some also minified with one-letter (often Unicode) names. Hits in minified code are hard to read,
+prefer scripts with readable names. One-letter declarations point at minified scripts:
 ```bash
-uv run search_scripts.py class usage Program --limit 5
+uv run search_scripts.py class declaration "re:^.$" --limit 5
 ```
 
 ## Common Script Patterns to Search For
@@ -202,17 +234,17 @@ uv run search_scripts.py class usage Program --limit 5
 # Find Program class implementations
 uv run search_scripts.py class declaration Program --limit 10
 
-# Find UpdateFrequency usage
-uv run search_scripts.py field usage UpdateFrequency --limit 15
+# Find UpdateFrequency usage (used after a dot, not indexed: grep)
+grep -rnw UpdateFrequency LocalScripts/ | head -15
 
 # Find LCD/display scripts
-uv run search_scripts.py class usage IMyTextSurface --limit 20
+uv run search_scripts.py field usage IMyTextSurface --limit 20
 
 # Find autopilot/control scripts
-uv run search_scripts.py class usage IMyRemoteControl --limit 10
+uv run search_scripts.py field usage IMyRemoteControl --limit 10
 
 # Find inventory management
-uv run search_scripts.py class usage IMyInventory --limit 15
+uv run search_scripts.py field usage IMyInventory --limit 15
 ```
 
 ## Still Having Issues?
@@ -232,7 +264,7 @@ uv run search_scripts.py class usage IMyInventory --limit 15
    test -d Data/CodeIndex && echo "OK" || echo "Run: uv run index_scripts.py"
    ```
 
-4. **Try a broad declaration search**:
+4. **Try a broad search** (any indexed identifier use):
    ```bash
-   uv run search_scripts.py class declaration Program --limit 5
+   uv run search_scripts.py field usage re:. --limit 5
    ```

@@ -14,7 +14,7 @@ Please consider supporting my work on [Patreon](https://www.patreon.com/semods) 
 - Reference these NuGet packages from project:
   - `SpaceEngineers.ScriptingReferences`
   - `System.Collections.Immutable` 
-- Use the `Script/Skeleton.cs` file from this repository as starting point for your script code
+- Use the `Script/Skeleton.cs` file of the [se-script-merge](https://github.com/viktor-ferenczi/se-script-merge) repository as starting point for your script code
 - See `TODO` comments in skeleton for more
 - See **Hints** below
 
@@ -79,7 +79,7 @@ namespace Script {
     /* Example script */
     static class Config {
         // Configuration variable
-        public static ConfigVar = 1; 
+        public static int ConfigVar = 1;
     }
 }
 ```
