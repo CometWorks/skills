@@ -79,6 +79,14 @@ player's machine from GitHub source revision identified by its PluginHub registr
 reviewed for safety and security on submission, but only on best effort basis, without any legal guarantees.
 Plugins run native code and can do anything.
 
+Plugins made from the templates set their version in two places. Bump both on every
+release: `<Version>` in `Version.Build.props` and the `AssemblyVersion` and
+`AssemblyFileVersion` attributes in `Plugin.cs` (`ClientPlugin/Plugin.cs`, and
+`ServerPlugin/Plugin.cs` for a server plugin). Local builds define `LOCAL_BUILD` and take
+the version from `Version.Build.props`. Pulsar and Magnetar compile the source without
+`LOCAL_BUILD`, so the version shown in game and on the server comes from those attributes.
+If only `Version.Build.props` is bumped, the old version keeps showing.
+
 Use `se-dev-game-code` to read the exact code you call or patch. If the
 `se-dev-game-book` handbook is installed, read it first to learn how a game system
 works and which types take part; without it, search the game code for that too.
