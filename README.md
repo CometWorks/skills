@@ -89,6 +89,10 @@ Scripts create junction points / symlinks from target skill folders to skill fol
 
 They install all skills listed in [Skills](#skills) section above.
 
+## Maintenance
+
+After a game update, follow [GameUpgrade.md](GameUpgrade.md) to bring the skills up to the new game version.
+
 ## FAQ
 
 ### How well does this work for plugin development?
@@ -103,8 +107,9 @@ Contributions via PR welcome.
 
 ### Does Claude Code know about the mod and script API whitelists?
 
-Exported current whitelists (as of game version 1.208.015) using [MDK2](https://github.com/malforge/mdk2).
-May need future updates or automation during preparation phase.
+Yes. Whitelists were exported from game version 1.208.015 using [MDK2](https://github.com/malforge/mdk2)
+and checked unchanged for game version 1.210.014. They are refreshed from the running game with
+[tools/whitelist-dump](tools/whitelist-dump) as a step of [upgrading the skills](GameUpgrade.md) to a new game version.
 
 If you use suggested mod or script template projects and **ScriptMerge** tool, no formal whitelist
 validation during build time. May fail when loading into game, but if you provide relevant game logs to

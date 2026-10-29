@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<PluginData
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:type="GitHubPlugin"
+>
+  <Id>whitelist-dump</Id>
+  <RepoId>local/whitelist-dump</RepoId>
+  <FriendlyName>Script whitelist dump</FriendlyName>
+  <Author>CometWorks</Author>
+  <Tooltip>Skills maintenance only: writes the PB and mod API whitelists of the running game, then exits</Tooltip>
+  <Hidden>true</Hidden>
+  <SourceDirectories>
+    <Directory>Source</Directory>
+  </SourceDirectories>
+</PluginData>
