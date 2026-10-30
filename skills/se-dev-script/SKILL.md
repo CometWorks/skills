@@ -46,7 +46,7 @@ If `Prepare.DONE` file missing in this folder, you MUST run one-time preparation
 ## Script Development
 
 Use only names matching the PB API whitelist: [PBApiWhitelist.txt](PBApiWhitelist.txt)
-Whitelist was exported from game version `1.208.015` using MDK2's `Mdk.Extractor`.
+Whitelist from game version `1.210.014`, dumped with the repository's `tools/whitelist-dump`.
 
 In-game (PB) scripts released on Steam Workshop or Mod.IO, mostly on former.
 In-game scripts compiled by game on loading into PB or world loading (if PB has script loaded)

@@ -46,7 +46,7 @@ If `Prepare.DONE` file is missing in this folder, you MUST run one-time preparat
 ## Mod Development
 
 Use only names matching Mod API whitelist: [ModApiWhitelist.txt](ModApiWhitelist.txt)
-Whitelist exported from game version `1.208.015` using MDK2's `Mdk.Extractor`.
+Whitelist from game version `1.210.014`, dumped with the repository's `tools/whitelist-dump`.
 
 Mods released on Steam Workshop or Mod.IO, mostly the former.
 Game compiles mods on world loading with Mod API whitelist enforced,
