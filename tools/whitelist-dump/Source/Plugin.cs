@@ -16,8 +16,8 @@ namespace WhitelistDump;
 //   ModApiWhitelist.txt  keys with the ModApi target
 //   game-version.txt     the game version they came from
 // Keys are in the game's own form ("Namespace.*, Assembly", "Type+*, Assembly", "Type.Member, Assembly"),
-// in registration order, as MDK2's Mdk.Extractor wrote them. Keys of plugin assemblies (Pulsar's core
-// plugins whitelist some of their own types) are left out. Does nothing without WHITELIST_DUMP_DIR.
+// in registration order. Keys of plugin assemblies (Pulsar's core plugins whitelist some of their own
+// types) are left out. Does nothing without WHITELIST_DUMP_DIR.
 public class Plugin : IPlugin
 {
     private static readonly string Dir = Environment.GetEnvironmentVariable("WHITELIST_DUMP_DIR");

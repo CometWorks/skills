@@ -107,8 +107,7 @@ Contributions via PR welcome.
 
 ### Does Claude Code know about the mod and script API whitelists?
 
-Yes. Whitelists were exported from game version 1.208.015 using [MDK2](https://github.com/malforge/mdk2)
-and checked unchanged for game version 1.210.014. They are refreshed from the running game with
+Yes. Whitelists are from game version 1.210.014, dumped from the running game with
 [tools/whitelist-dump](tools/whitelist-dump) as a step of [upgrading the skills](GameUpgrade.md) to a new game version.
 
 If you use suggested mod or script template projects and **ScriptMerge** tool, no formal whitelist
