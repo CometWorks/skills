@@ -1,4 +1,4 @@
-// 2bb5480c
+// 4ac9e80c
 call static System.Boolean Sandbox.Game.Multiplayer.Sync::get_IsServer()
 brtrue.s L0
 ldc.i4 25002

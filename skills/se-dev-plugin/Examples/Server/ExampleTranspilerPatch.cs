@@ -43,7 +43,7 @@ public static class MyPhysicsPatch
         // message. It allows you to look into game code changes efficiently and fix
         // your patch in the next version of your plugin. This check will also fail
         // if another plugin loaded before yours has already patched the same method.
-        il.VerifyCodeHash(patchedMethod, "2bb5480c");
+        il.VerifyCodeHash(patchedMethod, "4ac9e80c");
 
         // Modify the IL code of the method as needed to remove/replace game code.
         // Make sure to keep the stack balanced and don't delete labels which are still in use.
