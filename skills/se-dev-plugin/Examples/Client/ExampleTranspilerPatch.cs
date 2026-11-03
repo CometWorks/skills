@@ -44,8 +44,7 @@ public static class MyPhysicsPatch
         // if another plugin loaded before yours has already patched the same method.
         // This verification can be disabled by setting this environment variable:
         // `SE_PLUGIN_DISABLE_METHOD_VERIFICATION`
-        // This may be required on Linux if Wine/Proton is using Mono.
-        il.VerifyCodeHash(patchedMethod, "2bb5480c");
+        il.VerifyCodeHash(patchedMethod, "4ac9e80c");
 
         // Modify the IL code of the method as needed to remove/replace game code.
         // Make sure to keep the stack balanced and don't delete labels which are still in use.
