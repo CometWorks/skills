@@ -86,6 +86,13 @@ search work: build via [GraphifyPrepare.md](../se-dev/GraphifyPrepare.md), query
 - [Mod API documentation by Keen Software House](https://github.com/KeenSoftwareHouse/SpaceEngineersModAPI) May be outdated
 - [Mod Development Kit (MDK2)](https://github.com/malforge/mdk2) Mod development tooling mostly for VS2022
 
+### Companion skills in other repos
+
+Both are by Mike Dude of GV-Server-Mods. Clone the repo into your skills folder to install one.
+
+- [se-dev-mes](https://github.com/GV-Server-Mods/se-dev-mes) — NPC encounters with Modular Encounters Systems (MES) and RivalAI: spawn groups, behaviors, autopilot profiles, triggers and SBC profiles, with a tag database checked against the MES source and audit and scaffolding scripts.
+- [se-dev-seut](https://github.com/GV-Server-Mods/se-dev-seut) — Block, subpart and prop models in Blender with the Space Engineers Utilities (SEUT) add-on, exported to `.mwm`: scene setup, collision, LODs, build stages, mountpoints, vanilla materials, turret and weapon models, SEUT error codes, and driving a live Blender through the Blender MCP.
+
 ## Mod Code Search
 
 Search source code of Steam and local mods for examples and patterns:
