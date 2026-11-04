@@ -50,6 +50,8 @@ A plugin targets the **game client**, the **dedicated server**, or both (sharing
 - **[se-dev-plugin-review](../se-dev-plugin-review/SKILL.md)** — Review PluginHub, MagnetarHub, and QuasarHub PRs from their manifest pins; produces concise paste-ready findings while reserving approval for a human maintainer.
 - **[se-dev-plugin-sdk](https://github.com/CometWorks/magnetar/tree/main/skills/se-dev-plugin-sdk)** — Handbook for Magnetar's PluginSdk: declaring server config variables, UI layout Quasar renders, server-side chat commands, server lifecycle (save/reload/quit/restart), path resolution and environment-agnostic logging. Use together with `se-dev-plugin` for server plugins. *(Lives in [Magnetar](https://github.com/CometWorks/magnetar) repo.)*
 - **[se-dev-torch](../se-dev-torch/SKILL.md)** — Torch plugin development (legacy server host). Torch-only; not Magnetar-compatible.
+- **[se-dev-mes](https://github.com/GV-Server-Mods/se-dev-mes)** — Modular Encounters Systems (MES) and RivalAI encounter modding: spawn groups, behaviors, autopilot profiles, triggers and SBC profiles, with a tag database checked against the MES source and audit/scaffolding scripts. Use together with `se-dev-mod` for mods built on MES. *(Separate repo by Mike Dude of GV-Server-Mods; clone it into your skills folder to install.)*
+- **[se-dev-seut](https://github.com/GV-Server-Mods/se-dev-seut)** — Modeling blocks, subparts and props in Blender with the Space Engineers Utilities (SEUT) add-on and exporting them to `.mwm`: scene setup, collision, LODs, build stages, mountpoints, vanilla materials, turret/weapon models, SEUT error codes, and driving a live Blender through the Blender MCP. *(Separate repo by Mike Dude of GV-Server-Mods; clone it into your skills folder to install.)*
 
 ### Graphify graphs (read on demand)
 - **[GraphifyPrepare.md](GraphifyPrepare.md)** — how each subskill builds its own per-subskill `graphify-out/`. Prepare installs Graphify on **Python 3.12 with the fast native Rust Leiden clustering backend** and, when that backend is available (Linux/Windows with `uv`), builds the graph **automatically** — clustering then takes ~1-2 minutes even for the game/server corpora. Where the fast backend cannot be provisioned, Graphify stays **optional** and only builds on opt-in with `SE_DEV_GRAPHIFY=1` (the slow single-core fallback adds ~10-30 minutes; prepare reports this). `SE_DEV_GRAPHIFY=0` disables it entirely. Also covers the health check that detects an unusable (unclustered) graph and the clean-and-rebuild flow.
@@ -73,6 +75,8 @@ authoritative: the decompiled source wins when the two disagree.
 
 - **Programmable Block script?** → `se-dev-script` + `se-dev-game-code` for API details (`se-dev-game-book` first, if installed).
 - **Steam Workshop mod?** → `se-dev-mod` + `se-dev-game-code` / `se-dev-server-code` as needed (the matching `*-book` first, if installed).
+- **NPC encounters with MES / RivalAI (spawn groups, behaviors, triggers)?** → `se-dev-mes` (+ `se-dev-mod` for the mod around them).
+- **Block model in Blender (SEUT, `.mwm` export)?** → `se-dev-seut` (+ `se-dev-mod` for the block definition and mod packaging).
 - **Client plugin?** → `se-dev-plugin` + `se-dev-game-code` (`se-dev-game-book` first, if installed).
 - **Server plugin (Magnetar)?** → `se-dev-plugin` + `se-dev-plugin-sdk` + `se-dev-server-code` (`se-dev-server-book` first, if installed).
 - **Starting, testing or publishing a plugin, or a developer's process question?** → `se-dev-plugin-guide`.
