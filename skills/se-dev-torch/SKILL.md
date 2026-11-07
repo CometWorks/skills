@@ -1,7 +1,7 @@
 ---
 name: se-dev-torch
 description: Torch plugin development for Space Engineers version 1. Search TorchAPI/Torch source code, plugin API, managers, commands, and server UI patterns.
-license: MIT
+license: AGPL-3.0
 allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*clean.sh*), Bash(*uv run search_torch.py *), Bash(*uv run index_torch.py*), Bash(command -v graphify*), Bash(graphify*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 

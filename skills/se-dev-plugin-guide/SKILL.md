@@ -1,7 +1,7 @@
 ---
 name: se-dev-plugin-guide
 description: Developer guide for Space Engineers 1 plugins - which template to pick (client, client+server, Quasar), where to learn the game's internals, patching basics, testing locally with Pulsar/Magnetar, how players' PCs differ, filling the hub manifest XML, submitting to PluginHub/MagnetarHub/QuasarHub, and developing with AI coding agents. Use it to answer a plugin developer's process questions or to take a plugin from template to hub release.
-license: MIT
+license: AGPL-3.0
 allowed-tools: Read
 ---
 

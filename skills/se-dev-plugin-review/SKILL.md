@@ -1,7 +1,7 @@
 ---
 name: se-dev-plugin-review
 description: Review a plugin PR in StarCpt/PluginHub, CometWorks/magnetar-hub, or CometWorks/quasar-hub. Deterministically derives the target repository and exact source commit range from the hub manifest, produces an evidence-backed review preview, and posts it after confirmation.
-license: MIT
+license: AGPL-3.0
 ---
 
 # Space Engineers Plugin Review

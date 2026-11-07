@@ -1,7 +1,7 @@
 ---
 name: se-dev-server-code
 description: Search and read the decompiled C# code of the Space Engineers 1 Dedicated Server to learn how the server works inside and to get exact signatures, method bodies, IL and content files. If the se-dev-server-book handbook is installed, read it first for how a system works overall and come here for the exact code.
-license: MIT
+license: AGPL-3.0
 allowed-tools: Read, Bash(*Prepare.bat*), Bash(*prepare.sh*), Bash(*Clean.bat*), Bash(*clean.sh*), Bash(*VerifyServerFiles.bat*), Bash(*verify_server_files.sh*), Bash(*uv run hash_server_files.py *), Bash(*test_search_server_code*), Bash(*test_graphify_server_code*), Bash(*uv run test_search_code.py*), Bash(*uv run test_graphify_queries.py*), Bash(*graphify-check.sh*), Bash(*GraphifyCheck.bat*), Bash(*uv run search_server_code.py *), Bash(*uv run index_code.py *), Bash(*uv run check_index.py *), Bash(command -v graphify*), Bash(graphify*), Bash(*GRAPHIFY_MAX_GRAPH_BYTES*), Bash(*busybox* grep *), Bash(*busybox* find *), Bash(*busybox* cat *), Bash(*busybox* head *), Bash(*busybox* tail *), Bash(*busybox* ls*), Bash(*busybox* wc *), Bash(*busybox* sort *), Bash(*busybox* uniq *), Bash(*busybox* tree*)
 ---
 

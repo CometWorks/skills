@@ -1,7 +1,7 @@
 ---
 name: se-dev
 description: High level overview of Space Engineers (version 1) related development. Start here to understand the ecosystem (game client, dedicated server, Pulsar, Magnetar, Torch, PluginHub, MagnetarHub, Quasar) and to route to the right se-dev-* skill for in-game scripts, mods, plugins, the Magnetar PluginSdk, and decompiled code/handbook reference.
-license: MIT
+license: AGPL-3.0
 allowed-tools: Read
 ---
 
